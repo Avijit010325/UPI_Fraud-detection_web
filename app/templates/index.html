@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaySafe India — UPI Real-Time Fraud Detection</title>
+    <meta name="description" content="Production-ready real-time UPI transaction fraud detection powered by machine learning, behavioral telemetry, and counterfactual risk explainability.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0a0f1d;
+            --bg-surface: #111a2e;
+            --bg-surface-elevated: #17233d;
+            --bg-card: rgba(23, 35, 61, 0.7);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(99, 102, 241, 0.4);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --brand-primary: #4f46e5;
+            --brand-primary-light: #6366f1;
+            --brand-cyan: #06b6d4;
+            --brand-saffron: #f97316;
+            
+            --safe-color: #10b981;
+            --safe-bg: rgba(16, 185, 129, 0.12);
+            --safe-border: rgba(16, 185, 129, 0.35);
+            
+            --warn-color: #f59e0b;
+            --warn-bg: rgba(245, 158, 11, 0.12);
+            --warn-border: rgba(245, 158, 11, 0.35);
+            
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --danger-border: rgba(239, 68, 68, 0.35);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-full: 9999px;
+            
+            --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.6) 0%, transparent 100%);
+            background-attachment: fixed;
+            padding-bottom: 60px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* Top Navigation Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 28px;
+        }
+
+        .brand-cluster {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #f97316 0%, #4f46e5 50%, #06b6d4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 16px rgba(79, 70, 229, 0.4);
+        }
+
+        .brand-logo-icon svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+        }
+
+        .brand-titles h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #ffffff 30%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-titles p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .metrics-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            flex-wrap: wrap;
+        }
+
+        .metric-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
+        .metric-pill .label {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-pill .val {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #38bdf8;
+        }
+
+        .metric-divider {
+            width: 1px;
+            height: 14px;
+            background: var(--border-subtle);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--safe-color);
+            box-shadow: 0 0 8px var(--safe-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        /* Preset Scenarios */
+        .presets-wrapper {
+            background: rgba(17, 26, 46, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .presets-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preset-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .preset-btn {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preset-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--brand-primary-light);
+            transform: translateY(-1px);
+        }
+
+        .preset-btn.btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger-color);
+        }
+
+        /* Main Workspace Layout */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form Card */
+        .panel-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-toggle-badge {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 22px;
+        }
+
+        .section-title {
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .fields-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .fields-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .field-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .field-helper {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-control {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 9px 12px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .input-control:focus {
+            outline: none;
+            border-color: var(--brand-primary-light);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .currency-prefix {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            pointer-events: none;
+        }
+
+        .has-prefix .input-control {
+            padding-left: 28px;
+        }
+
+        /* Flag / Radio pills */
+        .flag-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .flag-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .flag-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            z-index: 2;
+        }
+
+        .flag-label {
+            display: block;
+            text-align: center;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .flag-option input[type="radio"]:checked + .flag-label {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: var(--brand-primary-light);
+            color: white;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
+
+        .flag-option.danger-opt input[type="radio"]:checked + .flag-label {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: var(--danger-color);
+            color: #fca5a5;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Advanced section accordion */
+        .advanced-accordion {
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            margin-top: 14px;
+            background: rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        .advanced-summary {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .advanced-summary:hover {
+            color: var(--text-primary);
+        }
+
+        .advanced-content {
+            padding: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 13px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+            background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
+        }
+
+        /* Result Panel (Right Column) */
+        .result-panel {
+            position: sticky;
+            top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .score-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 26px 22px;
+            text-align: center;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--safe-color);
+            transition: background 0.3s ease;
+        }
+
+        .score-card.state-safe::before { background: var(--safe-color); }
+        .score-card.state-medium::before { background: var(--warn-color); }
+        .score-card.state-high::before { background: var(--danger-color); }
+
+        /* Gauge Visual */
+        .gauge-container {
+            width: 170px;
+            height: 170px;
+            margin: 10px auto 16px;
+            position: relative;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+            width: 170px;
+            height: 170px;
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.07);
+            stroke-width: 14;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 14;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.3s ease;
+        }
+
+        .gauge-inner-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gauge-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.1rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #ffffff;
+        }
+
+        .gauge-score-label {
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Verdict Badge */
+        .verdict-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .badge-safe {
+            background: var(--safe-bg);
+            color: var(--safe-color);
+            border: 1px solid var(--safe-border);
+        }
+
+        .badge-medium {
+            background: var(--warn-bg);
+            color: var(--warn-color);
+            border: 1px solid var(--warn-border);
+        }
+
+        .badge-high {
+            background: var(--danger-bg);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-border);
+        }
+
+        .recommendation-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 0.8125rem;
+            color: #cbd5e1;
+            text-align: left;
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .recommendation-box svg {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+        }
+
+        /* Drivers / Explainability */
+        .drivers-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .drivers-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .drivers-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .driver-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+        }
+
+        .driver-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.775rem;
+            margin-bottom: 6px;
+        }
+
+        .driver-name {
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .driver-impact {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #f87171;
+        }
+
+        .driver-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .driver-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* Error Banner */
+        .error-alert {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger-color);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Developer API View */
+        .api-preview-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 0.75rem;
+        }
+
+        .api-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        pre.code-block {
+            background: #060911;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            color: #38bdf8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            max-height: 180px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 24px;
+        }
+
+        footer a {
+            color: var(--brand-primary-light);
+            text-decoration: none;
+        }
+        
+        /* Subtle spinner */
+        .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="brand-cluster">
+                <div class="brand-logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V8.26l7-3.89v8.62z"/>
+                    </svg>
+                </div>
+                <div class="brand-titles">
+                    <h1>PaySafe India</h1>
+                    <p>Real-Time UPI Fraud Risk Intelligence Engine</p>
+                </div>
+            </div>
+
+            <!-- Header ML Stats & System Health -->
+            <div class="metrics-bar">
+                <div class="metric-pill">
+                    <span class="status-dot"></span>
+                    <span class="label">Model:</span>
+                    <span class="val">{{ meta.model_name }}</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-pill">
+                    <span class="label">Precision:</span>
+                    <span class="val">{{ (meta.test_metrics.precision * 100)|round(1) }}%</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-pill">
+                    <span class="label">Recall:</span>
+                    <span class="val">{{ (meta.test_metrics.recall * 100)|round(1) }}%</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-pill">
+                    <span class="label">ROC-AUC:</span>
+                    <span class="val">{{ meta.test_metrics.roc_auc }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Presets Toolbar -->
+        <div class="presets-wrapper">
+            <div class="presets-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Demo Presets:</span>
+            </div>
+            <div class="preset-btns">
+                <button type="button" class="preset-btn" onclick="applyPreset('typical')">
+                    <span>☕</span> Typical Chai / Daily UPI (Safe)
+                </button>
+                <button type="button" class="preset-btn btn-danger" onclick="applyPreset('suspicious')">
+                    <span>🚨</span> Midnight High-Value Phishing (Fraud)
+                </button>
+                <button type="button" class="preset-btn" onclick="applyPreset('credential_stuffing')">
+                    <span>⚡</span> Multi-OTP Repeated Attempt
+                </button>
+                <button type="button" class="preset-btn" onclick="resetForm()">
+                    <span>🔄</span> Reset to Baseline
+                </button>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-alert">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span><strong>Validation Error:</strong> {{ error }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Workspace Layout -->
+        <div class="workspace-grid">
+            <!-- Left: Transaction Input Form -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg>
+                        <span>UPI Transaction Details</span>
+                    </div>
+                    <div class="live-toggle-badge">
+                        <span class="status-dot"></span>
+                        <span>Live ML Inference</span>
+                    </div>
+                </div>
+
+                <form id="fraud-form" method="POST" action="/">
+                    <!-- Group 1: Core Transaction Parameters -->
+                    <div class="form-section">
+                        <div class="section-title">Core Payment Parameters</div>
+                        <div class="fields-grid">
+                            <!-- Amount -->
+                            <div class="field-item">
+                                <label class="field-label" for="amount">
+                                    <span>Amount (₹)</span>
+                                    <span class="field-helper">Payment value</span>
+                                </label>
+                                <div class="input-group has-prefix">
+                                    <span class="currency-prefix">₹</span>
+                                    <input type="number" id="amount" name="amount" class="input-control"
+                                           value="{{ values['amount'] }}" min="1" max="10000000" step="any" required>
+                                </div>
+                            </div>
+
+                            <!-- Hour of Day -->
+                            <div class="field-item">
+                                <label class="field-label" for="transaction_time_of_day">
+                                    <span>Hour of Day (0–23)</span>
+                                    <span class="field-helper" id="hour-helper">24h clock</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" id="transaction_time_of_day" name="transaction_time_of_day"
+                                           class="input-control" value="{{ values['transaction_time_of_day'] }}"
+                                           min="0" max="23" required>
+                                </div>
+                            </div>
+
+                            <!-- Amount vs Sender History -->
+                            <div class="field-item">
+                                <label class="field-label" for="transaction_amount_vs_sender_history">
+                                    <span>Amount vs. Normal (×)</span>
+                                    <span class="field-helper">1x = typical baseline</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" id="transaction_amount_vs_sender_history"
+                                           name="transaction_amount_vs_sender_history" class="input-control"
+                                           value="{{ values['transaction_amount_vs_sender_history'] }}"
+                                           min="0" max="1000" step="0.1" required>
+                                </div>
+                            </div>
+
+                            <!-- Authentication Attempts -->
+                            <div class="field-item">
+                                <label class="field-label" for="authentication_attempts">
+                                    <span>Auth Attempts</span>
+                                    <span class="field-helper">PIN/OTP tries</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" id="authentication_attempts" name="authentication_attempts"
+                                           class="input-control" value="{{ values['authentication_attempts'] }}"
+                                           min="1" max="10" required>
+                                </div>
+                            </div>
+
+                            <!-- Failed Transaction Count -->
+                            <div class="field-item full-width">
+                                <label class="field-label" for="failed_transaction_count">
+                                    <span>Recent Failed Payments</span>
+                                    <span class="field-helper">Failures immediately preceding this transaction</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" id="failed_transaction_count" name="failed_transaction_count"
+                                           class="input-control" value="{{ values['failed_transaction_count'] }}"
+                                           min="0" max="20" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 2: Device & Network Context -->
+                    <div class="form-section">
+                        <div class="section-title">Device & Channel Security</div>
+                        <div class="fields-grid">
+                            <!-- Unusual Device -->
+                            <div class="field-item">
+                                <span class="field-label">Unusual Device?</span>
+                                <div class="flag-group">
+                                    <div class="flag-option">
+                                        <input type="radio" name="unusual_device_flag" id="dev_0" value="0"
+                                               {% if values['unusual_device_flag']|int == 0 %}checked{% endif %}>
+                                        <label for="dev_0" class="flag-label">No (Trusted)</label>
+                                    </div>
+                                    <div class="flag-option danger-opt">
+                                        <input type="radio" name="unusual_device_flag" id="dev_1" value="1"
+                                               {% if values['unusual_device_flag']|int == 1 %}checked{% endif %}>
+                                        <label for="dev_1" class="flag-label">Yes (Unusual)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Unusual IP -->
+                            <div class="field-item">
+                                <span class="field-label">Unusual IP / Location?</span>
+                                <div class="flag-group">
+                                    <div class="flag-option">
+                                        <input type="radio" name="unusual_ip_flag" id="ip_0" value="0"
+                                               {% if values['unusual_ip_flag']|int == 0 %}checked{% endif %}>
+                                        <label for="ip_0" class="flag-label">No (Known)</label>
+                                    </div>
+                                    <div class="flag-option danger-opt">
+                                        <input type="radio" name="unusual_ip_flag" id="ip_1" value="1"
+                                               {% if values['unusual_ip_flag']|int == 1 %}checked{% endif %}>
+                                        <label for="ip_1" class="flag-label">Yes (Unusual)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Session Source -->
+                            <div class="field-item">
+                                <label class="field-label" for="session_source">
+                                    <span>Session Source</span>
+                                    <span class="field-helper">App vs Phishing Link</span>
+                                </label>
+                                <select id="session_source" name="session_source" class="input-control">
+                                    <option value="app" {% if values['session_source'] == 'app' %}selected{% endif %}>Direct in App</option>
+                                    <option value="link" {% if values['session_source'] == 'link' %}selected{% endif %}>Opened via Link / SMS</option>
+                                </select>
+                            </div>
+
+                            <!-- PIN Entry Method -->
+                            <div class="field-item">
+                                <label class="field-label" for="pin_entry_method">
+                                    <span>PIN Entry Method</span>
+                                    <span class="field-helper">Typed vs Clipboard</span>
+                                </label>
+                                <select id="pin_entry_method" name="pin_entry_method" class="input-control">
+                                    <option value="manual" {% if values['pin_entry_method'] == 'manual' %}selected{% endif %}>Manual Typing</option>
+                                    <option value="pasted" {% if values['pin_entry_method'] == 'pasted' %}selected{% endif %}>Pasted / Auto-filled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 3: Advanced Behavioral Biometrics Accordion -->
+                    <details class="advanced-accordion" id="advanced-details">
+                        <summary class="advanced-summary">
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 20v-6M6 20V10M18 20V4"></path>
+                                </svg>
+                                Advanced Behavioral Biometrics (7 signals)
+                            </span>
+                            <span style="font-size: 0.75rem; color: #818cf8;">Expand / View</span>
+                        </summary>
+                        <div class="advanced-content">
+                            <div class="fields-grid">
+                                <!-- Time Pressure -->
+                                <div class="field-item">
+                                    <label class="field-label" for="time_pressure_indicators">
+                                        <span>Time-Pressure Signals (0–5)</span>
+                                        <span class="field-helper">Urgency/scam countdown cues</span>
+                                    </label>
+                                    <input type="number" id="time_pressure_indicators" name="time_pressure_indicators"
+                                           class="input-control" value="{{ values['time_pressure_indicators'] }}"
+                                           min="0" max="5">
+                                </div>
+
+                                <!-- Input Timing Consistency -->
+                                <div class="field-item">
+                                    <label class="field-label" for="input_timing_consistency">
+                                        <span>Typing Consistency (0–1)</span>
+                                        <span class="field-helper">1.0 = human, low = bot/script</span>
+                                    </label>
+                                    <input type="number" id="input_timing_consistency" name="input_timing_consistency"
+                                           class="input-control" value="{{ values['input_timing_consistency'] }}"
+                                           min="0" max="1" step="0.01">
+                                </div>
+
+                                <!-- PIN Entry Speed -->
+                                <div class="field-item">
+                                    <label class="field-label" for="pin_entry_speed">
+                                        <span>PIN Entry Speed (s)</span>
+                                        <span class="field-helper">Very low = bot speed</span>
+                                    </label>
+                                    <input type="number" id="pin_entry_speed" name="pin_entry_speed"
+                                           class="input-control" value="{{ values['pin_entry_speed'] }}"
+                                           min="0" max="10" step="0.01">
+                                </div>
+
+                                <!-- Transaction Velocity -->
+                                <div class="field-item">
+                                    <label class="field-label" for="transaction_velocity">
+                                        <span>Velocity (Tx / 10m)</span>
+                                        <span class="field-helper">Payments in short window</span>
+                                    </label>
+                                    <input type="number" id="transaction_velocity" name="transaction_velocity"
+                                           class="input-control" value="{{ values['transaction_velocity'] }}"
+                                           min="0" max="50">
+                                </div>
+
+                                <!-- OTP Request Frequency -->
+                                <div class="field-item">
+                                    <label class="field-label" for="otp_request_frequency">
+                                        <span>OTP Requests</span>
+                                        <span class="field-helper">Recent OTP generation frequency</span>
+                                    </label>
+                                    <input type="number" id="otp_request_frequency" name="otp_request_frequency"
+                                           class="input-control" value="{{ values['otp_request_frequency'] }}"
+                                           min="0" max="20">
+                                </div>
+
+                                <!-- Session Duration -->
+                                <div class="field-item">
+                                    <label class="field-label" for="session_duration">
+                                        <span>Session Duration (s)</span>
+                                        <span class="field-helper">App open to submit time</span>
+                                    </label>
+                                    <input type="number" id="session_duration" name="session_duration"
+                                           class="input-control" value="{{ values['session_duration'] }}"
+                                           min="0" max="5000">
+                                </div>
+
+                                <!-- Geographic Disparity -->
+                                <div class="field-item full-width">
+                                    <label class="field-label" for="geographic_disparity">
+                                        <span>Geographic Disparity (km)</span>
+                                        <span class="field-helper">Distance between expected and real coordinate</span>
+                                    </label>
+                                    <input type="number" id="geographic_disparity" name="geographic_disparity"
+                                           class="input-control" value="{{ values['geographic_disparity'] }}"
+                                           min="0" max="25000">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" id="eval-btn">
+                            <span class="spinner" id="eval-spinner"></span>
+                            <span id="btn-text">Evaluate Transaction Risk</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Scoring Gauge & Explainability -->
+            <div class="result-panel">
+                <div class="score-card {% if result %}state-{{ result.band }}{% else %}state-safe{% endif %}" id="score-card">
+                    <div style="font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        UPI Fraud Risk Index
+                    </div>
+
+                    <!-- Animated Circular Gauge -->
+                    <div class="gauge-container">
+                        <svg class="gauge-svg" viewBox="0 0 170 170">
+                            <circle class="gauge-bg" cx="85" cy="85" r="70"></circle>
+                            <circle class="gauge-fill" id="gauge-fill" cx="85" cy="85" r="70"
+                                    stroke="{% if result and result.band == 'high' %}#ef4444{% elif result and result.band == 'medium' %}#f59e0b{% else %}#10b981{% endif %}">
+                            </circle>
+                        </svg>
+                        <div class="gauge-inner-text">
+                            <div class="gauge-score" id="gauge-score">
+                                {% if result %}{{ result.percent }}%{% else %}0.1%{% endif %}
+                            </div>
+                            <div class="gauge-score-label">Fraud Probability</div>
+                        </div>
+                    </div>
+
+                    <!-- Verdict Badge -->
+                    <div class="verdict-badge {% if result %}badge-{{ result.band }}{% else %}badge-safe{% endif %}" id="verdict-badge">
+                        {% if result %}
+                            {% if result.band == 'high' %}
+                                🛑 Fraud Risk: Block Payment
+                            {% elif result.band == 'medium' %}
+                                ⚠️ Suspicious: Challenge OTP
+                            {% else %}
+                                ✅ Legitimate Transaction
+                            {% endif %}
+                        {% else %}
+                            ✅ Legitimate Transaction
+                        {% endif %}
+                    </div>
+
+                    <!-- Recommendation / Action Box -->
+                    <div class="recommendation-box" id="rec-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="rec-icon">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <div id="rec-text">
+                            {% if result and result.band == 'high' %}
+                                High fraud signals detected. Auto-block initiated on UPI switch. Alert sent to issuing bank and customer.
+                            {% elif result and result.band == 'medium' %}
+                                Moderate risk variance detected. Transaction routed through Step-Up Challenge (MPIN + SMS Confirmation).
+                            {% else %}
+                                Transaction exhibits normal behavioral signals. Clear to settle instantly across NPCI UPI switch.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explainability / Driver Breakdown -->
+                <div class="drivers-card" id="drivers-card" style="display: {% if result and result.drivers %}block{% else %}none{% endif %};">
+                    <div class="drivers-title">
+                        <span>Top Anomaly Drivers</span>
+                        <span style="font-size: 0.7rem; color: #94a3b8; font-weight: normal;">Counterfactual impact</span>
+                    </div>
+                    <div class="drivers-list" id="drivers-list">
+                        {% if result and result.drivers %}
+                            {% for label, impact in result.drivers %}
+                            <div class="driver-item">
+                                <div class="driver-header">
+                                    <span class="driver-name">{{ label }}</span>
+                                    <span class="driver-impact">+{{ impact }}% risk</span>
+                                </div>
+                                <div class="driver-bar-bg">
+                                    <div class="driver-bar-fill" style="width: {{ impact }}%;"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- API Inspection Collapsible -->
+                <details class="api-preview-card">
+                    <summary class="api-preview-header" style="cursor: pointer;">
+                        <span>Telemetry & API Response</span>
+                        <span>/api/predict</span>
+                    </summary>
+                    <pre class="code-block" id="api-json">{% if result %}{{ result | tojson(indent=2) }}{% else %}{
+  "status": "ready",
+  "endpoint": "/api/predict"
+}{% endif %}</pre>
+                </details>
+            </div>
+        </div>
+
+        <footer>
+            <p>PaySafe India UPI Risk Engine • Deployed locally via Flask • Production Random Forest Pipeline</p>
+        </footer>
+    </div>
+
+    <script>
+        // Preset configurations provided by backend
+        const PRESETS = {{ presets | tojson }};
+        PRESETS.credential_stuffing = {
+            ...PRESETS.typical,
+            amount: 14500,
+            transaction_time_of_day: 23,
+            authentication_attempts: 5,
+            failed_transaction_count: 4,
+            otp_request_frequency: 3,
+            time_pressure_indicators: 2,
+            session_source: 'link',
+            unusual_device_flag: 1
+        };
+
+        const CIRCUMFERENCE = 2 * Math.PI * 70; // 439.82
+        const gaugeFill = document.getElementById('gauge-fill');
+        const gaugeScore = document.getElementById('gauge-score');
+        const scoreCard = document.getElementById('score-card');
+        const verdictBadge = document.getElementById('verdict-badge');
+        const recBox = document.getElementById('rec-box');
+        const recText = document.getElementById('rec-text');
+        const driversCard = document.getElementById('drivers-card');
+        const driversList = document.getElementById('drivers-list');
+        const apiJson = document.getElementById('api-json');
+        const form = document.getElementById('fraud-form');
+        const spinner = document.getElementById('eval-spinner');
+        const btnText = document.getElementById('btn-text');
+
+        // Update Gauge UI
+        function updateGaugeUI(scorePercent, band, drivers, isFraud) {
+            const offset = CIRCUMFERENCE - (scorePercent / 100) * CIRCUMFERENCE;
+            gaugeFill.style.strokeDashoffset = offset;
+            gaugeScore.innerText = scorePercent.toFixed(1) + '%';
+
+            // Reset state classes
+            scoreCard.classList.remove('state-safe', 'state-medium', 'state-high');
+            verdictBadge.classList.remove('badge-safe', 'badge-medium', 'badge-high');
+
+            if (band === 'high') {
+                scoreCard.classList.add('state-high');
+                verdictBadge.classList.add('badge-high');
+                gaugeFill.style.stroke = '#ef4444';
+                verdictBadge.innerHTML = '🛑 Fraud Risk: Block Payment';
+                recText.innerText = 'High fraud signals detected. Auto-block initiated on UPI switch. Alert sent to issuing bank and customer.';
+            } else if (band === 'medium') {
+                scoreCard.classList.add('state-medium');
+                verdictBadge.classList.add('badge-medium');
+                gaugeFill.style.stroke = '#f59e0b';
+                verdictBadge.innerHTML = '⚠️ Suspicious: Challenge OTP';
+                recText.innerText = 'Moderate risk variance detected. Transaction routed through Step-Up Challenge (MPIN + SMS Confirmation).';
+            } else {
+                scoreCard.classList.add('state-safe');
+                verdictBadge.classList.add('badge-safe');
+                gaugeFill.style.stroke = '#10b981';
+                verdictBadge.innerHTML = '✅ Legitimate Transaction';
+                recText.innerText = 'Transaction exhibits normal behavioral signals. Clear to settle instantly across NPCI UPI switch.';
+            }
+
+            // Update Drivers
+            if (drivers && drivers.length > 0) {
+                driversCard.style.display = 'block';
+                driversList.innerHTML = drivers.map(d => `
+                    <div class="driver-item">
+                        <div class="driver-header">
+                            <span class="driver-name">${d[0]}</span>
+                            <span class="driver-impact">+${d[1]}% risk</span>
+                        </div>
+                        <div class="driver-bar-bg">
+                            <div class="driver-bar-fill" style="width: ${Math.min(d[1], 100)}%;"></div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                driversCard.style.display = 'none';
+                driversList.innerHTML = '';
+            }
+        }
+
+        // Live Scoring API Call
+        let debounceTimer = null;
+        async function runLiveEvaluation() {
+            const formData = new FormData(form);
+            const payload = {};
+            formData.forEach((value, key) => {
+                payload[key] = value;
+            });
+
+            // Read radio buttons specifically
+            const devFlag = document.querySelector('input[name="unusual_device_flag"]:checked');
+            if (devFlag) payload.unusual_device_flag = devFlag.value;
+            const ipFlag = document.querySelector('input[name="unusual_ip_flag"]:checked');
+            if (ipFlag) payload.unusual_ip_flag = ipFlag.value;
+
+            spinner.style.display = 'inline-block';
+            btnText.innerText = 'Scoring...';
+
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    console.warn("Prediction error:", errData.error);
+                    return;
+                }
+
+                const data = await response.json();
+                updateGaugeUI(data.percent, data.band, data.drivers, data.is_fraud);
+                apiJson.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                console.error("Fetch failed:", err);
+            } finally {
+                spinner.style.display = 'none';
+                btnText.innerText = 'Evaluate Transaction Risk';
+            }
+        }
+
+        function triggerDebouncedEval() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(runLiveEvaluation, 250);
+        }
+
+        // Listen on all inputs for instant reactive scoring
+        form.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', triggerDebouncedEval);
+            element.addEventListener('change', triggerDebouncedEval);
+        });
+
+        // Form submit fallback
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            runLiveEvaluation();
+        });
+
+        // Preset Application
+        function applyPreset(name) {
+            const p = PRESETS[name];
+            if (!p) return;
+
+            for (const [key, val] of Object.entries(p)) {
+                const input = form.elements[key];
+                if (input) {
+                    if (input.length && input[0].type === 'radio') {
+                        // Radio button group
+                        for (const radio of input) {
+                            if (String(radio.value) === String(val)) {
+                                radio.checked = true;
+                            }
+                        }
+                    } else {
+                        input.value = val;
+                    }
+                }
+            }
+
+            // Open advanced details if suspicious
+            if (name === 'suspicious' || name === 'credential_stuffing') {
+                const adv = document.getElementById('advanced-details');
+                if (adv) adv.open = true;
+            }
+
+            runLiveEvaluation();
+        }
+
+        function resetForm() {
+            applyPreset('typical');
+            const adv = document.getElementById('advanced-details');
+            if (adv) adv.open = false;
+        }
+
+        // Initial gauge rendering on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            {% if result %}
+                updateGaugeUI({{ result.percent }}, '{{ result.band }}', {{ result.drivers | tojson }}, {{ 'true' if result.is_fraud else 'false' }});
+            {% else %}
+                const initialPercent = 0.1;
+                const offset = CIRCUMFERENCE - (initialPercent / 100) * CIRCUMFERENCE;
+                gaugeFill.style.strokeDashoffset = offset;
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

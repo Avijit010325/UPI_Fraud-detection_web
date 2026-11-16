@@ -1,0 +1,89 @@
+{
+  "model_name": "Random Forest",
+  "threshold": 0.5,
+  "numeric_features": [
+    "amount",
+    "transaction_amount_vs_sender_history",
+    "transaction_time_of_day",
+    "authentication_attempts",
+    "failed_transaction_count",
+    "transaction_velocity",
+    "session_duration",
+    "geographic_disparity",
+    "pin_entry_speed",
+    "otp_request_frequency",
+    "time_pressure_indicators",
+    "input_timing_consistency",
+    "unusual_device_flag",
+    "unusual_ip_flag"
+  ],
+  "categorical_features": [
+    "session_source",
+    "pin_entry_method"
+  ],
+  "categories": {
+    "session_source": [
+      "app",
+      "link"
+    ],
+    "pin_entry_method": [
+      "manual",
+      "pasted"
+    ]
+  },
+  "legit_median": {
+    "amount": 3460.913626,
+    "transaction_amount_vs_sender_history": 1.3806210235,
+    "transaction_time_of_day": 11.0,
+    "authentication_attempts": 1.0,
+    "failed_transaction_count": 0.0,
+    "transaction_velocity": 0.0,
+    "session_duration": 165.0,
+    "geographic_disparity": 9964.526653,
+    "pin_entry_speed": 1.2537014515,
+    "otp_request_frequency": 0.0,
+    "time_pressure_indicators": 0.0,
+    "input_timing_consistency": 0.9010616755,
+    "unusual_device_flag": 0.0,
+    "unusual_ip_flag": 0.0
+  },
+  "min": {
+    "amount": 139.2676643,
+    "transaction_amount_vs_sender_history": 0.222799075,
+    "transaction_time_of_day": 0.0,
+    "authentication_attempts": 1.0,
+    "failed_transaction_count": 0.0,
+    "transaction_velocity": 0.0,
+    "session_duration": 5.0,
+    "geographic_disparity": 14.16743895,
+    "pin_entry_speed": 0.100424484,
+    "otp_request_frequency": 0.0,
+    "time_pressure_indicators": 0.0,
+    "input_timing_consistency": 0.300418489,
+    "unusual_device_flag": 0.0,
+    "unusual_ip_flag": 0.0
+  },
+  "max": {
+    "amount": 49970.15858,
+    "transaction_amount_vs_sender_history": 294.6286799,
+    "transaction_time_of_day": 23.0,
+    "authentication_attempts": 5.0,
+    "failed_transaction_count": 3.0,
+    "transaction_velocity": 5.0,
+    "session_duration": 600.0,
+    "geographic_disparity": 19983.47789,
+    "pin_entry_speed": 1.999997576,
+    "otp_request_frequency": 4.0,
+    "time_pressure_indicators": 5.0,
+    "input_timing_consistency": 0.999997881,
+    "unusual_device_flag": 1.0,
+    "unusual_ip_flag": 1.0
+  },
+  "test_metrics": {
+    "accuracy": 0.9765,
+    "precision": 0.9828,
+    "recall": 0.879,
+    "f1": 0.928,
+    "roc_auc": 0.969
+  }
+}
