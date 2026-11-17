@@ -1,0 +1,2944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PaySafe India — UPI Real-Time Fraud Detection Prototype</title>
+    <meta name="description" content="Next-Gen UPI Transaction Fraud Detection Prototype & AI Security Intelligence Engine for NPCI & Indian Banks.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #07090e;
+            --bg-card: rgba(18, 22, 34, 0.75);
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-glow: rgba(99, 102, 241, 0.25);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --accent-brand: #6366f1;
+            --accent-cyan: #06b6d4;
+            --accent-saffron: #f97316;
+            
+            --safe-emerald: #10b981;
+            --safe-glow: rgba(16, 185, 129, 0.4);
+            --warn-amber: #f59e0b;
+            --danger-crimson: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.45);
+
+            --radius-phone: 54px;
+            --radius-island: 24px;
+            --radius-card: 22px;
+            
+            --phone-w: 390px;
+            --phone-h: 814px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.8) 0%, transparent 100%);
+            background-attachment: fixed;
+        }
+
+        /* Top Presentation Header Bar */
+        .top-navbar {
+            background: rgba(10, 14, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-badge-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f97316 0%, #6366f1 50%, #06b6d4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .brand-badge-logo svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .brand-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #ffffff 40%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .proto-pill {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            -webkit-text-fill-color: #a5b4fc;
+        }
+
+        .brand-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* View Mode Switcher Pills */
+        .view-switcher {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+            gap: 4px;
+        }
+
+        .view-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-btn.active {
+            background: var(--accent-brand);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .view-btn:hover:not(.active) {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Sound Toggle */
+        .sound-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .sound-btn.active {
+            border-color: #10b981;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        /* Presenter Scenarios Strip */
+        .scenarios-strip {
+            background: rgba(15, 21, 37, 0.65);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 10px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .scenarios-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .scenario-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .scenario-pill:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .scenario-pill.pill-safe:hover {
+            border-color: var(--safe-emerald);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .scenario-pill.pill-danger {
+            border-color: rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .scenario-pill.pill-danger:hover {
+            border-color: var(--danger-crimson);
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Main Workspace Stage */
+        .stage-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 24px 60px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* IPHONE 16 PRO MOBILE MOCKUP STYLES (Matching Video 1 & Video 2) */
+        /* ------------------------------------------------------------- */
+        .phone-wrapper {
+            position: relative;
+            width: var(--phone-w);
+            height: var(--phone-h);
+            flex-shrink: 0;
+            background: #000;
+            border-radius: var(--radius-phone);
+            box-shadow: 
+                0 0 0 4px #232733,
+                0 0 0 7px #10131a,
+                0 30px 70px -15px rgba(0, 0, 0, 0.9),
+                0 0 100px -20px rgba(99, 102, 241, 0.25);
+            border: 5px solid #141721;
+            overflow: hidden;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            transform: translateZ(0);
+        }
+
+        /* Dynamic Island */
+        .dynamic-island {
+            position: absolute;
+            top: 11px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 118px;
+            height: 33px;
+            background: #000000;
+            border-radius: var(--radius-island);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .dynamic-island.expanded {
+            width: 290px;
+            height: 58px;
+            padding: 0 16px;
+            border-radius: 28px;
+            background: #090b12;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .dynamic-island.alert-danger {
+            background: #2b0c0e;
+            box-shadow: 0 10px 35px rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .di-camera {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #111422;
+            border: 1px solid #1e2235;
+        }
+
+        .di-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--safe-emerald);
+            box-shadow: 0 0 8px var(--safe-emerald);
+            animation: pulse-di 2s infinite;
+        }
+
+        @keyframes pulse-di {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.85); opacity: 0.6; }
+        }
+
+        .di-expanded-content {
+            display: none;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dynamic-island.expanded .di-expanded-content {
+            display: flex;
+        }
+
+        .dynamic-island.expanded .di-idle {
+            display: none;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 48px;
+            padding: 12px 26px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff;
+            z-index: 90;
+            background: transparent;
+        }
+
+        .status-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
+        /* App Inside Phone */
+        .phone-app-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+            background: #090c15;
+            color: #ffffff;
+            scrollbar-width: none;
+        }
+
+        .phone-app-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Tab Views inside Phone */
+        .app-tab-page {
+            display: none;
+            flex-direction: column;
+            padding: 12px 18px 84px;
+            flex: 1;
+            animation: fadeIn 0.25s ease forwards;
+        }
+
+        .app-tab-page.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Tab Header (Video 1) */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .avatar-circle .online-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border: 2px solid #090c15;
+            border-radius: 50%;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Balance Display (Video 1 & 2) */
+        .balance-card {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .balance-info .label {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .balance-amount {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .balance-amount span.currency {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-right: 2px;
+        }
+
+        .balance-amount span.cents {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .balance-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .action-pill {
+            background: white;
+            color: #000000;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .action-pill:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 15px rgba(255,255,255,0.25);
+        }
+
+        .action-pill.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .action-pill.secondary:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        /* Spending Overview Pill (Video 1) */
+        .spending-pill-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .spending-pill-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .spending-left .title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .spending-left .amount {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .spending-avatars {
+            display: flex;
+            align-items: center;
+        }
+
+        .mini-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid #090c15;
+            margin-left: -8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Linked Cards Carousel (Video 1) */
+        .cards-slider {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin: 0 -18px 22px;
+            padding: 4px 18px;
+            scrollbar-width: none;
+        }
+
+        .cards-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .virtual-card {
+            min-width: 240px;
+            height: 140px;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.25s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .virtual-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-gold {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 60%, #d97706 100%);
+            color: #451a03;
+        }
+
+        .card-emerald {
+            background: linear-gradient(135deg, #059669 0%, #10b981 60%, #047857 100%);
+            color: #064e3b;
+        }
+
+        .card-sapphire {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 60%, #1d4ed8 100%);
+            color: #ffffff;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-name {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .card-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .card-network {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* Recipients Row (Video 1) */
+        .section-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-heading {
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+
+        .section-btn-link {
+            font-size: 0.75rem;
+            color: #818cf8;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .recipients-row {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            margin: 0 -18px 22px;
+            padding: 4px 18px;
+            scrollbar-width: none;
+        }
+
+        .recipients-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .recipient-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .recipient-item:hover {
+            transform: scale(1.05);
+        }
+
+        .recipient-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1e2438;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .recipient-item.is-scam .recipient-avatar {
+            border-color: #ef4444;
+            background: #3b1115;
+            color: #fca5a5;
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        }
+
+        .recipient-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            max-width: 60px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        .recipient-vpa {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            max-width: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Transactions List (Video 1 & 2) */
+        .transactions-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 16px;
+        }
+
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tx-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tx-item:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .tx-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tx-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .tx-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .tx-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .tx-right {
+            text-align: right;
+        }
+
+        .tx-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .tx-status {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .tx-status.safe {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .tx-status.blocked {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* SEND PAYMENT SHEET / MODAL (The Keypad & Swipe from Video 1)   */
+        /* ------------------------------------------------------------- */
+        .send-sheet-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #090c15;
+            z-index: 120;
+            display: none;
+            flex-direction: column;
+            padding: 50px 22px 24px;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .send-sheet-modal.open {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .send-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .send-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            padding: 3px;
+        }
+
+        .send-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 5px 16px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .send-tab-btn.active {
+            background: white;
+            color: black;
+        }
+
+        .btn-close-sheet {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .target-recipient-badge {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            border-radius: 999px;
+            padding: 6px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: center;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+        }
+
+        .target-recipient-badge .t-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #6366f1;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Large Amount Display */
+        .send-amount-container {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .send-amount-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .send-available-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Arithmetic Mini Bar (Video 1: "+ - × ÷") */
+        .arithmetic-bar {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 10px 0 16px;
+        }
+
+        .arith-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .arith-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.08);
+        }
+
+        /* Keypad (Video 1) */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px 14px;
+            margin-bottom: 20px;
+        }
+
+        .key-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 14px 0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+        }
+
+        .key-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.96);
+        }
+
+        /* SWIPE TO CONFIRM SLIDER (Exact replica of Video 1!) */
+        .swipe-track-container {
+            position: relative;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: auto;
+        }
+
+        .swipe-track-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 56px;
+            background: linear-gradient(90deg, #6366f1, #10b981);
+            border-radius: 999px;
+            pointer-events: none;
+            opacity: 0.3;
+            transition: width 0.05s ease;
+        }
+
+        .swipe-track-text {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.02em;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .swipe-handle {
+            position: absolute;
+            left: 4px;
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            color: #000;
+            transition: transform 0.05s ease;
+        }
+
+        .swipe-handle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* FULL-SCREEN SUCCESS MODAL (Green Screen from Video 1)          */
+        /* ------------------------------------------------------------- */
+        .screen-success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #00c853;
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            cursor: pointer;
+        }
+
+        .screen-success-overlay.open {
+            display: flex;
+        }
+
+        .success-checkmark-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 0 35px rgba(255, 255, 255, 0.4);
+        }
+
+        .success-checkmark-circle svg {
+            width: 42px;
+            height: 42px;
+            stroke: white;
+        }
+
+        .success-amount-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.7rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .success-recipient-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            opacity: 0.95;
+            margin-bottom: 18px;
+        }
+
+        .success-ai-shield-tag {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tap-to-close-hint {
+            font-size: 0.8rem;
+            opacity: 0.75;
+            position: absolute;
+            bottom: 34px;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* FULL-SCREEN FRAUD INTERCEPT MODAL (The Star of Presentation)   */
+        /* ------------------------------------------------------------- */
+        .screen-fraud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #3b0d11 0%, #170406 100%);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 55px 22px 30px;
+            text-align: center;
+            color: white;
+            animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .screen-fraud-overlay.open {
+            display: flex;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .fraud-siren-shield {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.25);
+            border: 2px solid #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+            margin-bottom: 14px;
+            animation: pulse-siren 1.2s infinite;
+        }
+
+        @keyframes pulse-siren {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+            50% { transform: scale(1.08); box-shadow: 0 0 60px rgba(239, 68, 68, 0.9); }
+        }
+
+        .fraud-title-banner {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fca5a5;
+            letter-spacing: -0.01em;
+            margin-bottom: 4px;
+        }
+
+        .fraud-amount-banner {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        /* Risk Gauge Pill inside Phone */
+        .fraud-risk-pill {
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: #ef4444;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        /* Anomaly Breakdown Card */
+        .fraud-reasons-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 12px;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .reasons-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fca5a5;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .reason-bullet {
+            font-size: 0.75rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .reason-bullet:last-child {
+            margin-bottom: 0;
+        }
+
+        .fraud-modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-report-cyber {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-dismiss-fraud {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* ANALYTICS & SPEND TAB (Video 2 Dot-Matrix Apple Card Style)    */
+        /* ------------------------------------------------------------- */
+        .dot-matrix-card-wrapper {
+            width: 100%;
+            height: 180px;
+            border-radius: 20px;
+            background: #000000;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #dotMatrixCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .card-overlay-info {
+            position: absolute;
+            bottom: 16px;
+            left: 18px;
+            right: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+
+        .c-balance-title {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .c-balance-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .category-breakdown-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .cat-item {
+            margin-bottom: 12px;
+        }
+
+        .cat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .cat-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .cat-progress-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .cat-progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.8s ease;
+        }
+
+        /* Floating Phone Navigation Bar (Video 1 Dock) */
+        .phone-dock-nav {
+            position: absolute;
+            bottom: 14px;
+            left: 20px;
+            right: 20px;
+            height: 58px;
+            background: rgba(22, 28, 44, 0.8);
+            backdrop-filter: blur(25px);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 80;
+        }
+
+        .dock-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dock-tab-btn.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .dock-tab-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* RIGHT SIDE: BANK SOC & PRESENTATION COMMAND CENTER            */
+        /* ------------------------------------------------------------- */
+        .desktop-command-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            min-width: 0;
+        }
+
+        /* Metric Highlights Row */
+        .metric-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #06b6d4);
+        }
+
+        .kpi-card.kpi-safe::after { background: #10b981; }
+        .kpi-card.kpi-danger::after { background: #ef4444; }
+
+        .kpi-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .kpi-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .kpi-sub {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* SOC Tabs Card */
+        .soc-panel-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .soc-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .soc-tabs-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .soc-tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .soc-tab-btn.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* SOC Views */
+        .soc-view-content {
+            display: none;
+        }
+
+        .soc-view-content.active {
+            display: block;
+        }
+
+        /* Live Telemetry Stream */
+        .event-stream-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+
+        .event-stream-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .event-stream-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .badge-status {
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-status.pass { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .badge-status.block { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+        .badge-status.warn { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+
+        /* ML Research Artifacts Grid */
+        .artifacts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .artifact-box {
+            background: rgba(12, 17, 30, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .artifact-box h4 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+
+        .artifact-box img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .artifact-box img:hover {
+            transform: scale(1.02);
+        }
+
+        /* Live Interactive Parameter Tuning */
+        .tuning-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .tune-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .tune-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tune-slider {
+            width: 100%;
+            accent-color: var(--accent-brand);
+            cursor: pointer;
+        }
+
+        @media (max-width: 1100px) {
+            .stage-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .desktop-command-center {
+                width: 100%;
+            }
+            .metric-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Presentation Header -->
+    <header class="top-navbar">
+        <div class="brand-box">
+            <div class="brand-badge-logo">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V8.26l7-3.89v8.62z"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>PaySafe India <span class="proto-pill">AI Guardian Prototype</span></h1>
+                <p>NPCI UPI Fraud Prevention Engine • ML & Behavioral Telemetry</p>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="sound-btn active" id="soundToggle" onclick="toggleSound()">
+                <span id="soundIcon">🔊</span> Sound FX: ON
+            </button>
+            <div class="view-switcher">
+                <button class="view-btn active" onclick="switchMainView('mobile')">
+                    📱 Mobile Experience
+                </button>
+                <button class="view-btn" onclick="switchMainView('command')">
+                    🛡️ Bank SOC Operations
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Presenter Demo Scenarios Strip (One-Click Presentation Demonstrations) -->
+    <div class="scenarios-strip">
+        <div class="scenarios-title">
+            <span>⚡ Presenter Scenarios:</span>
+        </div>
+        <button class="scenario-pill pill-safe" onclick="loadScenario('safe_chai')">
+            <span>☕</span> Normal Chai (₹40 • Safe)
+        </button>
+        <button class="scenario-pill pill-safe" onclick="loadScenario('safe_shopping')">
+            <span>🛍️</span> Grocery Spend (₹2,860 • Safe)
+        </button>
+        <button class="scenario-pill" onclick="loadScenario('medium_warning')">
+            <span>⚠️</span> High-Value Tech (₹24,999 • 2FA Alert)
+        </button>
+        <button class="scenario-pill pill-danger" onclick="loadScenario('fraud_kyc')">
+            <span>🚨</span> Midnight Phishing Scam (₹95,000 • Intercepted)
+        </button>
+        <button class="scenario-pill pill-danger" onclick="loadScenario('fraud_qr')">
+            <span>🚨</span> Fake QR Lottery Lure (₹48,000 • Intercepted)
+        </button>
+    </div>
+
+    <!-- Main Workspace Stage -->
+    <main class="stage-container">
+
+        <!-- ========================================================= -->
+        <!-- IPHONE 16 PRO MOBILE SIMULATOR (From Video 1 & Video 2)    -->
+        <!-- ========================================================= -->
+        <div class="phone-wrapper" id="phoneWrapper">
+            
+            <!-- Dynamic Island with Interactive State -->
+            <div class="dynamic-island" id="dynamicIsland" onclick="toggleDynamicIsland()">
+                <div class="di-idle" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div class="di-dot" id="diDot"></div>
+                    <span style="font-size: 0.65rem; font-weight: 700; color: #a5b4fc;" id="diStatusText">PaySafe AI</span>
+                    <div class="di-camera"></div>
+                </div>
+                <div class="di-expanded-content">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1rem;" id="diExpIcon">🛡️</span>
+                        <div style="text-align: left;">
+                            <div style="font-size: 0.75rem; font-weight: 700;" id="diExpTitle">Real-Time Protection Active</div>
+                            <div style="font-size: 0.65rem; color: #94a3b8;" id="diExpSub">Random Forest • K-Means K=4</div>
+                        </div>
+                    </div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: #38bdf8;" id="diExpRisk">
+                        0.8%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span id="liveTime">9:41</span>
+                <div class="status-icons">
+                    <span>5G</span>
+                    <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M1 9.5C1 8.94772 1.44772 8.5 2 8.5H13C13.5523 8.5 14 8.94772 14 9.5C14 10.0523 13.5523 10.5 13 10.5H2C1.44772 10.5 1 10.0523 1 9.5Z" fill="white"/><path d="M4 6.5C4 5.94772 4.44772 5.5 5 5.5H10C10.5523 5.5 11 5.94772 11 6.5C11 7.05228 10.5523 7.5 10 7.5H5C4.44772 7.5 4 7.05228 4 6.5Z" fill="white"/><path d="M6 3.5C6 2.94772 6.44772 2.5 7 2.5H8C8.55228 2.5 9 2.94772 9 3.5C9 4.05228 8.55228 4.5 8 4.5H7C6.44772 4.5 6 4.05228 6 3.5Z" fill="white"/></svg>
+                    <svg width="22" height="11" viewBox="0 0 22 11" fill="none"><rect x="0.5" y="0.5" width="18" height="10" rx="3.5" stroke="white"/><rect x="2" y="2" width="15" height="7" rx="2" fill="white"/><path d="M20 3.5V7.5" stroke="white" stroke-linecap="round"/></svg>
+                </div>
+            </div>
+
+            <!-- Internal Phone Screen -->
+            <div class="phone-app-screen">
+                
+                <!-- TAB 1: HOME DASHBOARD (Video 1) -->
+                <div class="app-tab-page active" id="tabHome">
+                    <!-- User Header -->
+                    <div class="app-header">
+                        <div class="user-profile">
+                            <div class="avatar-circle">
+                                <span>AA</span>
+                                <div class="online-badge"></div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8rem; font-weight: 700;">Avijit Aditya</div>
+                                <div style="font-size: 0.7rem; color: var(--text-muted);">@avijit.okhdfc</div>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <div class="icon-btn" onclick="openNotifCenter()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                <div class="notif-badge">3</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Balance -->
+                    <div class="balance-card">
+                        <div class="balance-info">
+                            <div class="label">Total UPI Balance</div>
+                            <div class="balance-amount">
+                                <span class="currency">₹</span>78,540<span class="cents">.43</span>
+                            </div>
+                            <div class="balance-actions">
+                                <button class="action-pill" onclick="openSendPayment('Pavlo', 'pavlo@upi', 286)">
+                                    <span>+</span> Send
+                                </button>
+                                <button class="action-pill secondary" onclick="alert('UPI Request Link generated: upi://pay?pa=avijit@okhdfc')">
+                                    <span>↙</span> Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spending Summary Widget (Video 1 & 2) -->
+                    <div class="spending-pill-card" onclick="switchPhoneTab('analytics')">
+                        <div class="spending-left">
+                            <div class="title">Monthly Spending</div>
+                            <div class="amount">₹ 13,850.00</div>
+                        </div>
+                        <div class="spending-avatars">
+                            <div class="mini-avatar" style="background: #3b82f6;">A</div>
+                            <div class="mini-avatar" style="background: #10b981;">T</div>
+                            <div class="mini-avatar" style="background: #f59e0b;">E</div>
+                            <div class="mini-avatar" style="background: #ef4444;">+4</div>
+                        </div>
+                    </div>
+
+                    <!-- Linked Cards / Bank Accounts Carousel (Video 1) -->
+                    <div class="cards-slider">
+                        <!-- Card 1 -->
+                        <div class="virtual-card card-gold">
+                            <div class="card-top">
+                                <span class="card-name">RuPay Credit on UPI</span>
+                                <span>📡</span>
+                            </div>
+                            <div class="card-number">•••• 7642</div>
+                            <div class="card-bottom">
+                                <span style="font-size: 0.72rem; font-weight: 600;">SBI DIGITAL</span>
+                                <span class="card-network">RuPay</span>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="virtual-card card-emerald">
+                            <div class="card-top">
+                                <span class="card-name">HDFC Millennia UPI</span>
+                                <span>📡</span>
+                            </div>
+                            <div class="card-number">•••• 5123</div>
+                            <div class="card-bottom">
+                                <span style="font-size: 0.72rem; font-weight: 600;">HDFC BANK</span>
+                                <span class="card-network">UPI 2.0</span>
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="virtual-card card-sapphire">
+                            <div class="card-top">
+                                <span class="card-name">ICICI Platinum Savings</span>
+                                <span>📡</span>
+                            </div>
+                            <div class="card-number">•••• 3413</div>
+                            <div class="card-bottom">
+                                <span style="font-size: 0.72rem; font-weight: 600;">ICICI BANK</span>
+                                <span class="card-network">UPI</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipients Row (Video 1) -->
+                    <div class="section-header-row">
+                        <span class="section-heading">Quick Transfer</span>
+                        <button class="section-btn-link" onclick="openSendPayment('New Contact', 'new@upi', 100)">+ Add</button>
+                    </div>
+
+                    <div class="recipients-row">
+                        <!-- Pavlo (From Video 1) -->
+                        <div class="recipient-item" onclick="openSendPayment('Pavlo', 'pavlo@upi', 286)">
+                            <div class="recipient-avatar" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                                <span>P</span>
+                            </div>
+                            <span class="recipient-name">Pavlo</span>
+                            <span class="recipient-vpa">@pavlo</span>
+                        </div>
+                        <!-- Sarah -->
+                        <div class="recipient-item" onclick="openSendPayment('Sarah', 'sarah@okhdfc', 500)">
+                            <div class="recipient-avatar" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                                <span>S</span>
+                            </div>
+                            <span class="recipient-name">Sarah</span>
+                            <span class="recipient-vpa">@sarah</span>
+                        </div>
+                        <!-- Rahul -->
+                        <div class="recipient-item" onclick="openSendPayment('Rahul Sharma', 'rahul@oksbi', 1200)">
+                            <div class="recipient-avatar" style="background: linear-gradient(135deg, #6366f1, #3b82f6);">
+                                <span>R</span>
+                            </div>
+                            <span class="recipient-name">Rahul S.</span>
+                            <span class="recipient-vpa">@oksbi</span>
+                        </div>
+                        <!-- Ramesh Chaiwala -->
+                        <div class="recipient-item" onclick="openSendPayment('Ramesh Chaiwala', 'ramesh.chai@okhdfcbank', 40)">
+                            <div class="recipient-avatar" style="background: linear-gradient(135deg, #d97706, #78350f);">
+                                <span>☕</span>
+                            </div>
+                            <span class="recipient-name">Chai</span>
+                            <span class="recipient-vpa">₹40</span>
+                        </div>
+                        <!-- SCAM RECIPIENT (For Presentation) -->
+                        <div class="recipient-item is-scam" onclick="openSendPayment('🚨 Urgent Bank KYC Desk', 'sbi_kyc_verify.support@fakevpa', 95000, true)">
+                            <div class="recipient-avatar">
+                                <span>⚠️</span>
+                            </div>
+                            <span class="recipient-name" style="color: #fca5a5;">Fake KYC</span>
+                            <span class="recipient-vpa" style="color: #ef4444;">Scam Lure</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions Feed (Video 1 & 2) -->
+                    <div class="section-header-row">
+                        <span class="section-heading">Recent Activity</span>
+                        <span style="font-size: 0.72rem; color: #10b981;">Shield Active</span>
+                    </div>
+
+                    <div class="transactions-card">
+                        <div class="tx-list" id="txFeedList">
+                            <div class="tx-item">
+                                <div class="tx-left">
+                                    <div class="tx-icon">🍎</div>
+                                    <div>
+                                        <div class="tx-name">Apple Store</div>
+                                        <div class="tx-time">2 hours ago • HDFC UPI</div>
+                                    </div>
+                                </div>
+                                <div class="tx-right">
+                                    <div class="tx-amount">- ₹ 2,000.00</div>
+                                    <div class="tx-status safe">Cleared (1.1%)</div>
+                                </div>
+                            </div>
+                            <div class="tx-item">
+                                <div class="tx-left">
+                                    <div class="tx-icon">🧵</div>
+                                    <div>
+                                        <div class="tx-name">Threads App</div>
+                                        <div class="tx-time">Yesterday • RuPay</div>
+                                    </div>
+                                </div>
+                                <div class="tx-right">
+                                    <div class="tx-amount">- ₹ 300.00</div>
+                                    <div class="tx-status safe">Cleared (0.9%)</div>
+                                </div>
+                            </div>
+                            <div class="tx-item">
+                                <div class="tx-left">
+                                    <div class="tx-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">🚨</div>
+                                    <div>
+                                        <div class="tx-name">Phishing VPA Intercepted</div>
+                                        <div class="tx-time">02:14 AM • Link Session</div>
+                                    </div>
+                                </div>
+                                <div class="tx-right">
+                                    <div class="tx-amount" style="color: #ef4444;">Blocked ₹ 95,000</div>
+                                    <div class="tx-status blocked">Blocked (98.4%)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: SPEND & ANALYTICS (Video 2: Apple Card Dot Matrix & Category Breakdown) -->
+                <div class="app-tab-page" id="tabAnalytics">
+                    <div class="section-header-row" style="margin-top: 10px;">
+                        <span class="section-heading" style="font-size: 1.15rem;">Spend & Anomaly Intel</span>
+                        <span style="font-size: 0.75rem; color: var(--accent-cyan);">NPCI Connected</span>
+                    </div>
+
+                    <!-- Dot Matrix Card from Video 2 -->
+                    <div class="dot-matrix-card-wrapper">
+                        <canvas id="dotMatrixCanvas"></canvas>
+                        <div class="card-overlay-info">
+                            <div>
+                                <div class="c-balance-title">PaySafe Super-Card</div>
+                                <div class="c-balance-val">₹ 78,540.43</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="c-balance-title">Fraud Protected</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #34d399;">₹ 4,20,000</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Breakdown from Video 2 -->
+                    <div class="category-breakdown-card">
+                        <div class="section-heading" style="margin-bottom: 14px;">Spending by Category</div>
+                        
+                        <div class="cat-item">
+                            <div class="cat-header">
+                                <span>🛍️ Shopping (112 tx)</span>
+                                <span style="font-family: 'JetBrains Mono';">₹ 9,708.31</span>
+                            </div>
+                            <div class="cat-progress-bg">
+                                <div class="cat-progress-fill" style="width: 78%; background: #f97316;"></div>
+                            </div>
+                        </div>
+
+                        <div class="cat-item">
+                            <div class="cat-header">
+                                <span>🍔 Food & Drinks (599 tx)</span>
+                                <span style="font-family: 'JetBrains Mono';">₹ 8,526.61</span>
+                            </div>
+                            <div class="cat-progress-bg">
+                                <div class="cat-progress-fill" style="width: 68%; background: #ec4899;"></div>
+                            </div>
+                        </div>
+
+                        <div class="cat-item">
+                            <div class="cat-header">
+                                <span>⚙️ Services & Bills (42 tx)</span>
+                                <span style="font-family: 'JetBrains Mono';">₹ 5,483.91</span>
+                            </div>
+                            <div class="cat-progress-bg">
+                                <div class="cat-progress-fill" style="width: 44%; background: #3b82f6;"></div>
+                            </div>
+                        </div>
+
+                        <div class="cat-item">
+                            <div class="cat-header">
+                                <span>🚗 Transportation (176 tx)</span>
+                                <span style="font-family: 'JetBrains Mono';">₹ 3,817.73</span>
+                            </div>
+                            <div class="cat-progress-bg">
+                                <div class="cat-progress-fill" style="width: 32%; background: #10b981;"></div>
+                            </div>
+                        </div>
+
+                        <div class="cat-item">
+                            <div class="cat-header">
+                                <span>🎮 Entertainment (77 tx)</span>
+                                <span style="font-family: 'JetBrains Mono';">₹ 2,084.35</span>
+                            </div>
+                            <div class="cat-progress-bg">
+                                <div class="cat-progress-fill" style="width: 20%; background: #a855f7;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Protection Summary -->
+                    <div class="transactions-card">
+                        <div style="font-size: 0.8125rem; font-weight: 700; margin-bottom: 8px;">PaySafe AI Security Health</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">
+                            <span>Model Precision:</span>
+                            <span style="font-weight: 700; color: #38bdf8;">98.28%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px;">
+                            <span>Recall (Fraud Caught):</span>
+                            <span style="font-weight: 700; color: #34d399;">87.90%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary);">
+                            <span>Zero False Accusations:</span>
+                            <span style="font-weight: 700; color: #f59e0b;">99.8%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: CARDS & ACCOUNTS -->
+                <div class="app-tab-page" id="tabCards">
+                    <div class="section-header-row" style="margin-top: 10px;">
+                        <span class="section-heading" style="font-size: 1.15rem;">Linked UPI Accounts</span>
+                        <button class="section-btn-link">+ Link Bank</button>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+                        <div class="virtual-card card-gold" style="min-width: 100%; height: 150px;">
+                            <div class="card-top">
+                                <span class="card-name">State Bank of India</span>
+                                <span style="font-size: 0.75rem; background: rgba(0,0,0,0.15); padding: 2px 8px; border-radius: 999px;">Primary VPA</span>
+                            </div>
+                            <div class="card-number">•••• •••• •••• 7642</div>
+                            <div class="card-bottom">
+                                <div>
+                                    <div style="font-size: 0.65rem;">Account Balance</div>
+                                    <div style="font-size: 1.1rem; font-weight: 800;">₹ 52,140.20</div>
+                                </div>
+                                <span class="card-network">RuPay</span>
+                            </div>
+                        </div>
+
+                        <div class="virtual-card card-emerald" style="min-width: 100%; height: 150px;">
+                            <div class="card-top">
+                                <span class="card-name">HDFC Bank Salary</span>
+                                <span style="font-size: 0.75rem; background: rgba(0,0,0,0.15); padding: 2px 8px; border-radius: 999px;">Linked UPI</span>
+                            </div>
+                            <div class="card-number">•••• •••• •••• 5123</div>
+                            <div class="card-bottom">
+                                <div>
+                                    <div style="font-size: 0.65rem;">Account Balance</div>
+                                    <div style="font-size: 1.1rem; font-weight: 800;">₹ 26,400.23</div>
+                                </div>
+                                <span class="card-network">HDFC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Floating Dock Navigation Bar (Video 1) -->
+            <div class="phone-dock-nav">
+                <button class="dock-tab-btn active" id="dockHome" onclick="switchPhoneTab('home')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </button>
+                <button class="dock-tab-btn" id="dockCards" onclick="switchPhoneTab('cards')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                </button>
+                <button class="dock-tab-btn" id="dockAnalytics" onclick="switchPhoneTab('analytics')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </button>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- SEND PAYMENT MODAL (Interactive Keypad + Swipe to Pay)  -->
+            <!-- ======================================================= -->
+            <div class="send-sheet-modal" id="sendSheetModal">
+                <div class="send-sheet-header">
+                    <div class="send-tabs">
+                        <button class="send-tab-btn active">Send</button>
+                        <button class="send-tab-btn">Request</button>
+                    </div>
+                    <button class="btn-close-sheet" onclick="closeSendSheet()">✕</button>
+                </div>
+
+                <div class="target-recipient-badge">
+                    <div class="t-avatar" id="sheetAvatar">P</div>
+                    <div>
+                        <span id="sheetRecipientName" style="font-weight: 700;">Pavlo</span> • 
+                        <span id="sheetRecipientVpa" style="color: var(--text-muted);">7642 UPI</span>
+                    </div>
+                </div>
+
+                <div class="send-amount-container">
+                    <div class="send-amount-val" id="sheetAmountDisplay">₹ 286</div>
+                    <div class="send-available-sub">Available: ₹ 78,540.43</div>
+                </div>
+
+                <!-- Arithmetic helper (+ - × ÷ from Video 1) -->
+                <div class="arithmetic-bar">
+                    <button class="arith-btn" onclick="applyArithmetic('+')">+</button>
+                    <button class="arith-btn" onclick="applyArithmetic('-')">−</button>
+                    <button class="arith-btn" onclick="applyArithmetic('×')">×</button>
+                    <button class="arith-btn" onclick="applyArithmetic('÷')">÷</button>
+                </div>
+
+                <!-- Keypad -->
+                <div class="keypad-grid">
+                    <button class="key-btn" onclick="pressDigit('1')">1</button>
+                    <button class="key-btn" onclick="pressDigit('2')">2</button>
+                    <button class="key-btn" onclick="pressDigit('3')">3</button>
+                    <button class="key-btn" onclick="pressDigit('4')">4</button>
+                    <button class="key-btn" onclick="pressDigit('5')">5</button>
+                    <button class="key-btn" onclick="pressDigit('6')">6</button>
+                    <button class="key-btn" onclick="pressDigit('7')">7</button>
+                    <button class="key-btn" onclick="pressDigit('8')">8</button>
+                    <button class="key-btn" onclick="pressDigit('9')">9</button>
+                    <button class="key-btn" onclick="pressDigit('.')">.</button>
+                    <button class="key-btn" onclick="pressDigit('0')">0</button>
+                    <button class="key-btn" onclick="pressBackspace()">⌫</button>
+                </div>
+
+                <!-- Swipe Right to Confirm (Video 1 Interaction) -->
+                <div class="swipe-track-container" id="swipeTrack">
+                    <div class="swipe-track-fill" id="swipeFill"></div>
+                    <span class="swipe-track-text" id="swipeText">Swipe right to confirm</span>
+                    <div class="swipe-handle" id="swipeHandle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- FULL-SCREEN SUCCESS MODAL (Green Screen from Video 1)   -->
+            <!-- ======================================================= -->
+            <div class="screen-success-overlay" id="screenSuccess" onclick="closeOutcomeScreen()">
+                <div class="success-checkmark-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div class="success-amount-text" id="successAmountText">₹ 286.00</div>
+                <div class="success-recipient-text" id="successRecipientText">Sent to Pavlo</div>
+                <div class="success-ai-shield-tag">
+                    <span>🛡️</span> PaySafe AI Verified • Cleared (0.8% Risk)
+                </div>
+                <div class="tap-to-close-hint">Tap anywhere to close</div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- FULL-SCREEN FRAUD INTERCEPT MODAL (The Presentation Peak) -->
+            <!-- ======================================================= -->
+            <div class="screen-fraud-overlay" id="screenFraud">
+                <div>
+                    <div class="fraud-siren-shield">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <div class="fraud-title-banner">TRANSACTION BLOCKED</div>
+                    <div style="font-size: 0.75rem; color: #fca5a5; margin-bottom: 8px;">NPCI Safety Intercept #PS-9842</div>
+                    <div class="fraud-amount-banner" id="fraudAmountBanner">₹ 95,000.00</div>
+                    <div class="fraud-risk-pill" id="fraudRiskPill">
+                        <span>🛑</span> Risk Index: 98.4% (Severe Threat)
+                    </div>
+
+                    <!-- Reasons Card -->
+                    <div class="fraud-reasons-card">
+                        <div class="reasons-title">AI Anomaly Attribution (Random Forest):</div>
+                        <div class="reason-bullet">
+                            <span>⚠️</span> <span id="fraudReason1">Nocturnal burst window (02:15 AM - is_night=1)</span>
+                        </div>
+                        <div class="reason-bullet">
+                            <span>⚠️</span> <span id="fraudReason2">Extreme amount outlier (8.5× sender historical median)</span>
+                        </div>
+                        <div class="reason-bullet">
+                            <span>⚠️</span> <span id="fraudReason3">Unrecognized device fingerprint & foreign IP ASN</span>
+                        </div>
+                        <div class="reason-bullet" style="color: #67e8f9;">
+                            <span>🧩</span> <span id="fraudClusterText">Cluster 3: Nocturnal Anomaly Transfer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fraud-modal-actions">
+                    <button class="btn-report-cyber" onclick="reportToCyberCell()">
+                        🚨 Report to National Cybercrime Helpline (1930)
+                    </button>
+                    <button class="btn-dismiss-fraud" onclick="closeOutcomeScreen()">
+                        Cancel & Freeze UPI ID
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- RIGHT SIDE: BANK SOC & AUDIENCE PRESENTATION COMMAND CENTER-->
+        <!-- ========================================================= -->
+        <div class="desktop-command-center">
+
+            <!-- Real-time ML Evaluation Metrics (Directly from models/model_meta.json) -->
+            <div class="metric-cards-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Champion Model</div>
+                    <div class="kpi-val" style="color: #a5b4fc;">Random Forest</div>
+                    <div class="kpi-sub">100 Trees • Max Depth 12</div>
+                </div>
+                <div class="kpi-card kpi-safe">
+                    <div class="kpi-title">Model Precision</div>
+                    <div class="kpi-val" style="color: #34d399;">98.28%</div>
+                    <div class="kpi-sub">Minimizes false customer alerts</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Fraud Recall</div>
+                    <div class="kpi-val" style="color: #38bdf8;">87.90%</div>
+                    <div class="kpi-sub">Interception of real fraud</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">ROC-AUC Score</div>
+                    <div class="kpi-val" style="color: #f59e0b;">0.969</div>
+                    <div class="kpi-sub">Benchmark on 250k UPI records</div>
+                </div>
+            </div>
+
+            <!-- Interactive SOC Operations Panel -->
+            <div class="soc-panel-card">
+                <div class="soc-panel-header">
+                    <div>
+                        <h2 style="font-size: 1.15rem; font-weight: 700;">Live Fraud Analytics & Forensics</h2>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">Real-time feature evaluation on the current transaction in simulator</p>
+                    </div>
+                    <div class="soc-tabs-nav">
+                        <button class="soc-tab-btn active" onclick="switchSocTab('telemetry')">Live Stream</button>
+                        <button class="soc-tab-btn" onclick="switchSocTab('research')">Research Charts</button>
+                        <button class="soc-tab-btn" onclick="switchSocTab('tuning')">What-If Tuning</button>
+                    </div>
+                </div>
+
+                <!-- SOC TAB 1: Live Event Stream -->
+                <div class="soc-view-content active" id="socTelemetry">
+                    <table class="event-stream-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Recipient VPA</th>
+                                <th>Amount</th>
+                                <th>Hour</th>
+                                <th>Cluster</th>
+                                <th>Risk Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="socEventStreamBody">
+                            <tr>
+                                <td>Just now</td>
+                                <td>pavlo@upi</td>
+                                <td>₹ 286.00</td>
+                                <td>14:30</td>
+                                <td>Cluster 0</td>
+                                <td>0.8%</td>
+                                <td><span class="badge-status pass">APPROVED</span></td>
+                            </tr>
+                            <tr>
+                                <td>2m ago</td>
+                                <td>ramesh.chai@okhdfcbank</td>
+                                <td>₹ 40.00</td>
+                                <td>10:15</td>
+                                <td>Cluster 0</td>
+                                <td>0.5%</td>
+                                <td><span class="badge-status pass">APPROVED</span></td>
+                            </tr>
+                            <tr style="background: rgba(239, 68, 68, 0.08);">
+                                <td>15m ago</td>
+                                <td>sbi_kyc_verify.support@fakevpa</td>
+                                <td>₹ 95,000.00</td>
+                                <td>02:15</td>
+                                <td>Cluster 3</td>
+                                <td>98.4%</td>
+                                <td><span class="badge-status block">BLOCKED</span></td>
+                            </tr>
+                            <tr>
+                                <td>42m ago</td>
+                                <td>quick.tech99@ybl</td>
+                                <td>₹ 24,999.00</td>
+                                <td>20:05</td>
+                                <td>Cluster 2</td>
+                                <td>38.2%</td>
+                                <td><span class="badge-status warn">2FA CHALLENGE</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SOC TAB 2: Research Visualizations (Directly from Project Artifacts) -->
+                <div class="soc-view-content" id="socResearch">
+                    <div class="artifacts-grid">
+                        <div class="artifact-box">
+                            <h4>Feature Correlation Heatmap</h4>
+                            <img src="images/eda_correlation_heatmap.png" alt="Correlation Heatmap" onclick="openImageModal(this.src)">
+                        </div>
+                        <div class="artifact-box">
+                            <h4>K-Means Elbow & Silhouette Analysis</h4>
+                            <img src="images/kmeans_elbow_plot.png" alt="K-Means Elbow" onclick="openImageModal(this.src)">
+                        </div>
+                        <div class="artifact-box">
+                            <h4>Random Forest Confusion Matrices</h4>
+                            <img src="images/confusion_matrices.png" alt="Confusion Matrix" onclick="openImageModal(this.src)">
+                        </div>
+                        <div class="artifact-box">
+                            <h4>Feature Importance (Gini MDI)</h4>
+                            <img src="images/rf_feature_importance.png" alt="Feature Importance" onclick="openImageModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOC TAB 3: What-If Feature Sensitivity Tuning -->
+                <div class="soc-view-content" id="socTuning">
+                    <div class="tuning-grid">
+                        <div class="tune-item">
+                            <div class="tune-label">
+                                <span>Amount:</span>
+                                <span id="tuneAmountVal" style="color: #38bdf8;">₹ 286</span>
+                            </div>
+                            <input type="range" class="tune-slider" min="10" max="100000" step="50" value="286" id="sliderAmount" oninput="onTuneChange()">
+                        </div>
+
+                        <div class="tune-item">
+                            <div class="tune-label">
+                                <span>Hour of Day (0–23):</span>
+                                <span id="tuneHourVal" style="color: #38bdf8;">14:00 (Daytime)</span>
+                            </div>
+                            <input type="range" class="tune-slider" min="0" max="23" value="14" id="sliderHour" oninput="onTuneChange()">
+                        </div>
+
+                        <div class="tune-item">
+                            <div class="tune-label">
+                                <span>Ratio vs Normal (×):</span>
+                                <span id="tuneRatioVal" style="color: #38bdf8;">1.0×</span>
+                            </div>
+                            <input type="range" class="tune-slider" min="0.5" max="15" step="0.5" value="1.0" id="sliderRatio" oninput="onTuneChange()">
+                        </div>
+
+                        <div class="tune-item">
+                            <div class="tune-label">
+                                <span>Velocity (Tx / 10m):</span>
+                                <span id="tuneVelocityVal" style="color: #38bdf8;">0 tx</span>
+                            </div>
+                            <input type="range" class="tune-slider" min="0" max="10" value="0" id="sliderVelocity" oninput="onTuneChange()">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Real-Time Sensitivity Re-Score:</div>
+                            <div style="font-size: 1.25rem; font-weight: 800;" id="liveTuningOutcome">Safe Legitimate (0.8%)</div>
+                        </div>
+                        <button class="action-pill" onclick="syncTuningToPhone()">
+                            📱 Send to Mobile Simulator
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ============================================================= -->
+    <!-- SOUND SYNTHESIS & CLIENT-SIDE INTELLIGENCE SCRIPTS             -->
+    <!-- ============================================================= -->
+    <script>
+        // Web Audio Synthesizer (Zero external dependencies!)
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggle');
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                btn.classList.add('active');
+                icon.innerText = '🔊';
+                btn.innerHTML = '<span>🔊</span> Sound FX: ON';
+                playChime(600, 0.05);
+            } else {
+                btn.classList.remove('active');
+                icon.innerText = '🔇';
+                btn.innerHTML = '<span>🔇</span> Sound FX: OFF';
+            }
+        }
+
+        function playKeyClick() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.03);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.03);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.03);
+            } catch(e) {}
+        }
+
+        function playChime(freq, duration) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                // Play chord
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.5);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + idx * 0.08);
+                    osc.stop(ctx.currentTime + idx * 0.08 + 0.5);
+                });
+            } catch(e) {}
+        }
+
+        function playAlarmSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                for (let i = 0; i < 3; i++) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + i * 0.2);
+                    osc.frequency.linearRampToValueAtTime(440, ctx.currentTime + i * 0.2 + 0.15);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.2 + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + i * 0.2);
+                    osc.stop(ctx.currentTime + i * 0.2 + 0.2);
+                }
+            } catch(e) {}
+        }
+
+        // Live Clock in Status Bar
+        function updateLiveTime() {
+            const now = new Date();
+            const h = now.getHours();
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const el = document.getElementById('liveTime');
+            if (el) el.innerText = `${h}:${m}`;
+        }
+        setInterval(updateLiveTime, 1000);
+        updateLiveTime();
+
+        // Phone Tab Navigation
+        function switchPhoneTab(tabName) {
+            document.querySelectorAll('.app-tab-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.dock-tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (tabName === 'home') {
+                document.getElementById('tabHome').classList.add('active');
+                document.getElementById('dockHome').classList.add('active');
+            } else if (tabName === 'cards') {
+                document.getElementById('tabCards').classList.add('active');
+                document.getElementById('dockCards').classList.add('active');
+            } else if (tabName === 'analytics') {
+                document.getElementById('tabAnalytics').classList.add('active');
+                document.getElementById('dockAnalytics').classList.add('active');
+                initDotMatrixCanvas();
+            }
+            playKeyClick();
+        }
+
+        // Send Payment Modal State
+        let currentRecipient = { name: "Pavlo", vpa: "pavlo@upi", isScam: false };
+        let currentAmountStr = "286";
+        let currentPayload = {};
+
+        function openSendPayment(name, vpa, amount, isScam = false) {
+            currentRecipient = { name, vpa, isScam };
+            currentAmountStr = String(amount);
+            
+            document.getElementById('sheetRecipientName').innerText = name;
+            document.getElementById('sheetRecipientVpa').innerText = vpa;
+            document.getElementById('sheetAvatar').innerText = name.charAt(0);
+            document.getElementById('sheetAmountDisplay').innerText = '₹ ' + currentAmountStr;
+
+            // Reset Slider
+            resetSwipeSlider();
+
+            const modal = document.getElementById('sendSheetModal');
+            modal.classList.add('open');
+            playKeyClick();
+        }
+
+        function closeSendSheet() {
+            document.getElementById('sendSheetModal').classList.remove('open');
+            playKeyClick();
+        }
+
+        function pressDigit(d) {
+            playKeyClick();
+            if (currentAmountStr === "0" && d !== ".") {
+                currentAmountStr = d;
+            } else {
+                if (currentAmountStr.length < 8) currentAmountStr += d;
+            }
+            document.getElementById('sheetAmountDisplay').innerText = '₹ ' + currentAmountStr;
+        }
+
+        function pressBackspace() {
+            playKeyClick();
+            if (currentAmountStr.length > 1) {
+                currentAmountStr = currentAmountStr.slice(0, -1);
+            } else {
+                currentAmountStr = "0";
+            }
+            document.getElementById('sheetAmountDisplay').innerText = '₹ ' + currentAmountStr;
+        }
+
+        function applyArithmetic(op) {
+            playKeyClick();
+            let val = parseFloat(currentAmountStr) || 0;
+            if (op === '+') val += 50;
+            else if (op === '-') val = Math.max(1, val - 50);
+            else if (op === '×') val *= 2;
+            else if (op === '÷') val = Math.round(val / 2);
+            currentAmountStr = String(val);
+            document.getElementById('sheetAmountDisplay').innerText = '₹ ' + currentAmountStr;
+        }
+
+        // =============================================================
+        // INTERACTIVE "SWIPE RIGHT TO CONFIRM" SLIDER (From Video 1!)
+        // =============================================================
+        const track = document.getElementById('swipeTrack');
+        const handle = document.getElementById('swipeHandle');
+        const fill = document.getElementById('swipeFill');
+        const text = document.getElementById('swipeText');
+        let isDragging = false;
+        let startX = 0;
+        let maxSlide = 0;
+
+        function resetSwipeSlider() {
+            handle.style.transform = `translateX(0px)`;
+            fill.style.width = `48px`;
+            text.style.opacity = '1';
+            text.innerText = 'Swipe right to confirm';
+            isDragging = false;
+        }
+
+        function initSwipeEvents() {
+            const getClientX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+
+            const onStart = (e) => {
+                isDragging = true;
+                startX = getClientX(e);
+                maxSlide = track.offsetWidth - handle.offsetWidth - 8;
+                handle.style.transition = 'none';
+                fill.style.transition = 'none';
+            };
+
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const currentX = getClientX(e);
+                let delta = currentX - startX;
+                delta = Math.max(0, Math.min(delta, maxSlide));
+
+                handle.style.transform = `translateX(${delta}px)`;
+                fill.style.width = `${delta + 48}px`;
+
+                const progress = delta / maxSlide;
+                text.style.opacity = String(1 - progress * 1.5);
+
+                if (progress > 0.88) {
+                    isDragging = false;
+                    onSwipeComplete();
+                }
+            };
+
+            const onEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                handle.style.transition = 'transform 0.25s ease';
+                fill.style.transition = 'width 0.25s ease';
+                resetSwipeSlider();
+            };
+
+            handle.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+
+            handle.addEventListener('touchstart', onStart, { passive: true });
+            window.addEventListener('touchmove', onMove, { passive: true });
+            window.addEventListener('touchend', onEnd);
+        }
+        initSwipeEvents();
+
+        // When user completes swipe
+        async function onSwipeComplete() {
+            text.innerText = 'Evaluating AI Shield...';
+            playChime(750, 0.1);
+
+            // Trigger dynamic island scan pulse
+            const di = document.getElementById('dynamicIsland');
+            di.classList.add('expanded');
+            document.getElementById('diExpTitle').innerText = 'Analyzing Transaction Risk...';
+            document.getElementById('diExpSub').innerText = 'Running Random Forest Model';
+
+            const amt = parseFloat(currentAmountStr) || 286;
+            
+            // Build Payload for Backend API
+            const payload = {
+                amount: amt,
+                transaction_time_of_day: currentRecipient.isScam ? 2 : 14,
+                transaction_amount_vs_sender_history: currentRecipient.isScam ? 8.5 : 1.1,
+                authentication_attempts: currentRecipient.isScam ? 4 : 1,
+                failed_transaction_count: currentRecipient.isScam ? 2 : 0,
+                unusual_device_flag: currentRecipient.isScam ? 1 : 0,
+                unusual_ip_flag: currentRecipient.isScam ? 1 : 0,
+                session_source: currentRecipient.isScam ? 'link' : 'app',
+                pin_entry_method: currentRecipient.isScam ? 'pasted' : 'manual',
+                transaction_velocity: currentRecipient.isScam ? 4 : 0
+            };
+
+            let assessment = null;
+            try {
+                const res = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    assessment = await res.json();
+                }
+            } catch(e) {}
+
+            // Heuristic fallback if server is unreachable
+            if (!assessment) {
+                const isFraud = currentRecipient.isScam || amt > 40000;
+                assessment = {
+                    is_fraud: isFraud,
+                    percent: isFraud ? 98.4 : 0.8,
+                    band: isFraud ? 'high' : 'low',
+                    cluster_name: isFraud ? 'Cluster 3: Nocturnal Burst Anomaly' : 'Cluster 0: Normal Micro-UPI Spend',
+                    drivers: isFraud ? [["Nocturnal Transfer (02:15 AM)", 38], ["Outlier Ticket vs History", 32], ["Unusual IP/Device", 24]] : []
+                };
+            }
+
+            // Close send sheet
+            closeSendSheet();
+
+            // Display outcome after 400ms scan
+            setTimeout(() => {
+                di.classList.remove('expanded');
+                if (assessment.is_fraud || assessment.band === 'high') {
+                    showFraudOutcome(amt, assessment);
+                } else {
+                    showSuccessOutcome(amt, assessment);
+                }
+                logSocEvent(currentRecipient.vpa, amt, assessment);
+            }, 500);
+        }
+
+        function showSuccessOutcome(amt, assessment) {
+            document.getElementById('successAmountText').innerText = '₹ ' + amt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            document.getElementById('successRecipientText').innerText = 'Sent to ' + currentRecipient.name;
+            document.getElementById('screenSuccess').classList.add('open');
+            playSuccessSound();
+        }
+
+        function showFraudOutcome(amt, assessment) {
+            document.getElementById('fraudAmountBanner').innerText = '₹ ' + amt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            document.getElementById('fraudRiskPill').innerHTML = `<span>🛑</span> Risk Index: ${assessment.percent}% (Severe Threat)`;
+            
+            if (assessment.drivers && assessment.drivers.length > 0) {
+                if (assessment.drivers[0]) document.getElementById('fraudReason1').innerText = assessment.drivers[0][0];
+                if (assessment.drivers[1]) document.getElementById('fraudReason2').innerText = assessment.drivers[1][0];
+                if (assessment.drivers[2]) document.getElementById('fraudReason3').innerText = assessment.drivers[2][0];
+            }
+            if (assessment.cluster_name) {
+                document.getElementById('fraudClusterText').innerText = assessment.cluster_name;
+            }
+
+            document.getElementById('screenFraud').classList.add('open');
+            playAlarmSound();
+
+            // Set Dynamic Island to Danger
+            const di = document.getElementById('dynamicIsland');
+            di.classList.add('alert-danger');
+            document.getElementById('diStatusText').innerText = '🚨 BLOCKED';
+            document.getElementById('diDot').style.background = '#ef4444';
+        }
+
+        function closeOutcomeScreen() {
+            document.getElementById('screenSuccess').classList.remove('open');
+            document.getElementById('screenFraud').classList.remove('open');
+            
+            const di = document.getElementById('dynamicIsland');
+            di.classList.remove('alert-danger');
+            document.getElementById('diStatusText').innerText = 'PaySafe AI';
+            document.getElementById('diDot').style.background = '#10b981';
+            
+            playKeyClick();
+        }
+
+        function reportToCyberCell() {
+            alert("🚨 OFFICIAL REPORT FILED!\n\nIncident Ref: 1930-NPCI-2026-9842\nEvidence Packet Dispatched to National Cyber Crime Reporting Portal.\nVPA " + currentRecipient.vpa + " placed on National Fraud Blacklist.");
+            closeOutcomeScreen();
+        }
+
+        // Add to SOC Audit Trail Table
+        function logSocEvent(vpa, amt, assessment) {
+            const tbody = document.getElementById('socEventStreamBody');
+            const tr = document.createElement('tr');
+            const isBlock = assessment.is_fraud || assessment.band === 'high';
+            if (isBlock) tr.style.background = 'rgba(239, 68, 68, 0.08)';
+
+            tr.innerHTML = `
+                <td>Just now</td>
+                <td>${vpa}</td>
+                <td>₹ ${amt.toLocaleString('en-IN')}</td>
+                <td>${isBlock ? '02:15' : '14:30'}</td>
+                <td>${assessment.cluster_name ? assessment.cluster_name.split(':')[0] : 'Cluster 0'}</td>
+                <td style="font-weight: 700; color: ${isBlock ? '#ef4444' : '#10b981'};">${assessment.percent}%</td>
+                <td><span class="badge-status ${isBlock ? 'block' : 'pass'}">${isBlock ? 'BLOCKED' : 'APPROVED'}</span></td>
+            `;
+            tbody.insertBefore(tr, tbody.firstChild);
+        }
+
+        // =============================================================
+        // CANVAS DOT-MATRIX CARD ANIMATION (Exact replica of Video 2!)
+        // =============================================================
+        let canvasAnimId = null;
+        function initDotMatrixCanvas() {
+            const canvas = document.getElementById('dotMatrixCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const cols = 28;
+            const rows = 14;
+            const spacingX = rect.width / cols;
+            const spacingY = rect.height / rows;
+
+            let tick = 0;
+            if (canvasAnimId) cancelAnimationFrame(canvasAnimId);
+
+            function render() {
+                ctx.clearRect(0, 0, rect.width, rect.height);
+                tick += 0.04;
+
+                for (let i = 0; i < cols; i++) {
+                    for (let j = 0; j < rows; j++) {
+                        const x = i * spacingX + spacingX / 2;
+                        const y = j * spacingY + spacingY / 2;
+
+                        // Circular wave ripple matching Apple Cash in Video 2
+                        const dist = Math.hypot(i - cols / 2, j - rows / 2);
+                        const wave = Math.sin(dist * 0.4 - tick);
+                        const radius = Math.max(1, (wave + 1) * 2.2);
+                        const alpha = Math.max(0.1, (wave + 1) * 0.45);
+
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                        ctx.fill();
+                    }
+                }
+                canvasAnimId = requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        // Presenter Scenario Pre-loaders
+        function loadScenario(type) {
+            playKeyClick();
+            if (type === 'safe_chai') {
+                openSendPayment('Ramesh Chaiwala', 'ramesh.chai@okhdfcbank', 40, false);
+            } else if (type === 'safe_shopping') {
+                openSendPayment('Nature Basket Store', 'nature.basket@icici', 2860, false);
+            } else if (type === 'medium_warning') {
+                openSendPayment('Quick Tech Hub', 'quick.tech99@ybl', 24999, false);
+            } else if (type === 'fraud_kyc') {
+                openSendPayment('🚨 Urgent Bank KYC Desk', 'sbi_kyc_verify.support@fakevpa', 95000, true);
+            } else if (type === 'fraud_qr') {
+                openSendPayment('🚨 Cashback Lottery Rewards', 'cashback.claim100@fakeaxis', 48000, true);
+            }
+        }
+
+        // SOC Tabs Switcher
+        function switchSocTab(tab) {
+            document.querySelectorAll('.soc-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.soc-view-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'telemetry') {
+                document.getElementById('socTelemetry').classList.add('active');
+            } else if (tab === 'research') {
+                document.getElementById('socResearch').classList.add('active');
+            } else if (tab === 'tuning') {
+                document.getElementById('socTuning').classList.add('active');
+            }
+            event.target.classList.add('active');
+            playKeyClick();
+        }
+
+        // What-if Tuning Slider Handler
+        function onTuneChange() {
+            const amt = parseFloat(document.getElementById('sliderAmount').value);
+            const hour = parseInt(document.getElementById('sliderHour').value);
+            const ratio = parseFloat(document.getElementById('sliderRatio').value);
+            const vel = parseInt(document.getElementById('sliderVelocity').value);
+
+            document.getElementById('tuneAmountVal').innerText = '₹ ' + amt.toLocaleString('en-IN');
+            document.getElementById('tuneHourVal').innerText = `${hour}:00 (${(hour >= 23 || hour <= 4) ? '🚨 Night Window' : 'Daytime'})`;
+            document.getElementById('tuneRatioVal').innerText = ratio.toFixed(1) + '×';
+            document.getElementById('tuneVelocityVal').innerText = vel + ' tx';
+
+            // Calculate live score
+            let z = 0;
+            if (ratio > 5) z += 2.5; else if (ratio > 2.5) z += 1.2;
+            if (hour >= 23 || hour <= 4) z += 2.0;
+            z += vel * 0.4;
+            if (amt > 50000) z += 1.5;
+            z -= 3.5;
+
+            const prob = 1 / (1 + Math.exp(-z));
+            const pct = (prob * 100).toFixed(1);
+            const outEl = document.getElementById('liveTuningOutcome');
+            if (prob >= 0.5) {
+                outEl.innerText = `🚨 HIGH FRAUD RISK (${pct}%)`;
+                outEl.style.color = '#ef4444';
+            } else if (prob >= 0.2) {
+                outEl.innerText = `⚠️ SUSPICIOUS 2FA (${pct}%)`;
+                outEl.style.color = '#f59e0b';
+            } else {
+                outEl.innerText = `✅ SAFE TRANSACTION (${pct}%)`;
+                outEl.style.color = '#10b981';
+            }
+        }
+
+        function syncTuningToPhone() {
+            const amt = parseFloat(document.getElementById('sliderAmount').value);
+            const hour = parseInt(document.getElementById('sliderHour').value);
+            const isScam = (hour >= 23 || hour <= 4) && amt > 30000;
+            openSendPayment(isScam ? 'Suspicious Beneficiary' : 'Tuned Beneficiary', 'tuned@upi', amt, isScam);
+        }
+
+        // View Mode Switcher
+        function switchMainView(mode) {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            if (mode === 'mobile') {
+                document.getElementById('phoneWrapper').style.display = 'flex';
+                event.target.classList.add('active');
+            } else {
+                event.target.classList.add('active');
+                switchSocTab('telemetry');
+            }
+            playKeyClick();
+        }
+
+        function toggleDynamicIsland() {
+            document.getElementById('dynamicIsland').classList.toggle('expanded');
+            playKeyClick();
+        }
+
+        function openNotifCenter() {
+            alert("🔔 PaySafe Security Center:\n\n• 3 Phishing attacks intercepted this week\n• RuPay UPI limits verified\n• Bank Fraud Database updated at 06:00 AM");
+        }
+
+        function openImageModal(src) {
+            window.open(src, '_blank');
+        }
+
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', () => {
+            initDotMatrixCanvas();
+        });
+    </script>
+</body>
+</html>
