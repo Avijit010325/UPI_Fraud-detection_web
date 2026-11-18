@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#07090e">
+    <title>PaySafe India — UPI Fraud Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================================================================
+           CSS CUSTOM PROPERTIES
+        ================================================================ */
+        :root {
+            --bg: #07090e;
+            --bg-card: rgba(18,22,34,0.8);
+            --bg-glass: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.08);
+            --border-active: rgba(99,102,241,0.4);
+            --text: #f8fafc;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --brand: #6366f1;
+            --cyan: #06b6d4;
+            --saffron: #f97316;
+            --safe: #10b981;
+            --safe-bg: rgba(16,185,129,0.12);
+            --safe-border: rgba(16,185,129,0.3);
+            --warn: #f59e0b;
+            --warn-bg: rgba(245,158,11,0.12);
+            --danger: #ef4444;
+            --danger-bg: rgba(239,68,68,0.12);
+            --danger-border: rgba(239,68,68,0.35);
+            --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-full: 999px;
+        }
+
+        /* ================================================================
+           RESET & BASE
+        ================================================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        html { height: 100%; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(99,102,241,0.14) 0%, transparent 45%),
+                radial-gradient(circle at 80% 85%, rgba(6,182,212,0.10) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* ================================================================
+           LAYOUT HELPERS
+        ================================================================ */
+        .container { max-width: 1360px; margin: 0 auto; padding: 0 20px; }
+
+        /* ================================================================
+           TOP HEADER / NAVBAR — iOS 26 Liquid Glass
+        ================================================================ */
+
+        /* Animated prismatic shimmer for glass surfaces */
+        @keyframes glassPrism {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes glassShimmer {
+            0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+            40%  { opacity: 0.5; }
+            60%  { opacity: 0.5; }
+            100% { transform: translateX(300%) skewX(-15deg); opacity: 0; }
+        }
+        @keyframes liquidPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50%       { opacity: 1;   transform: scale(1.015); }
+        }
+
+        .topbar {
+            position: sticky; top: 0; z-index: 900;
+            /* Liquid glass base */
+            background: linear-gradient(135deg,
+                rgba(255,255,255,0.10) 0%,
+                rgba(255,255,255,0.05) 40%,
+                rgba(140,160,255,0.08) 70%,
+                rgba(255,255,255,0.07) 100%);
+            backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
+            -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
+            /* Prismatic border */
+            border: 1px solid transparent;
+            border-image: linear-gradient(135deg,
+                rgba(255,255,255,0.45) 0%,
+                rgba(160,180,255,0.3) 25%,
+                rgba(255,180,255,0.2) 50%,
+                rgba(130,220,255,0.3) 75%,
+                rgba(255,255,255,0.4) 100%) 1;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            position: sticky;
+            overflow: hidden;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.15) inset,
+                0 -1px 0 rgba(0,0,0,0.3) inset,
+                0 8px 32px rgba(0,0,0,0.4),
+                0 2px 8px rgba(99,102,241,0.15);
+        }
+        /* Liquid glass moving shimmer sweep */
+        .topbar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -60%;
+            width: 45%; height: 100%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.08) 40%,
+                rgba(255,255,255,0.18) 50%,
+                rgba(255,255,255,0.08) 60%,
+                transparent 100%);
+            transform: skewX(-15deg);
+            animation: glassShimmer 4s ease-in-out infinite;
+            pointer-events: none; z-index: 0;
+        }
+        /* Prismatic colour breathing (top edge) */
+        .topbar::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg,
+                rgba(99,102,241,0.0) 0%,
+                rgba(99,102,241,0.8) 20%,
+                rgba(168,85,247,0.8) 40%,
+                rgba(6,182,212,0.8) 60%,
+                rgba(249,115,22,0.6) 80%,
+                rgba(99,102,241,0.0) 100%);
+            background-size: 200% 100%;
+            animation: glassPrism 3s linear infinite;
+            pointer-events: none; z-index: 1;
+        }
+        /* Make all topbar children sit above glass layers */
+        .topbar > * { position: relative; z-index: 2; }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+
+        .brand-logo {
+            width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #6366f1 55%, #06b6d4);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 18px rgba(99,102,241,0.4);
+        }
+        .brand-logo svg { width: 22px; height: 22px; fill: white; }
+
+        .brand-text h1 {
+            font-family: 'Outfit', sans-serif; font-size: clamp(1rem, 3vw, 1.25rem);
+            font-weight: 800; letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #fff 40%, #c7d2fe);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .brand-text p { font-size: 0.7rem; color: var(--text3); display: none; }
+        @media (min-width: 480px) { .brand-text p { display: block; } }
+
+        .proto-pill {
+            font-size: 0.6rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+            background: rgba(99,102,241,0.18); color: #a5b4fc; padding: 2px 7px;
+            border-radius: var(--r-full); border: 1px solid rgba(99,102,241,0.35);
+            -webkit-text-fill-color: #a5b4fc; white-space: nowrap;
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .health-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: var(--safe);
+            box-shadow: 0 0 8px var(--safe); animation: blink 2s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+        .health-label { font-size: 0.75rem; font-weight: 600; color: var(--safe); display: none; }
+        @media (min-width: 400px) { .health-label { display: block; } }
+
+        /* ================================================================
+           SCENARIO STRIP
+        ================================================================ */
+        .scenario-strip {
+            background: rgba(10,14,24,0.7); border-bottom: 1px solid var(--border);
+            padding: 10px 16px; display: flex; gap: 8px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; align-items: center;
+        }
+        .scenario-strip::-webkit-scrollbar { display: none; }
+        .strip-label { font-size: 0.7rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; display: none; }
+        @media (min-width: 500px) { .strip-label { display: block; } }
+
+        .s-pill {
+            flex-shrink: 0; border-radius: var(--r-full); padding: 6px 14px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04); color: var(--text); transition: all 0.18s;
+            display: inline-flex; align-items: center; gap: 6px; user-select: none;
+        }
+        .s-pill:active { transform: scale(0.96); }
+        .s-pill.safe:hover, .s-pill.safe:active { border-color: var(--safe); background: var(--safe-bg); }
+        .s-pill.danger { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.07); }
+        .s-pill.danger:hover, .s-pill.danger:active { background: var(--danger-bg); border-color: var(--danger); }
+        .s-pill.warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
+        .s-pill.warn:hover { border-color: var(--warn); background: var(--warn-bg); }
+
+        /* ================================================================
+           MAIN STAGE — DESKTOP: 2 COL | MOBILE: 1 COL
+        ================================================================ */
+        .stage {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            padding: 20px 20px 80px;
+            max-width: 1360px;
+            margin: 0 auto;
+        }
+        @media (min-width: 1000px) {
+            .stage { grid-template-columns: 400px 1fr; padding: 28px 28px 60px; align-items: start; }
+        }
+
+        /* ================================================================
+           PHONE CARD — full-width on mobile, fixed on desktop
+        ================================================================ */
+        .phone-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+        }
+
+        /* App-style header inside the card */
+        .app-chrome {
+            background: rgba(10,14,24,0.95);
+            padding: 14px 18px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-toprow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+
+        .user-pill { display: flex; align-items: center; gap: 10px; }
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.12);
+            position: relative; flex-shrink: 0;
+        }
+        .avatar .dot { position: absolute; bottom: 0; right: 0; width: 9px; height: 9px; background: var(--safe); border: 2px solid #0a0e18; border-radius: 50%; }
+        .user-name { font-size: 0.85rem; font-weight: 700; }
+        .user-vpa { font-size: 0.7rem; color: var(--text3); }
+
+        .header-actions { display: flex; gap: 8px; }
+        .icon-btn {
+            width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.07);
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text); position: relative;
+        }
+        .icon-btn .notif { position: absolute; top: 1px; right: 1px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid #0a0e18; font-size: 0.55rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+        /* Balance section */
+        .balance-row {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 18px 18px 0;
+        }
+        .balance-label { font-size: 0.75rem; color: var(--text2); margin-bottom: 3px; }
+        .balance-amount {
+            font-family: 'Outfit', sans-serif; font-size: clamp(1.9rem, 6vw, 2.3rem);
+            font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+        }
+        .balance-actions { display: flex; gap: 8px; padding: 10px 18px 6px; }
+        .btn-primary {
+            flex: 1; background: white; color: #000; border: none; border-radius: var(--r-full);
+            padding: 10px 0; font-weight: 700; font-size: 0.875rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.18s;
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-secondary {
+            flex: 1; background: rgba(255,255,255,0.09); color: white; border: none;
+            border-radius: var(--r-full); padding: 10px 0; font-weight: 700; font-size: 0.875rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.18s;
+        }
+        .btn-secondary:active { transform: scale(0.97); }
+
+        /* UPI Quick Actions grid (4 icon buttons) */
+        .upi-actions {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; padding: 8px 18px 14px;
+        }
+        .upi-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .upi-btn:active { transform: scale(0.92); }
+        .upi-btn-icon {
+            width: 46px; height: 46px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: box-shadow 0.2s;
+        }
+        .upi-btn:hover .upi-btn-icon { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        .upi-btn-label { font-size: 0.62rem; font-weight: 600; color: var(--text2); }
+
+        /* UPI Verified badge */
+        .upi-verified-bar {
+            display: flex; align-items: center; gap: 7px;
+            margin: 0 18px 10px; padding: 7px 12px;
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 10px;
+        }
+        .upi-verified-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+            box-shadow: 0 0 6px #10b981; flex-shrink: 0;
+            animation: blink 2s infinite;
+        }
+        .upi-verified-text { font-size: 0.68rem; font-weight: 600; color: #34d399; flex: 1; }
+        .upi-vpa-id { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text3); }
+
+        /* QR Scanner modal */
+        .qr-modal {
+            display: none; position: fixed; inset: 0; z-index: 950;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            align-items: center; justify-content: center;
+        }
+        .qr-modal.open { display: flex; }
+        .qr-box {
+            background: #0d1117; border: 1px solid var(--border); border-radius: 24px;
+            padding: 24px; max-width: 320px; width: 90%; text-align: center;
+            animation: fadeup 0.3s cubic-bezier(.16,1,.3,1);
+        }
+        @keyframes fadeup { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .qr-viewfinder {
+            width: 200px; height: 200px; margin: 16px auto;
+            border-radius: 16px; background: #000; position: relative; overflow: hidden;
+        }
+        /* Animated scan line */
+        .qr-scanline {
+            position: absolute; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, #10b981, transparent);
+            animation: scanDown 2s ease-in-out infinite;
+        }
+        @keyframes scanDown {
+            0%   { top: 10%; opacity: 1; }
+            90%  { top: 90%; opacity: 1; }
+            100% { top: 10%; opacity: 0; }
+        }
+        /* Corner brackets */
+        .qr-corner { position: absolute; width: 24px; height: 24px; border-color: #10b981; border-style: solid; }
+        .qr-corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+        .qr-corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+        .qr-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+        .qr-corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+        /* Fake QR pattern */
+        .qr-pattern {
+            position: absolute; inset: 30px;
+            background-image:
+                repeating-linear-gradient(0deg,  rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 6px, transparent 6px, transparent 12px),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 6px, transparent 6px, transparent 12px);
+            border-radius: 4px;
+        }
+
+        /* ═══════════════════════════════════════════
+           REALISTIC CARD CAROUSEL
+        ═══════════════════════════════════════════ */
+        .cards-scroll {
+            display: flex; gap: 16px; overflow-x: auto; padding: 4px 18px 22px;
+            scrollbar-width: none; perspective: 1000px;
+        }
+        .cards-scroll::-webkit-scrollbar { display: none; }
+
+        /* Base card shell */
+        .vcard {
+            flex-shrink: 0; width: 240px; height: 150px;
+            border-radius: 16px; cursor: pointer; position: relative;
+            overflow: hidden; transform-style: preserve-3d;
+            transition: transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s;
+            user-select: none;
+        }
+        .vcard:hover {
+            transform: perspective(600px) rotateY(-8deg) rotateX(4deg) scale(1.04);
+        }
+        .vcard:active { transform: scale(0.96); }
+
+        /* Shared shine overlay */
+        .vcard::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%, rgba(255,255,255,0.06) 100%);
+            border-radius: inherit; pointer-events: none; z-index: 10;
+            transition: opacity 0.3s;
+        }
+        .vcard:hover::after { opacity: 0.7; }
+
+        /* ── HDFC BANK Mastercard (dark navy) ── */
+        .vcard.hdfc {
+            background: linear-gradient(145deg, #0a1628 0%, #12275a 45%, #0d1f4a 70%, #091630 100%);
+            box-shadow: 0 8px 32px rgba(0,0,255,0.25), 0 2px 8px rgba(0,0,0,0.6);
+            color: #fff;
+        }
+        .vcard.hdfc::before {
+            content: '';
+            position: absolute; top: -30px; right: -30px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(30,60,120,0.5) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* ── Bank of America Visa (crimson red) ── */
+        .vcard.bofa {
+            background: linear-gradient(135deg, #8b0000 0%, #c0202a 25%, #a01020 50%, #8b0000 70%, #6b0010 100%);
+            box-shadow: 0 8px 32px rgba(180,0,30,0.4), 0 2px 8px rgba(0,0,0,0.5);
+            color: #fff;
+        }
+        .vcard.bofa::before {
+            content: '';
+            position: absolute;
+            top: -20px; left: 60px; width: 200px; height: 200px;
+            background: linear-gradient(135deg, transparent 40%, rgba(160,30,40,0.6) 60%, transparent 80%);
+            transform: rotate(-25deg);
+            pointer-events: none;
+        }
+        /* Diagonal stripe overlays like real BoA card */
+        .vcard.bofa .card-stripe1,
+        .vcard.bofa .card-stripe2 {
+            position: absolute; height: 300%; width: 60px;
+            background: rgba(255,255,255,0.05);
+            transform: rotate(-35deg);
+            top: -60px; pointer-events: none;
+        }
+        .vcard.bofa .card-stripe1 { left: 110px; }
+        .vcard.bofa .card-stripe2 { left: 160px; background: rgba(255,255,255,0.03); width: 90px; }
+
+        /* ── American Express Platinum (faithful silver/metal recreation) ── */
+        .vcard.amex {
+            background: linear-gradient(160deg,
+                #f0f0f0 0%, #e2e2e2 8%, #d4d4d4 18%,
+                #ececec 28%, #c8c8c8 40%, #e8e8e8 50%,
+                #d0d0d0 60%, #e6e6e6 72%, #bebebe 82%,
+                #e4e4e4 92%, #f2f2f2 100%);
+            box-shadow:
+                0 8px 32px rgba(0,0,0,0.30),
+                0 2px 8px rgba(0,0,0,0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                inset 0 -1px 0 rgba(0,0,0,0.08);
+            color: #111;
+        }
+        /* Subtle watermark grid */
+        .vcard.amex::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg,  transparent 0px, transparent 11px, rgba(150,150,150,0.07) 11px, rgba(150,150,150,0.07) 12px),
+                repeating-linear-gradient(90deg, transparent 0px, transparent 11px, rgba(150,150,150,0.07) 11px, rgba(150,150,150,0.07) 12px);
+            border-radius: inherit; pointer-events: none; z-index: 0;
+        }
+        /* Ornate thick black outer border — the defining Amex Platinum feature */
+        .vcard.amex .amex-border {
+            position: absolute; inset: 0;
+            border-radius: 16px;
+            border: 3px solid #0a0a0a;
+            pointer-events: none; z-index: 6;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+        }
+        /* Top ornate dot-row */
+        .vcard.amex .amex-border::before {
+            content: '· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·';
+            position: absolute; top: 1.5px; left: 5px; right: 5px;
+            font-size: 4px; letter-spacing: 1.5px; color: rgba(0,0,0,0.55);
+            overflow: hidden; white-space: nowrap; line-height: 1;
+        }
+        /* Bottom ornate dot-row */
+        .vcard.amex .amex-border::after {
+            content: '· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·';
+            position: absolute; bottom: 1.5px; left: 5px; right: 5px;
+            font-size: 4px; letter-spacing: 1.5px; color: rgba(0,0,0,0.55);
+            overflow: hidden; white-space: nowrap; line-height: 1;
+        }
+
+        /* ══════════════════════════════════════════════════════
+           HOLOGRAPHIC VIDEO EFFECT ON CARDS
+           Animated rainbow iridescent shimmer — real holo card
+        ══════════════════════════════════════════════════════ */
+
+        /* Keyframes */
+        @keyframes holoSweep {
+            0%   { background-position: 0% 50%; transform: translateX(-10%) rotate(-5deg); }
+            50%  { background-position: 100% 50%; transform: translateX(10%) rotate(5deg); }
+            100% { background-position: 0% 50%; transform: translateX(-10%) rotate(-5deg); }
+        }
+        @keyframes holoSparkle {
+            0%, 100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+            25%       { opacity: 0.6; transform: scale(1.1) rotate(90deg); }
+            50%       { opacity: 0.3; transform: scale(1) rotate(180deg); }
+            75%       { opacity: 0.7; transform: scale(1.15) rotate(270deg); }
+        }
+        @keyframes holoGlint {
+            0%   { left: -40%; opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { left: 140%; opacity: 0; }
+        }
+        @keyframes holoRipple {
+            0%   { background-position: 0% 0%; }
+            100% { background-position: 200% 200%; }
+        }
+
+        /* Holo rainbow layer (sits on top of card, pointer-events:none) */
+        .vcard .holo-layer {
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none; z-index: 8; overflow: hidden;
+            /* Animated prismatic rainbow gradient */
+            background: linear-gradient(
+                125deg,
+                rgba(255,0,128,0)    0%,
+                rgba(255,0,128,0.18) 10%,
+                rgba(255,165,0,0.22) 20%,
+                rgba(255,255,0,0.18) 30%,
+                rgba(0,255,100,0.20) 40%,
+                rgba(0,200,255,0.22) 50%,
+                rgba(100,0,255,0.20) 60%,
+                rgba(255,0,200,0.18) 70%,
+                rgba(255,100,0,0.15) 80%,
+                rgba(0,255,200,0.18) 90%,
+                rgba(255,0,128,0)    100%
+            );
+            background-size: 400% 400%;
+            mix-blend-mode: screen;
+            animation: holoSweep 4s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .vcard:hover .holo-layer { opacity: 1; }
+
+        /* Secondary texture layer — fine diagonal lines like real holo foil */
+        .vcard .holo-foil {
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none; z-index: 7; overflow: hidden;
+            background-image:
+                repeating-linear-gradient(
+                    60deg,
+                    rgba(255,255,255,0.0) 0px,
+                    rgba(255,255,255,0.0) 4px,
+                    rgba(255,255,255,0.04) 4px,
+                    rgba(255,255,255,0.04) 5px
+                ),
+                repeating-linear-gradient(
+                    -60deg,
+                    rgba(255,255,255,0.0) 0px,
+                    rgba(255,255,255,0.0) 4px,
+                    rgba(255,255,255,0.03) 4px,
+                    rgba(255,255,255,0.03) 5px
+                );
+            background-size: 10px 10px;
+            animation: holoRipple 6s linear infinite;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        /* Moving glint streak (always animated) */
+        .vcard .holo-glint {
+            position: absolute; top: -20%; left: -40%;
+            width: 30%; height: 140%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.0) 20%,
+                rgba(255,255,255,0.35) 50%,
+                rgba(255,255,255,0.0) 80%,
+                transparent 100%);
+            transform: skewX(-20deg);
+            pointer-events: none; z-index: 9;
+            animation: holoGlint 3.5s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .vcard:hover .holo-glint { opacity: 1; }
+
+        /* Sparkle dots */
+        .vcard .holo-sparks {
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none; z-index: 10; overflow: hidden;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .vcard:hover .holo-sparks { opacity: 1; }
+        .spark {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            animation: holoSparkle 2s ease-in-out infinite;
+        }
+
+        /* On amex — extra silver foil shimmer */
+        .vcard.amex .holo-layer {
+            mix-blend-mode: color-dodge;
+            background: linear-gradient(
+                125deg,
+                rgba(200,200,255,0)    0%,
+                rgba(200,220,255,0.25) 15%,
+                rgba(255,255,255,0.3)  30%,
+                rgba(200,200,255,0.2)  50%,
+                rgba(255,230,200,0.25) 70%,
+                rgba(200,255,220,0.2)  85%,
+                rgba(200,200,255,0)    100%
+            );
+            background-size: 400% 400%;
+        }
+
+        /* ── Shared chip (EMV) ── */
+        .chip {
+            width: 34px; height: 26px; border-radius: 5px;
+            position: relative; flex-shrink: 0;
+        }
+        .chip.gold-chip {
+            background: linear-gradient(135deg, #c8961c 0%, #f0c844 30%, #d4a820 50%, #b8840e 70%, #e8b830 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .chip.silver-chip {
+            background: linear-gradient(135deg, #9ca3af 0%, #d1d5db 30%, #9ca3af 50%, #6b7280 70%, #d1d5db 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .chip::before {
+            content: '';
+            position: absolute; inset: 4px 3px;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(0,0,0,0.1));
+        }
+        .chip::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 60%; height: 1px;
+            background: rgba(0,0,0,0.2);
+            box-shadow: 0 -4px 0 rgba(0,0,0,0.15), 0 4px 0 rgba(0,0,0,0.15);
+        }
+
+        /* ── Card content layout ── */
+        .card-inner {
+            position: relative; z-index: 2;
+            width: 100%; height: 100%;
+            padding: 11px 13px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            box-sizing: border-box;
+        }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-mid { display: flex; flex-direction: column; gap: 2px; }
+        .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+
+        /* Card number */
+        .card-num {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.72rem; letter-spacing: 0.12em; font-weight: 500;
+        }
+        .card-num.dark { color: rgba(255,255,255,0.9); }
+        .card-num.light { color: #111; }
+
+        /* Cardholder & expiry */
+        .card-valid-label { font-size: 0.38rem; letter-spacing: 0.08em; opacity: 0.7; text-transform: uppercase; }
+        .card-valid { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; }
+        .card-holder { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+        .card-holder.dark { color: rgba(255,255,255,0.95); }
+        .card-holder.light { color: #111; }
+
+        /* Bank name labels */
+        .hdfc-label {
+            background: #005da6; color: #fff;
+            font-size: 0.55rem; font-weight: 800; letter-spacing: 0.06em;
+            padding: 2px 7px; border-radius: 3px;
+            border: 2px solid #fff;
+        }
+        .hdfc-logo-h {
+            width: 18px; height: 18px; background: #cc0000;
+            border-radius: 2px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.55rem; font-weight: 900; color: #fff; margin-right: 2px;
+        }
+        .bofa-label {
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.03em; color: #fff;
+            line-height: 1.1;
+        }
+        .amex-label {
+            font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; color: #111;
+            text-transform: uppercase;
+        }
+
+        /* Mastercard circles */
+        .mc-logo { display: flex; align-items: center; }
+        .mc-left { width: 18px; height: 18px; border-radius: 50%; background: #eb001b; }
+        .mc-right { width: 18px; height: 18px; border-radius: 50%; background: #f79e1b; margin-left: -7px; }
+        .mc-text { font-size: 0.38rem; color: rgba(255,255,255,0.8); margin-top: 1px; letter-spacing: 0.04em; text-align: center; }
+
+        /* Visa logo */
+        .visa-logo {
+            font-family: 'Times New Roman', serif; font-size: 1.2rem; font-weight: 900;
+            color: #fff; letter-spacing: -0.02em; font-style: italic;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Amex centurion silhouette (SVG inline) */
+        .amex-centurion {
+            width: 36px; height: 36px;
+        }
+
+        /* NFC contactless icon */
+        .nfc-icon { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+        .nfc-icon.dark-nfc { color: rgba(80,80,80,0.7); }
+
+        /* Member since badge (Amex) */
+        .amex-member {
+            font-size: 0.38rem; letter-spacing: 0.06em; color: #444;
+            border: 1px solid #888; padding: 1px 5px; border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Section header */
+        .sec-hdr { display: flex; justify-content: space-between; align-items: center; padding: 0 18px; margin-bottom: 10px; }
+        .sec-title { font-size: 0.875rem; font-weight: 700; }
+        .sec-link { font-size: 0.75rem; color: #818cf8; background: none; border: none; cursor: pointer; font-weight: 600; }
+
+        /* Recipients row */
+        .recipients-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 2px 18px 18px; scrollbar-width: none; }
+        .recipients-scroll::-webkit-scrollbar { display: none; }
+        .rec-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; transition: transform 0.15s; min-width: 60px; }
+        .rec-item:active { transform: scale(0.93); }
+        .rec-av {
+            width: 50px; height: 50px; border-radius: 50%; background: #1e2438;
+            border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .rec-item.scam .rec-av {
+            border-color: var(--danger); background: #2d0a0c; color: #fca5a5;
+            animation: pulse-red 1.6s infinite;
+        }
+        @keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)} 50%{box-shadow:0 0 0 7px rgba(239,68,68,0)} }
+        .rec-name { font-size: 0.72rem; font-weight: 600; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+        .rec-sub { font-size: 0.62rem; color: var(--text3); }
+
+        /* Transaction feed */
+        .tx-feed { margin: 0 18px 18px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+        .tx-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .tx-item:last-child { padding-bottom: 0; border-bottom: none; }
+        .tx-left { display: flex; align-items: center; gap: 10px; }
+        .tx-icon { width: 36px; height: 36px; border-radius: 11px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .tx-name { font-size: 0.82rem; font-weight: 600; }
+        .tx-time { font-size: 0.68rem; color: var(--text3); }
+        .tx-right { text-align: right; flex-shrink: 0; }
+        .tx-amt { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; }
+        .tx-badge {
+            font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 5px;
+            display: inline-block; margin-top: 2px;
+        }
+        .tx-badge.safe { background: rgba(16,185,129,0.15); color: #34d399; }
+        .tx-badge.block { background: rgba(239,68,68,0.18); color: #f87171; }
+
+        /* Phone tab dock — Liquid Glass */
+        .phone-dock {
+            position: sticky; bottom: 0; display: flex; justify-content: space-around;
+            align-items: center; padding: 10px 24px 14px;
+            /* Liquid glass */
+            background: linear-gradient(180deg,
+                rgba(255,255,255,0.08) 0%,
+                rgba(10,14,24,0.75) 40%,
+                rgba(10,14,24,0.88) 100%);
+            backdrop-filter: blur(28px) saturate(160%) brightness(1.05);
+            -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.05);
+            border-top: 1px solid rgba(255,255,255,0.12);
+            box-shadow:
+                0 -1px 0 rgba(255,255,255,0.08) inset,
+                0 -12px 32px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        /* Prismatic top-edge on dock */
+        .phone-dock::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(99,102,241,0.6) 25%,
+                rgba(6,182,212,0.6) 50%,
+                rgba(168,85,247,0.6) 75%,
+                transparent 100%);
+            background-size: 200% 100%;
+            animation: glassPrism 4s linear infinite reverse;
+            pointer-events: none;
+        }
+        .phone-dock > * { position: relative; z-index: 2; }
+        .dock-btn {
+            background: none; border: none; color: var(--text3); padding: 6px 14px;
+            border-radius: 10px; cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; gap: 3px; transition: all 0.18s; font-size: 0.65rem; font-weight: 600;
+        }
+        .dock-btn svg { width: 22px; height: 22px; stroke: currentColor; }
+        .dock-btn.active { color: var(--brand); background: rgba(99,102,241,0.12); }
+
+        /* ================================================================
+           TAB PAGES inside phone card
+        ================================================================ */
+        .tab-page { display: none; padding-bottom: 4px; }
+        .tab-page.active { display: block; animation: fadein 0.22s ease; }
+        @keyframes fadein { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+
+        /* Analytics tab */
+        .canvas-wrap {
+            margin: 0 18px 18px; height: 165px; background: #000;
+            border-radius: 20px; overflow: hidden; position: relative;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #dotCanvas { width: 100%; height: 100%; display: block; }
+        .canvas-overlay { position: absolute; bottom: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+        .canvas-bal { font-family: 'Outfit',sans-serif; font-size: 1.3rem; font-weight: 800; }
+
+        .cat-card { margin: 0 18px 18px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+        .cat-row { margin-bottom: 12px; }
+        .cat-row:last-child { margin-bottom: 0; }
+        .cat-hdr { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 5px; }
+        .cat-bar-bg { height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+        .cat-bar { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+
+        /* Accounts tab */
+        .accounts-list { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 16px; }
+
+        /* Realistic full-width account cards */
+        .acc-card {
+            border-radius: 20px; padding: 18px 20px;
+            display: flex; flex-direction: column; justify-content: space-between; gap: 14px;
+            position: relative; overflow: hidden;
+            cursor: pointer; transform-style: preserve-3d;
+            transition: transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s;
+            min-height: 140px;
+        }
+        .acc-card:hover { transform: perspective(800px) rotateX(3deg) scale(1.02); }
+        .acc-card > * { position: relative; z-index: 2; }
+
+        /* Shared shine overlay */
+        .acc-card::after {
+            content: '';
+            position: absolute; inset: 0; border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+            pointer-events: none; z-index: 1;
+        }
+
+        /* ── HDFC-style dark navy account card ── */
+        .acc-card.hdfc-acc {
+            background: linear-gradient(145deg, #0a1628 0%, #12275a 45%, #0d1f4a 70%, #091630 100%);
+            box-shadow: 0 10px 40px rgba(0,30,120,0.35), 0 2px 8px rgba(0,0,0,0.6);
+            color: #fff;
+        }
+        .acc-card.hdfc-acc::before {
+            content: '';
+            position: absolute; top: -40px; right: -40px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(30,60,140,0.4) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 0;
+        }
+
+        /* ── BoA-style crimson account card ── */
+        .acc-card.bofa-acc {
+            background: linear-gradient(135deg, #8b0000 0%, #c0202a 25%, #a01020 50%, #8b0000 70%, #6b0010 100%);
+            box-shadow: 0 10px 40px rgba(180,0,30,0.35), 0 2px 8px rgba(0,0,0,0.5);
+            color: #fff;
+        }
+        .acc-card.bofa-acc::before {
+            content: '';
+            position: absolute; top: -30px; left: 80px; width: 260px; height: 260px;
+            background: linear-gradient(135deg, transparent 40%, rgba(160,30,40,0.5) 60%, transparent 80%);
+            transform: rotate(-25deg); pointer-events: none; z-index: 0;
+        }
+
+        /* ── Amex-style silver account card ── */
+        .acc-card.amex-acc {
+            background: linear-gradient(160deg,
+                #f0f0f0 0%, #e2e2e2 8%, #d4d4d4 18%,
+                #ececec 28%, #c8c8c8 40%, #e8e8e8 50%,
+                #d0d0d0 60%, #e6e6e6 72%, #bebebe 82%,
+                #e4e4e4 92%, #f2f2f2 100%);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06);
+            color: #111; min-height: 200px;
+        }
+        .acc-card.amex-acc::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(180,180,180,0.07) 18px, rgba(180,180,180,0.07) 19px),
+                        repeating-linear-gradient(0deg,  transparent, transparent 18px, rgba(180,180,180,0.07) 18px, rgba(180,180,180,0.07) 19px);
+            border-radius: inherit; pointer-events: none; z-index: 0;
+        }
+
+        /* Holo effect on acc-cards (same as carousel) */
+        .acc-card .holo-layer,
+        .acc-card .holo-foil,
+        .acc-card .holo-glint,
+        .acc-card .holo-sparks { border-radius: 20px; }
+
+        /* Account card inner layout */
+        .acc-top  { display: flex; justify-content: space-between; align-items: flex-start; }
+        .acc-mid  { display: flex; align-items: center; gap: 10px; }
+        .acc-name { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.01em; }
+        .acc-tag  { font-size: 0.6rem; background: rgba(255,255,255,0.15); padding: 2px 9px; border-radius: 999px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); }
+        .acc-tag.dark-tag { background: rgba(0,0,0,0.12); border-color: rgba(0,0,0,0.15); color: #333; }
+        .acc-num  { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.14em; opacity: 0.85; }
+        .acc-bal  { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; }
+        .acc-bal-label { font-size: 0.6rem; opacity: 0.7; margin-bottom: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        /* ================================================================
+           SEND PAYMENT SHEET (Full-screen overlay inside the card)
+        ================================================================ */
+        .send-sheet {
+            position: fixed; inset: 0; z-index: 800;
+            background: #090c15; display: none; flex-direction: column;
+            padding: env(safe-area-inset-top, 20px) 22px env(safe-area-inset-bottom, 20px);
+            animation: slideup 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .send-sheet.open { display: flex; }
+        @keyframes slideup { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+        .sheet-topbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 0 12px; }
+        .sheet-tabs { display: flex; background: rgba(255,255,255,0.08); border-radius: 999px; padding: 3px; gap: 2px; }
+        .sheet-tab { background: none; border: none; color: var(--text2); padding: 6px 16px; font-size: 0.8rem; font-weight: 700; border-radius: 999px; cursor: pointer; }
+        .sheet-tab.active { background: white; color: black; }
+        .btn-close { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .sheet-recipient {
+            align-self: center; background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+            border-radius: 999px; padding: 6px 14px; display: flex; align-items: center; gap: 8px;
+            font-size: 0.8rem; margin-bottom: 10px; max-width: 100%; overflow: hidden;
+        }
+        .mini-av { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        #sheetVpa { font-size: 0.72rem; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+
+        .amount-display { text-align: center; margin-bottom: 8px; }
+        .amount-val { font-family: 'Outfit', sans-serif; font-size: clamp(2.4rem, 10vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+        .amount-sub { font-size: 0.75rem; color: var(--text3); margin-top: 3px; }
+
+        .arith-row { display: flex; justify-content: center; gap: 14px; margin: 10px 0 14px; }
+        .arith-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.07); border: 1px solid var(--border); color: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+        .arith-btn:active { background: rgba(255,255,255,0.18); transform: scale(0.92); }
+
+        .keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px 14px; margin-bottom: 20px; }
+        .key {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; padding: 15px 0; font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem; font-weight: 600; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.1s;
+            user-select: none; -webkit-user-select: none;
+        }
+        .key:active { background: rgba(255,255,255,0.18); transform: scale(0.94); }
+
+        /* Swipe to Pay */
+        .swipe-track {
+            position: relative; height: 56px; background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14); border-radius: 999px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            margin-top: auto; touch-action: none;
+        }
+        .swipe-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 56px; background: linear-gradient(90deg, var(--brand), var(--safe)); border-radius: 999px; pointer-events: none; opacity: 0.3; }
+        .swipe-text { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.55); pointer-events: none; z-index: 1; }
+        .swipe-handle {
+            position: absolute; left: 4px; width: 48px; height: 48px; background: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: grab; z-index: 2; box-shadow: 0 4px 14px rgba(0,0,0,0.4); color: #000;
+            touch-action: none; user-select: none; -webkit-user-select: none;
+        }
+        .swipe-handle svg { width: 20px; height: 20px; }
+
+        /* ================================================================
+           OUTCOME MODALS (full viewport)
+        ================================================================ */
+        .outcome-modal {
+            position: fixed; inset: 0; z-index: 950;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px 24px env(safe-area-inset-bottom, 24px);
+            text-align: center; animation: popin 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .outcome-modal.open { display: flex; }
+        @keyframes popin { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
+
+        .modal-success { background: #00c853; color: white; cursor: pointer; }
+        .modal-fraud { background: linear-gradient(180deg,#3b0d11 0%,#170406 100%); color: white; }
+
+        /* Success modal */
+        .success-circle {
+            width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
+            box-shadow: 0 0 40px rgba(255,255,255,0.3);
+        }
+        .success-circle svg { width: 42px; height: 42px; stroke: white; }
+        .success-amt { font-family: 'Outfit', sans-serif; font-size: clamp(2rem,8vw,2.8rem); font-weight: 800; margin-bottom: 4px; }
+        .success-to { font-size: 1.1rem; font-weight: 600; margin-bottom: 18px; opacity: 0.95; }
+        .success-ai-tag { background: rgba(0,0,0,0.2); padding: 6px 16px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .tap-close { font-size: 0.8rem; opacity: 0.7; margin-top: 36px; }
+
+        /* Fraud modal */
+        .siren-ring {
+            width: 76px; height: 76px; border-radius: 50%; background: rgba(239,68,68,0.2);
+            border: 2px solid var(--danger); display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 40px rgba(239,68,68,0.6); margin-bottom: 14px;
+            animation: siren 1.1s infinite;
+        }
+        @keyframes siren { 0%,100%{transform:scale(1);box-shadow:0 0 30px rgba(239,68,68,0.6)} 50%{transform:scale(1.08);box-shadow:0 0 60px rgba(239,68,68,0.9)} }
+        .fraud-title { font-family: 'Outfit',sans-serif; font-size: 1.25rem; font-weight: 800; color: #fca5a5; margin-bottom: 4px; }
+        .fraud-id { font-size: 0.72rem; color: #fca5a5; opacity: 0.7; margin-bottom: 8px; }
+        .fraud-amt { font-family: 'JetBrains Mono', monospace; font-size: clamp(1.4rem,5vw,1.75rem); font-weight: 700; margin-bottom: 10px; }
+        .fraud-risk-tag { background: rgba(239,68,68,0.18); border: 1px solid rgba(239,68,68,0.4); padding: 6px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; color: var(--danger); display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+        .fraud-reasons {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 16px; padding: 12px; text-align: left; width: 100%; max-width: 440px; margin-bottom: 16px;
+        }
+        .reasons-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #fca5a5; font-weight: 700; margin-bottom: 8px; }
+        .reason-row { font-size: 0.75rem; color: #e2e8f0; display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px; }
+        .reason-row:last-child { margin-bottom: 0; }
+        .cluster-row { color: #67e8f9; }
+        .fraud-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 440px; }
+        .btn-report { background: var(--danger); color: white; border: none; padding: 13px; border-radius: 13px; font-size: 0.875rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 18px rgba(239,68,68,0.4); }
+        .btn-dismiss { background: rgba(255,255,255,0.1); color: white; border: none; padding: 11px; border-radius: 13px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+
+        /* ================================================================
+           RIGHT PANEL — COMMAND CENTER (hidden below 1000px)
+        ================================================================ */
+        .command-center {
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        /* On mobile, command center becomes a horizontal scrollable section below the phone card */
+        @media (max-width: 999px) {
+            .command-center { order: 2; }
+        }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+        @media (min-width: 480px) { .kpi-grid { grid-template-columns: repeat(4,1fr); } }
+        @media (min-width: 1000px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (min-width: 1160px) { .kpi-grid { grid-template-columns: repeat(4,1fr); } }
+
+        .kpi {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 14px; position: relative; overflow: hidden;
+        }
+        .kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--brand); }
+        .kpi.safe::before { background: var(--safe); }
+        .kpi.warn::before { background: var(--warn); }
+        .kpi.cyan::before { background: var(--cyan); }
+        .kpi-title { font-size: 0.68rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 6px; }
+        .kpi-val { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; line-height: 1; }
+        .kpi-sub { font-size: 0.68rem; color: var(--text2); margin-top: 4px; }
+
+        /* SOC Panel */
+        .soc-panel {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-lg);
+            padding: 20px; box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+        }
+        .soc-hdr { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+        .soc-hdr h2 { font-size: 1rem; font-weight: 700; }
+        .soc-hdr p { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+        .soc-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .soc-tab {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text2);
+            padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.18s;
+        }
+        .soc-tab.active { background: rgba(99,102,241,0.18); color: #a5b4fc; border-color: var(--border-active); }
+
+        .soc-view { display: none; }
+        .soc-view.active { display: block; animation: fadein 0.2s ease; }
+
+        /* Event stream table */
+        .stream-wrap { overflow-x: auto; }
+        table.stream { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 560px; }
+        table.stream th { text-align: left; padding: 9px 10px; font-size: 0.65rem; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); }
+        table.stream td { padding: 11px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .badge { padding: 3px 8px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; display: inline-block; }
+        .badge.pass { background: rgba(16,185,129,0.15); color: #34d399; }
+        .badge.block { background: rgba(239,68,68,0.18); color: #f87171; }
+        .badge.warn2 { background: rgba(245,158,11,0.18); color: #fbbf24; }
+
+        /* Research artifacts */
+        .artifacts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .artifact { background: rgba(10,14,22,0.7); border: 1px solid var(--border); border-radius: 13px; padding: 12px; text-align: center; }
+        .artifact h4 { font-size: 0.75rem; color: var(--text2); font-weight: 600; margin-bottom: 8px; }
+        .artifact img { width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); cursor: zoom-in; transition: transform 0.2s; }
+        .artifact img:hover { transform: scale(1.02); }
+
+        /* What-if tuning */
+        .tuning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 480px) { .tuning-grid { grid-template-columns: 1fr; } }
+        .tune-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+        .tune-label { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; margin-bottom: 7px; }
+        input[type=range] { width: 100%; accent-color: var(--brand); cursor: pointer; }
+        .tune-result {
+            margin-top: 16px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 13px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+        }
+        .tune-score { font-size: 1.1rem; font-weight: 800; }
+        .btn-sync { background: white; color: black; border: none; padding: 9px 18px; border-radius: var(--r-full); font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+        /* ================================================================
+           MOBILE-SPECIFIC: bottom floating action bar for SOC section
+        ================================================================ */
+        @media (max-width: 999px) {
+            .stage { padding-bottom: 24px; }
+        }
+
+        /* Utility */
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+        .hide-mobile { display: block; }
+        @media (max-width: 999px) { .hide-mobile { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================
+     HEADER / NAVBAR
+================================================================ -->
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V8.26l7-3.89v8.62z"/></svg>
+        </div>
+        <div class="brand-text">
+            <h1>PaySafe India <span class="proto-pill">AI Prototype</span></h1>
+            <p>NPCI UPI Real-Time Fraud Intelligence Engine</p>
+        </div>
+    </div>
+    <div class="topbar-right">
+        <div class="health-dot"></div>
+        <span class="health-label">Shield Active</span>
+    </div>
+</header>
+
+<!-- ================================================================
+     SCENARIO QUICK-LAUNCH STRIP
+================================================================ -->
+<nav class="scenario-strip" aria-label="Demo scenarios">
+    <span class="strip-label">Scenarios:</span>
+    <button class="s-pill safe"  onclick="loadScenario('chai')">☕ Chai ₹40</button>
+    <button class="s-pill safe"  onclick="loadScenario('grocery')">🛍️ Grocery ₹2,860</button>
+    <button class="s-pill warn"  onclick="loadScenario('tech')">⚠️ Tech ₹24,999</button>
+    <button class="s-pill danger" onclick="loadScenario('fraud_kyc')">🚨 Phishing ₹95,000</button>
+    <button class="s-pill danger" onclick="loadScenario('fraud_qr')">🚨 QR Lure ₹48,000</button>
+</nav>
+
+<!-- ================================================================
+     MAIN STAGE
+================================================================ -->
+<main class="stage">
+
+    <!-- ============================================================
+         LEFT / TOP: PHONE UPI APP CARD
+    ============================================================ -->
+    <section class="phone-card" aria-label="UPI App Simulator">
+
+        <!-- App chrome header -->
+        <div class="app-chrome">
+            <div class="app-toprow">
+                <div class="user-pill">
+                    <div class="avatar">AA<div class="dot"></div></div>
+                    <div>
+                        <div class="user-name">Avijit Aditya</div>
+                        <div class="user-vpa">@avijit.okhdfc</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="icon-btn" onclick="showNotifs()" aria-label="Notifications">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <div class="notif">3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PAGES -->
+
+        <!-- Home Tab -->
+        <div class="tab-page active" id="tabHome">
+            <div class="balance-row">
+                <div>
+                    <div class="balance-label">Total UPI Balance</div>
+                    <div class="balance-amount">₹78,540<span style="font-size:1.5rem;color:var(--text2)">.43</span></div>
+                </div>
+            </div>
+            <!-- UPI Verified Bar -->
+            <div class="upi-verified-bar">
+                <div class="upi-verified-dot"></div>
+                <div style="flex:1;">
+                    <div class="upi-verified-text">✓ UPI ID Verified</div>
+                    <div class="upi-vpa-id">avijit@okhdfc · avijit@ybl</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+
+            <!-- 4 UPI Quick Action Buttons -->
+            <div class="upi-actions">
+                <button class="upi-btn" onclick="openSend('Pavlo','pavlo@upi',286,false)">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+                    </div>
+                    <span class="upi-btn-label">Send</span>
+                </button>
+                <button class="upi-btn" onclick="showRequestModal()">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><polyline points="8 7 3 12 8 17"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                    </div>
+                    <span class="upi-btn-label">Request</span>
+                </button>
+                <button class="upi-btn" onclick="openQRScanner()">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/>
+                            <rect x="3" y="15" width="6" height="6" rx="1"/>
+                            <line x1="15" y1="15" x2="17" y2="15"/><line x1="21" y1="15" x2="21" y2="15.01"/>
+                            <line x1="15" y1="21" x2="21" y2="21"/><line x1="21" y1="18" x2="15" y2="18"/>
+                        </svg>
+                    </div>
+                    <span class="upi-btn-label">Scan QR</span>
+                </button>
+                <button class="upi-btn" onclick="exitApp()">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </div>
+                    <span class="upi-btn-label">Exit</span>
+                </button>
+            </div>
+
+            <!-- Cards Carousel — Realistic card designs -->
+            <div class="cards-scroll">
+
+                <!-- ① HDFC Bank Mastercard (dark navy) -->
+                <div class="vcard hdfc" title="HDFC Bank Mastercard">
+                    <!-- Holographic layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:20%;left:30%;animation-delay:0s;animation-duration:1.8s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:60%;left:70%;animation-delay:0.5s;animation-duration:2.2s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:40%;left:55%;animation-delay:0.9s;animation-duration:1.5s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:75%;left:20%;animation-delay:1.3s;animation-duration:2.0s;"></div>
+                        <div class="spark" style="width:4px;height:4px;top:15%;left:80%;animation-delay:0.3s;animation-duration:1.7s;"></div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-top">
+                            <div style="display:flex;align-items:center;gap:4px;">
+                                <div class="hdfc-logo-h">✦</div>
+                                <span style="display:flex;flex-direction:column;line-height:1;">
+                                    <span class="hdfc-label">HDFC BANK</span>
+                                </span>
+                            </div>
+                            <div class="chip gold-chip"></div>
+                        </div>
+                        <div class="card-mid">
+                            <div class="card-num dark">1234  5678  9012  3456</div>
+                            <div style="display:flex;gap:12px;align-items:flex-end;margin-top:2px;">
+                                <div>
+                                    <div class="card-valid-label" style="color:rgba(255,255,255,0.6);">सेवा समाप्ति / VALID THRU</div>
+                                    <div class="card-valid" style="color:#fff;">12/26</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-bottom">
+                            <div>
+                                <div class="card-holder dark">AVIJIT ADITYA</div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:center;">
+                                <div class="mc-logo">
+                                    <div class="mc-left"></div>
+                                    <div class="mc-right"></div>
+                                </div>
+                                <div class="mc-text">mastercard</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ② Bank of America Visa (crimson red) -->
+                <div class="vcard bofa" title="Bank of America Visa">
+                    <div class="card-stripe1"></div>
+                    <div class="card-stripe2"></div>
+                    <!-- Holographic layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:25%;left:40%;animation-delay:0.2s;animation-duration:2.0s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:65%;left:60%;animation-delay:0.7s;animation-duration:1.6s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:45%;left:25%;animation-delay:1.1s;animation-duration:2.3s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:80%;left:75%;animation-delay:0.4s;animation-duration:1.9s;"></div>
+                        <div class="spark" style="width:4px;height:4px;top:10%;left:65%;animation-delay:1.5s;animation-duration:1.4s;"></div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-top">
+                            <div class="bofa-label">Bank of America<br><span style="font-size:0.5rem;font-weight:600;opacity:0.9;">BankAmericard CASH REWARDS™</span></div>
+                            <div class="chip silver-chip"></div>
+                        </div>
+                        <div class="card-mid">
+                            <div class="card-num dark">4000  1234  5678  9123</div>
+                            <div style="display:flex;gap:12px;align-items:flex-end;margin-top:2px;">
+                                <div>
+                                    <div class="card-valid-label" style="color:rgba(255,255,255,0.6);">VALID THRU</div>
+                                    <div class="card-valid" style="color:#fff;">08/28</div>
+                                </div>
+                                <div style="font-size:0.45rem;color:rgba(255,255,255,0.5);align-self:flex-start;margin-top:1px;">4000</div>
+                            </div>
+                        </div>
+                        <div class="card-bottom">
+                            <div class="card-holder dark">AVIJIT ADITYA</div>
+                            <div class="visa-logo">VISA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ③ American Express Platinum (silver metal) -->
+                <div class="vcard amex" title="American Express Platinum">
+                    <div class="amex-border"></div>
+                    <!-- Holographic layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:5px;height:5px;top:30%;left:45%;animation-delay:0.1s;animation-duration:1.9s;background:radial-gradient(circle,rgba(180,180,255,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:4px;height:4px;top:70%;left:55%;animation-delay:0.6s;animation-duration:2.1s;background:radial-gradient(circle,rgba(255,220,180,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:3px;height:3px;top:50%;left:30%;animation-delay:1.0s;animation-duration:1.7s;background:radial-gradient(circle,rgba(180,255,220,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:6px;height:6px;top:20%;left:70%;animation-delay:0.4s;animation-duration:2.4s;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,transparent 60%);"></div>
+                        <div class="spark" style="width:3px;height:3px;top:85%;left:35%;animation-delay:1.4s;animation-duration:1.5s;background:radial-gradient(circle,rgba(220,180,255,0.9) 0%,transparent 70%);"></div>
+                    </div>
+                    <div class="card-inner" style="padding:9px 11px;">
+
+                        <!-- ROW 1: AMERICAN EXPRESS centered title -->
+                        <div style="text-align:center;position:relative;z-index:3;">
+                            <div style="font-family:'Outfit',sans-serif;font-size:0.68rem;font-weight:900;letter-spacing:0.14em;color:#111;text-transform:uppercase;line-height:1;">AMERICAN EXPRESS</div>
+                        </div>
+
+                        <!-- ROW 2: chip left | Centurion oval center | NFC+member right -->
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;flex:1;margin:4px 0;">
+                            <!-- Silver EMV chip -->
+                            <div class="chip silver-chip" style="flex-shrink:0;"></div>
+
+                            <!-- Centurion oval medallion -->
+                            <div style="flex:1;display:flex;justify-content:center;">
+                                <div style="position:relative;width:52px;height:58px;">
+                                    <!-- Oval frame -->
+                                    <svg viewBox="0 0 60 68" width="52" height="58" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Oval border -->
+                                        <ellipse cx="30" cy="34" rx="27" ry="31" fill="none" stroke="#888" stroke-width="1.5"/>
+                                        <ellipse cx="30" cy="34" rx="25" ry="29" fill="url(#centurionFill)" stroke="#aaa" stroke-width="0.5"/>
+                                        <defs>
+                                            <radialGradient id="centurionFill" cx="40%" cy="35%" r="65%">
+                                                <stop offset="0%" stop-color="#e0e0e0"/>
+                                                <stop offset="100%" stop-color="#b0b0b0"/>
+                                            </radialGradient>
+                                        </defs>
+                                        <!-- Centurion warrior silhouette — head with helmet -->
+                                        <g opacity="0.75" transform="translate(30,34)">
+                                            <!-- Helmet plume -->
+                                            <path d="M-2,-24 Q-4,-30 0,-33 Q4,-30 2,-24" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                            <path d="M-5,-22 Q-10,-28 -8,-32 Q-5,-29 -3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                            <path d="M5,-22 Q10,-28 8,-32 Q5,-29 3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                            <!-- Helmet crest -->
+                                            <path d="M-6,-20 L6,-20 L7,-17 Q0,-15 -7,-17 Z" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                            <!-- Head -->
+                                            <ellipse cx="0" cy="-10" rx="6" ry="7.5" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                            <!-- Face profile (looking right) -->
+                                            <path d="M0,-14 Q5,-13 6,-10 Q6,-6 3,-4 Q0,-3 -1,-5 Q-3,-8 -2,-14 Z" fill="#888" stroke="#666" stroke-width="0.3"/>
+                                            <!-- Eye -->
+                                            <ellipse cx="3" cy="-10" rx="1" ry="1" fill="#444"/>
+                                            <!-- Nose -->
+                                            <path d="M5,-8 Q7,-7 6,-5" stroke="#666" stroke-width="0.5" fill="none"/>
+                                            <!-- Chin/jaw -->
+                                            <path d="M-1,-5 Q2,-2 4,-3 Q5,-1 2,2" stroke="#777" stroke-width="0.5" fill="none"/>
+                                            <!-- Neck -->
+                                            <rect x="-2" y="2" width="4" height="4" rx="1" fill="#999" stroke="#777" stroke-width="0.4"/>
+                                            <!-- Shoulder armour -->
+                                            <path d="M-8,6 Q-5,4 -2,6 L-2,14 Q-5,15 -9,13 Z" fill="#888" stroke="#666" stroke-width="0.5"/>
+                                            <path d="M2,6 Q5,4 8,6 L9,13 Q5,15 2,14 Z" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                            <!-- Chest -->
+                                            <path d="M-8,6 Q0,8 8,6 L9,20 Q0,22 -9,20 Z" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+                                            <!-- Armour lines -->
+                                            <line x1="-7" y1="10" x2="8" y2="10" stroke="#888" stroke-width="0.4"/>
+                                            <line x1="-8" y1="14" x2="8" y2="14" stroke="#888" stroke-width="0.4"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- NFC + Member Since (right side) -->
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+                                <div style="display:flex;align-items:center;gap:2px;">
+                                    <!-- Contactless symbol -->
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 1 Q20 5 20 12 Q20 19 12 23" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                        <path d="M12 5 Q17 8 17 12 Q17 16 12 19" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                        <path d="M12 9 Q14 10.5 14 12 Q14 13.5 12 15" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#222;font-weight:600;letter-spacing:0.06em;">7997</span>
+                                </div>
+                                <!-- Member Since badge -->
+                                <div style="border:1px solid #888;border-radius:2px;padding:1px 4px;text-align:center;">
+                                    <div style="font-size:0.32rem;letter-spacing:0.07em;color:#555;text-transform:uppercase;font-weight:700;line-height:1.3;">MEMBER SINCE</div>
+                                    <div style="font-size:0.5rem;color:#333;font-family:'JetBrains Mono',monospace;font-weight:600;text-align:center;">09</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROW 3: Cardholder name left | © AMEX right -->
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;color:#111;text-transform:uppercase;">AVIJIT</div>
+                            <div style="font-size:0.38rem;color:#555;font-weight:700;letter-spacing:0.06em;">© AMEX</div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Recipients -->
+            <div class="sec-hdr">
+                <span class="sec-title">Quick Transfer</span>
+                <button class="sec-link">+ Add</button>
+            </div>
+            <div class="recipients-scroll">
+                <div class="rec-item" onclick="openSend('Pavlo','pavlo@upi',286,false)">
+                    <div class="rec-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">P</div>
+                    <span class="rec-name">Pavlo</span><span class="rec-sub">@pavlo</span>
+                </div>
+                <div class="rec-item" onclick="openSend('Sarah','sarah@okhdfc',500,false)">
+                    <div class="rec-av" style="background:linear-gradient(135deg,#10b981,#06b6d4)">S</div>
+                    <span class="rec-name">Sarah</span><span class="rec-sub">@sarah</span>
+                </div>
+                <div class="rec-item" onclick="openSend('Rahul Sharma','rahul@oksbi',1200,false)">
+                    <div class="rec-av" style="background:linear-gradient(135deg,#6366f1,#3b82f6)">R</div>
+                    <span class="rec-name">Rahul S.</span><span class="rec-sub">@oksbi</span>
+                </div>
+                <div class="rec-item" onclick="openSend('Ramesh Chaiwala','ramesh.chai@okhdfcbank',40,false)">
+                    <div class="rec-av" style="background:linear-gradient(135deg,#d97706,#78350f)">☕</div>
+                    <span class="rec-name">Chai</span><span class="rec-sub">₹40</span>
+                </div>
+                <div class="rec-item scam" onclick="openSend('🚨 Fake KYC Desk','sbi_kyc_verify.support@fakevpa',95000,true)">
+                    <div class="rec-av">⚠️</div>
+                    <span class="rec-name" style="color:#fca5a5">Fake KYC</span><span class="rec-sub" style="color:var(--danger)">Scam!</span>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="sec-hdr">
+                <span class="sec-title">Recent Activity</span>
+                <span style="font-size:0.72rem;color:var(--safe)">🛡️ Shield Active</span>
+            </div>
+            <div class="tx-feed" id="txFeed">
+                <div class="tx-item">
+                    <div class="tx-left">
+                        <div class="tx-icon">🍎</div>
+                        <div><div class="tx-name">Apple Store</div><div class="tx-time">2h ago • HDFC UPI</div></div>
+                    </div>
+                    <div class="tx-right">
+                        <div class="tx-amt">−₹2,000</div>
+                        <div class="tx-badge safe">Cleared (1.1%)</div>
+                    </div>
+                </div>
+                <div class="tx-item">
+                    <div class="tx-left">
+                        <div class="tx-icon">🧵</div>
+                        <div><div class="tx-name">Threads App</div><div class="tx-time">Yesterday • RuPay</div></div>
+                    </div>
+                    <div class="tx-right">
+                        <div class="tx-amt">−₹300</div>
+                        <div class="tx-badge safe">Cleared (0.9%)</div>
+                    </div>
+                </div>
+                <div class="tx-item">
+                    <div class="tx-left">
+                        <div class="tx-icon" style="background:rgba(239,68,68,0.12);color:#f87171">🚨</div>
+                        <div><div class="tx-name">Phishing VPA</div><div class="tx-time">02:14 AM • Link Session</div></div>
+                    </div>
+                    <div class="tx-right">
+                        <div class="tx-amt" style="color:var(--danger)">Blocked ₹95,000</div>
+                        <div class="tx-badge block">Blocked (98.4%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="tab-page" id="tabAnalytics">
+            <div style="padding:14px 18px 0;font-size:1rem;font-weight:700;">Spend & Anomaly Intel</div>
+            <div class="canvas-wrap" style="margin-top:14px">
+                <canvas id="dotCanvas"></canvas>
+                <div class="canvas-overlay">
+                    <div>
+                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.65)">PaySafe Balance</div>
+                        <div class="canvas-bal">₹78,540.43</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.65)">Fraud Saved</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;font-weight:700;color:#34d399">₹4,20,000</div>
+                    </div>
+                </div>
+            </div>
+            <div class="cat-card">
+                <div class="sec-title" style="margin-bottom:14px">Spending by Category</div>
+                <div class="cat-row"><div class="cat-hdr"><span>🛍️ Shopping (112 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹9,708</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:78%;background:#f97316"></div></div></div>
+                <div class="cat-row"><div class="cat-hdr"><span>🍔 Food & Drinks (599 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹8,526</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:68%;background:#ec4899"></div></div></div>
+                <div class="cat-row"><div class="cat-hdr"><span>⚙️ Services (42 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹5,483</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:44%;background:#3b82f6"></div></div></div>
+                <div class="cat-row"><div class="cat-hdr"><span>🚗 Transport (176 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹3,817</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:32%;background:#10b981"></div></div></div>
+                <div class="cat-row"><div class="cat-hdr"><span>🎮 Entertainment (77 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹2,084</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:20%;background:#a855f7"></div></div></div>
+            </div>
+            <div class="tx-feed" style="margin-top:0">
+                <div style="font-size:0.82rem;font-weight:700;margin-bottom:10px">AI Security Health</div>
+                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2);margin-bottom:5px"><span>Model Precision:</span><span style="font-weight:700;color:#38bdf8">98.28%</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2);margin-bottom:5px"><span>Fraud Recall:</span><span style="font-weight:700;color:#34d399">87.90%</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2)"><span>ROC-AUC:</span><span style="font-weight:700;color:#fbbf24">0.969</span></div>
+            </div>
+        </div>
+
+        <!-- Accounts Tab -->
+        <div class="tab-page" id="tabAccounts">
+            <div style="padding:14px 18px 12px;font-size:1rem;font-weight:700;">Linked Accounts</div>
+            <div class="accounts-list">
+
+                <!-- HDFC Bank Mastercard Account -->
+                <div class="acc-card hdfc-acc">
+                    <!-- Holo layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:25%;left:35%;animation-delay:0.3s;animation-duration:1.9s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:70%;left:65%;animation-delay:0.8s;animation-duration:2.2s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:50%;left:80%;animation-delay:1.2s;animation-duration:1.6s;"></div>
+                    </div>
+                    <!-- Card chip top-left -->
+                    <div class="acc-top">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div class="chip gold-chip" style="width:30px;height:22px;"></div>
+                            <div>
+                                <div style="display:flex;align-items:center;gap:5px;">
+                                    <div class="hdfc-logo-h" style="width:16px;height:16px;font-size:0.45rem;">✦</div>
+                                    <span class="hdfc-label" style="font-size:0.5rem;padding:1px 5px;">HDFC BANK</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                            <span class="acc-tag">Primary VPA</span>
+                            <div style="display:flex;flex-direction:column;align-items:center;">
+                                <div class="mc-logo" style="transform:scale(0.85);transform-origin:right;">
+                                    <div class="mc-left" style="width:16px;height:16px;"></div>
+                                    <div class="mc-right" style="width:16px;height:16px;margin-left:-6px;"></div>
+                                </div>
+                                <div class="mc-text">mastercard</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="acc-num">1234  5678  9012  3456</div>
+                        <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);letter-spacing:0.04em;margin-top:2px;">avijit@okhdfc</div>
+                    </div>
+                    <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end;">
+                        <div>
+                            <div class="acc-bal-label" style="color:rgba(255,255,255,0.65);">Account Balance</div>
+                            <div class="acc-bal">₹52,140.20</div>
+                        </div>
+                        <div>
+                            <div class="acc-bal-label" style="color:rgba(255,255,255,0.65);text-align:right;">AVIJIT ADITYA</div>
+                            <div style="font-size:0.55rem;color:rgba(255,255,255,0.4);text-align:right;">VALID THRU 12/26</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank of America Visa Account -->
+                <div class="acc-card bofa-acc">
+                    <!-- Diagonal stripes -->
+                    <div style="position:absolute;top:-60px;left:110px;width:60px;height:300%;background:rgba(255,255,255,0.05);transform:rotate(-35deg);pointer-events:none;z-index:0;"></div>
+                    <div style="position:absolute;top:-60px;left:170px;width:90px;height:300%;background:rgba(255,255,255,0.03);transform:rotate(-35deg);pointer-events:none;z-index:0;"></div>
+                    <!-- Holo layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:30%;left:50%;animation-delay:0.5s;animation-duration:2.0s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:65%;left:30%;animation-delay:1.0s;animation-duration:1.7s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:20%;left:75%;animation-delay:0.2s;animation-duration:2.4s;"></div>
+                    </div>
+                    <div class="acc-top">
+                        <div>
+                            <div class="bofa-label" style="font-size:0.68rem;">Bank of America</div>
+                            <div style="font-size:0.46rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:1px;">BankAmericard CASH REWARDS™</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                            <span class="acc-tag">Linked UPI</span>
+                            <div class="chip silver-chip" style="width:30px;height:22px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="acc-num">4000  1234  5678  9123</div>
+                        <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);letter-spacing:0.04em;margin-top:2px;">avijit@okbofa</div>
+                    </div>
+                    <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end;">
+                        <div>
+                            <div class="acc-bal-label" style="color:rgba(255,255,255,0.65);">Account Balance</div>
+                            <div class="acc-bal">₹26,400.23</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                            <div style="font-size:0.55rem;color:rgba(255,255,255,0.65);">AVIJIT ADITYA</div>
+                            <div class="visa-logo" style="font-size:1rem;">VISA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- American Express Platinum Account -->
+                <div class="acc-card amex-acc">
+                    <!-- Ornate black outer border -->
+                    <div style="position:absolute;inset:0;border-radius:20px;border:3.5px solid #0a0a0a;pointer-events:none;z-index:6;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);"></div>
+                    <!-- Dot border pattern top -->
+                    <div style="position:absolute;top:4px;left:8px;right:8px;font-size:4px;letter-spacing:1.5px;color:rgba(0,0,0,0.5);overflow:hidden;white-space:nowrap;z-index:7;line-height:1;pointer-events:none;">· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·</div>
+                    <!-- Dot border pattern bottom -->
+                    <div style="position:absolute;bottom:4px;left:8px;right:8px;font-size:4px;letter-spacing:1.5px;color:rgba(0,0,0,0.5);overflow:hidden;white-space:nowrap;z-index:7;line-height:1;pointer-events:none;">· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·</div>
+                    <!-- Holo layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:5px;height:5px;top:25%;left:40%;animation-delay:0.4s;animation-duration:2.1s;background:radial-gradient(circle,rgba(180,180,255,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:4px;height:4px;top:70%;left:70%;animation-delay:0.9s;animation-duration:1.8s;background:radial-gradient(circle,rgba(255,220,180,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:6px;height:6px;top:45%;left:85%;animation-delay:0.1s;animation-duration:2.5s;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,transparent 60%);"></div>
+                        <div class="spark" style="width:3px;height:3px;top:60%;left:20%;animation-delay:1.2s;animation-duration:1.6s;background:radial-gradient(circle,rgba(180,255,220,0.9) 0%,transparent 70%);"></div>
+                    </div>
+
+                    <!-- AMERICAN EXPRESS header centered -->
+                    <div style="text-align:center;position:relative;z-index:3;padding-top:4px;">
+                        <div style="font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:900;letter-spacing:0.14em;color:#0a0a0a;text-transform:uppercase;">AMERICAN EXPRESS</div>
+                        <div style="display:flex;justify-content:flex-end;margin-top:-16px;">
+                            <span class="acc-tag dark-tag">Platinum Card</span>
+                        </div>
+                    </div>
+
+                    <!-- Middle: chip | Centurion | NFC+member -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:3;">
+                        <!-- Chip -->
+                        <div class="chip silver-chip" style="width:34px;height:26px;flex-shrink:0;"></div>
+
+                        <!-- Centurion oval -->
+                        <div style="flex:1;display:flex;justify-content:center;">
+                            <svg viewBox="0 0 60 68" width="68" height="76" xmlns="http://www.w3.org/2000/svg">
+                                <ellipse cx="30" cy="34" rx="27" ry="31" fill="none" stroke="#888" stroke-width="1.5"/>
+                                <ellipse cx="30" cy="34" rx="25" ry="29" fill="url(#centurionFill2)" stroke="#aaa" stroke-width="0.5"/>
+                                <defs>
+                                    <radialGradient id="centurionFill2" cx="40%" cy="35%" r="65%">
+                                        <stop offset="0%" stop-color="#e0e0e0"/>
+                                        <stop offset="100%" stop-color="#b0b0b0"/>
+                                    </radialGradient>
+                                </defs>
+                                <g opacity="0.78" transform="translate(30,34)">
+                                    <path d="M-2,-24 Q-4,-30 0,-33 Q4,-30 2,-24" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                    <path d="M-5,-22 Q-10,-28 -8,-32 Q-5,-29 -3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                    <path d="M5,-22 Q10,-28 8,-32 Q5,-29 3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                    <path d="M-6,-20 L6,-20 L7,-17 Q0,-15 -7,-17 Z" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                    <ellipse cx="0" cy="-10" rx="6" ry="7.5" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                    <path d="M0,-14 Q5,-13 6,-10 Q6,-6 3,-4 Q0,-3 -1,-5 Q-3,-8 -2,-14 Z" fill="#888" stroke="#666" stroke-width="0.3"/>
+                                    <ellipse cx="3" cy="-10" rx="1" ry="1" fill="#444"/>
+                                    <path d="M5,-8 Q7,-7 6,-5" stroke="#666" stroke-width="0.5" fill="none"/>
+                                    <path d="M-1,-5 Q2,-2 4,-3 Q5,-1 2,2" stroke="#777" stroke-width="0.5" fill="none"/>
+                                    <rect x="-2" y="2" width="4" height="4" rx="1" fill="#999" stroke="#777" stroke-width="0.4"/>
+                                    <path d="M-8,6 Q-5,4 -2,6 L-2,14 Q-5,15 -9,13 Z" fill="#888" stroke="#666" stroke-width="0.5"/>
+                                    <path d="M2,6 Q5,4 8,6 L9,13 Q5,15 2,14 Z" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                    <path d="M-8,6 Q0,8 8,6 L9,20 Q0,22 -9,20 Z" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+                                    <line x1="-7" y1="10" x2="8" y2="10" stroke="#888" stroke-width="0.4"/>
+                                    <line x1="-8" y1="14" x2="8" y2="14" stroke="#888" stroke-width="0.4"/>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- NFC + Member Since -->
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                            <div style="display:flex;align-items:center;gap:3px;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 1 Q20 5 20 12 Q20 19 12 23" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                    <path d="M12 5 Q17 8 17 12 Q17 16 12 19" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                    <path d="M12 9 Q14 10.5 14 12 Q14 13.5 12 15" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                </svg>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#222;font-weight:600;letter-spacing:0.06em;">7997</span>
+                            </div>
+                            <div style="border:1px solid #888;border-radius:3px;padding:2px 6px;text-align:center;">
+                                <div style="font-size:0.35rem;letter-spacing:0.08em;color:#555;text-transform:uppercase;font-weight:700;line-height:1.4;">MEMBER SINCE</div>
+                                <div style="font-size:0.58rem;color:#333;font-family:'JetBrains Mono',monospace;font-weight:700;text-align:center;">09</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: account number, balance, name -->
+                    <div style="position:relative;z-index:3;">
+                        <div class="acc-num" style="color:#1a1a1a;letter-spacing:0.14em;margin-bottom:6px;">3782  822463  10005</div>
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                            <div>
+                                <div class="acc-bal-label" style="color:rgba(0,0,0,0.5);">Available Credit</div>
+                                <div class="acc-bal" style="color:#111;">₹1,20,000</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;color:#111;text-transform:uppercase;">AVIJIT</div>
+                                <div style="font-size:0.42rem;color:#666;font-weight:700;letter-spacing:0.06em;margin-top:1px;">© AMEX</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Dock Navigation -->
+        <nav class="phone-dock" aria-label="App navigation">
+            <button class="dock-btn active" id="dockHome" onclick="switchTab('Home')" aria-label="Home">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home
+            </button>
+            <button class="dock-btn" id="dockAnalytics" onclick="switchTab('Analytics')" aria-label="Analytics">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Spend
+            </button>
+            <button class="dock-btn" id="dockAccounts" onclick="switchTab('Accounts')" aria-label="Accounts">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Accounts
+            </button>
+        </nav>
+    </section>
+
+    <!-- ============================================================
+         RIGHT / BOTTOM: COMMAND CENTER
+    ============================================================ -->
+    <section class="command-center" aria-label="Security Operations Center">
+
+        <!-- KPI Row -->
+        <div class="kpi-grid">
+            <div class="kpi">
+                <div class="kpi-title">Champion Model</div>
+                <div class="kpi-val" style="color:#a5b4fc;font-size:1.1rem">Random Forest</div>
+                <div class="kpi-sub">100 Trees • Max Depth 12</div>
+            </div>
+            <div class="kpi safe">
+                <div class="kpi-title">Precision</div>
+                <div class="kpi-val" style="color:#34d399">98.3%</div>
+                <div class="kpi-sub">Minimal false alerts</div>
+            </div>
+            <div class="kpi warn">
+                <div class="kpi-title">Recall</div>
+                <div class="kpi-val" style="color:#fbbf24">87.9%</div>
+                <div class="kpi-sub">Fraud interception rate</div>
+            </div>
+            <div class="kpi cyan">
+                <div class="kpi-title">ROC-AUC</div>
+                <div class="kpi-val" style="color:#38bdf8">0.969</div>
+                <div class="kpi-sub">on 250k UPI records</div>
+            </div>
+        </div>
+
+        <!-- SOC Analytics Panel -->
+        <div class="soc-panel">
+            <div class="soc-hdr">
+                <div>
+                    <h2>Live Fraud Analytics</h2>
+                    <p>Real-time scoring on current simulator transaction</p>
+                </div>
+                <div class="soc-tabs">
+                    <button class="soc-tab active" onclick="switchSoc('stream', this)">Live Stream</button>
+                    <button class="soc-tab" onclick="switchSoc('research', this)">Research Charts</button>
+                    <button class="soc-tab" onclick="switchSoc('tuning', this)">What-If Tuning</button>
+                </div>
+            </div>
+
+            <!-- Live Stream -->
+            <div class="soc-view active" id="socStream">
+                <div class="stream-wrap">
+                    <table class="stream">
+                        <thead>
+                            <tr><th>Time</th><th>Recipient VPA</th><th>Amount</th><th>Hour</th><th>Cluster</th><th>Risk</th><th>Decision</th></tr>
+                        </thead>
+                        <tbody id="streamBody">
+                            <tr><td>Just now</td><td>pavlo@upi</td><td>₹286</td><td>14:30</td><td>Cluster 0</td><td style="color:var(--safe)">0.8%</td><td><span class="badge pass">APPROVED</span></td></tr>
+                            <tr><td>2m ago</td><td>ramesh.chai@okhdfcbank</td><td>₹40</td><td>10:15</td><td>Cluster 0</td><td style="color:var(--safe)">0.5%</td><td><span class="badge pass">APPROVED</span></td></tr>
+                            <tr style="background:rgba(239,68,68,0.06)"><td>15m ago</td><td>sbi_kyc_verify.support@fakevpa</td><td>₹95,000</td><td>02:15</td><td>Cluster 3</td><td style="color:var(--danger)">98.4%</td><td><span class="badge block">BLOCKED</span></td></tr>
+                            <tr><td>42m ago</td><td>quick.tech99@ybl</td><td>₹24,999</td><td>20:05</td><td>Cluster 2</td><td style="color:var(--warn)">38.2%</td><td><span class="badge warn2">2FA ALERT</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Research Charts -->
+            <div class="soc-view" id="socResearch">
+                <div class="artifacts">
+                    <div class="artifact">
+                        <h4>Feature Correlation Heatmap</h4>
+                        <img src="/images/eda_correlation_heatmap.png" alt="Heatmap" onclick="window.open(this.src,'_blank')">
+                    </div>
+                    <div class="artifact">
+                        <h4>K-Means Elbow & Silhouette</h4>
+                        <img src="/images/kmeans_elbow_plot.png" alt="Elbow" onclick="window.open(this.src,'_blank')">
+                    </div>
+                    <div class="artifact">
+                        <h4>Confusion Matrices (All Models)</h4>
+                        <img src="/images/confusion_matrices.png" alt="Confusion" onclick="window.open(this.src,'_blank')">
+                    </div>
+                    <div class="artifact">
+                        <h4>RF Feature Importances (MDI)</h4>
+                        <img src="/images/rf_feature_importance.png" alt="Feature Importance" onclick="window.open(this.src,'_blank')">
+                    </div>
+                </div>
+            </div>
+
+            <!-- What-If Tuning -->
+            <div class="soc-view" id="socTuning">
+                <div class="tuning-grid">
+                    <div class="tune-box">
+                        <div class="tune-label"><span>Amount:</span><span id="tvAmt" style="color:#38bdf8">₹286</span></div>
+                        <input type="range" min="10" max="100000" step="50" value="286" id="slAmt" oninput="recalc()">
+                    </div>
+                    <div class="tune-box">
+                        <div class="tune-label"><span>Hour (0–23):</span><span id="tvHr" style="color:#38bdf8">14:00</span></div>
+                        <input type="range" min="0" max="23" value="14" id="slHr" oninput="recalc()">
+                    </div>
+                    <div class="tune-box">
+                        <div class="tune-label"><span>Amount × History:</span><span id="tvRatio" style="color:#38bdf8">1.0×</span></div>
+                        <input type="range" min="0.5" max="15" step="0.5" value="1.0" id="slRatio" oninput="recalc()">
+                    </div>
+                    <div class="tune-box">
+                        <div class="tune-label"><span>Velocity (tx/10m):</span><span id="tvVel" style="color:#38bdf8">0</span></div>
+                        <input type="range" min="0" max="10" value="0" id="slVel" oninput="recalc()">
+                    </div>
+                </div>
+                <div class="tune-result">
+                    <div>
+                        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:3px">Live Risk Re-Score:</div>
+                        <div class="tune-score" id="tuneOut" style="color:var(--safe)">✅ Safe (0.8%)</div>
+                    </div>
+                    <button class="btn-sync" onclick="syncToPhone()">📱 Send to Simulator</button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<!-- ================================================================
+     SEND PAYMENT SHEET (Full-screen overlay)
+================================================================ -->
+<div class="send-sheet" id="sendSheet" role="dialog" aria-modal="true" aria-label="Send Payment">
+    <div class="sheet-topbar">
+        <div class="sheet-tabs">
+            <button class="sheet-tab active">Send</button>
+            <button class="sheet-tab">Request</button>
+        </div>
+        <button class="btn-close" onclick="closeSheet()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="sheet-recipient">
+        <div class="mini-av" id="sheetAv">P</div>
+        <strong id="sheetName">Pavlo</strong>&nbsp;•&nbsp;
+        <span id="sheetVpa">pavlo@upi</span>
+    </div>
+
+    <div class="amount-display">
+        <div class="amount-val" id="amtDisplay">₹ 286</div>
+        <div class="amount-sub">Available: ₹ 78,540.43</div>
+    </div>
+
+    <div class="arith-row">
+        <button class="arith-btn" onclick="arith('+')">+</button>
+        <button class="arith-btn" onclick="arith('-')">−</button>
+        <button class="arith-btn" onclick="arith('×')">×</button>
+        <button class="arith-btn" onclick="arith('÷')">÷</button>
+    </div>
+
+    <div class="keypad">
+        <button class="key" onclick="kp('1')">1</button><button class="key" onclick="kp('2')">2</button><button class="key" onclick="kp('3')">3</button>
+        <button class="key" onclick="kp('4')">4</button><button class="key" onclick="kp('5')">5</button><button class="key" onclick="kp('6')">6</button>
+        <button class="key" onclick="kp('7')">7</button><button class="key" onclick="kp('8')">8</button><button class="key" onclick="kp('9')">9</button>
+        <button class="key" onclick="kp('.')">.</button><button class="key" onclick="kp('0')">0</button><button class="key" onclick="backspace()">⌫</button>
+    </div>
+
+    <div class="swipe-track" id="swipeTrack">
+        <div class="swipe-fill" id="swipeFill"></div>
+        <span class="swipe-text" id="swipeText">Swipe right to pay</span>
+        <div class="swipe-handle" id="swipeHandle" aria-label="Swipe to confirm payment">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================
+     SUCCESS MODAL
+================================================================ -->
+<div class="outcome-modal modal-success" id="modalSuccess" onclick="closeOutcome()" role="alertdialog" aria-label="Payment Successful">
+    <div class="success-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="success-amt" id="successAmt">₹ 286.00</div>
+    <div class="success-to" id="successTo">Sent to Pavlo</div>
+    <div class="success-ai-tag">🛡️ PaySafe AI Verified • Cleared (0.8% Risk)</div>
+    <div class="tap-close">Tap anywhere to close</div>
+</div>
+
+<!-- ================================================================
+     FRAUD INTERCEPT MODAL
+================================================================ -->
+<div class="outcome-modal modal-fraud" id="modalFraud" role="alertdialog" aria-label="Transaction Blocked">
+    <div class="siren-ring">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="fraud-title">TRANSACTION BLOCKED</div>
+    <div class="fraud-id">NPCI Safety Intercept #PS-9842</div>
+    <div class="fraud-amt" id="fraudAmt">₹ 95,000.00</div>
+    <div class="fraud-risk-tag" id="fraudRiskTag">🛑 Risk: 98.4% (Severe Threat)</div>
+    <div class="fraud-reasons">
+        <div class="reasons-title">AI Anomaly Attribution (Random Forest):</div>
+        <div class="reason-row" id="fr1"><span>⚠️</span><span>Nocturnal burst window (02:15 AM — is_night=1)</span></div>
+        <div class="reason-row" id="fr2"><span>⚠️</span><span>Amount is 8.5× sender's 90-day baseline</span></div>
+        <div class="reason-row" id="fr3"><span>⚠️</span><span>Unrecognized device & foreign IP ASN, pasted PIN</span></div>
+        <div class="reason-row cluster-row" id="fr4"><span>🧩</span><span id="clusterText">Cluster 3: Nocturnal Burst Anomaly (High Risk)</span></div>
+    </div>
+    <div class="fraud-actions">
+        <button class="btn-report" onclick="reportCyber()">🚨 Report to National Cybercrime Helpline (1930)</button>
+        <button class="btn-dismiss" onclick="closeOutcome()">Cancel & Freeze this UPI ID</button>
+    </div>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+/* ------------------------------------------------------------------ */
+/* Audio Synthesizer (zero external deps)                               */
+/* ------------------------------------------------------------------ */
+let _ac = null;
+function ac() {
+    if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (_ac.state === 'suspended') _ac.resume();
+    return _ac;
+}
+function beep(freq, dur, type='sine', vol=0.18) {
+    try {
+        const c = ac(), o = c.createOscillator(), g = c.createGain();
+        o.type = type; o.frequency.setValueAtTime(freq, c.currentTime);
+        g.gain.setValueAtTime(vol, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+        o.connect(g); g.connect(c.destination);
+        o.start(); o.stop(c.currentTime + dur);
+    } catch(e){}
+}
+function chime() {
+    [523.25, 659.25, 783.99, 1046.5].forEach((f,i) => setTimeout(() => beep(f, 0.5), i * 80));
+}
+function alarm() {
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => { beep(880, 0.17, 'sawtooth', 0.3); }, i * 220);
+        setTimeout(() => { beep(440, 0.17, 'sawtooth', 0.25); }, i * 220 + 100);
+    }
+}
+function click() { beep(700, 0.025, 'sine', 0.12); }
+
+/* ------------------------------------------------------------------ */
+/* Phone Tab Navigation                                                  */
+/* ------------------------------------------------------------------ */
+function switchTab(name) {
+    click();
+    ['Home','Analytics','Accounts'].forEach(t => {
+        document.getElementById('tab' + t).classList.toggle('active', t === name);
+        document.getElementById('dock' + t).classList.toggle('active', t === name);
+    });
+    if (name === 'Analytics') setTimeout(initCanvas, 50);
+}
+
+/* ------------------------------------------------------------------ */
+/* SOC Tab Navigation                                                    */
+/* ------------------------------------------------------------------ */
+function switchSoc(id, btn) {
+    click();
+    document.querySelectorAll('.soc-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.soc-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('soc' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active');
+    btn.classList.add('active');
+}
+
+/* ------------------------------------------------------------------ */
+/* Send Sheet State                                                       */
+/* ------------------------------------------------------------------ */
+let curName = 'Pavlo', curVpa = 'pavlo@upi', curIsScam = false, curAmtStr = '286';
+
+function openSend(name, vpa, amt, isScam) {
+    click();
+    curName = name; curVpa = vpa; curIsScam = isScam; curAmtStr = String(amt);
+    document.getElementById('sheetName').textContent = name;
+    document.getElementById('sheetVpa').textContent = vpa;
+    document.getElementById('sheetAv').textContent = name.replace(/[^a-zA-Z]/g,'').charAt(0) || '?';
+    document.getElementById('amtDisplay').textContent = '₹ ' + curAmtStr;
+    resetSwipe();
+    document.getElementById('sendSheet').classList.add('open');
+}
+
+function closeSheet() { click(); document.getElementById('sendSheet').classList.remove('open'); }
+
+/* Keypad */
+function kp(d) {
+    click();
+    if (curAmtStr === '0' && d !== '.') curAmtStr = d;
+    else if (curAmtStr.length < 9) curAmtStr += d;
+    document.getElementById('amtDisplay').textContent = '₹ ' + curAmtStr;
+}
+function backspace() {
+    click();
+    curAmtStr = curAmtStr.length > 1 ? curAmtStr.slice(0,-1) : '0';
+    document.getElementById('amtDisplay').textContent = '₹ ' + curAmtStr;
+}
+function arith(op) {
+    click();
+    let v = parseFloat(curAmtStr) || 0;
+    if (op === '+') v += 50;
+    else if (op === '-') v = Math.max(1, v - 50);
+    else if (op === '×') v *= 2;
+    else if (op === '÷') v = Math.round(v / 2);
+    curAmtStr = String(Math.round(v));
+    document.getElementById('amtDisplay').textContent = '₹ ' + curAmtStr;
+}
+
+/* ------------------------------------------------------------------ */
+/* Swipe-to-Pay Handler (Mouse + Touch)                                  */
+/* ------------------------------------------------------------------ */
+function resetSwipe() {
+    const h = document.getElementById('swipeHandle');
+    const f = document.getElementById('swipeFill');
+    const t = document.getElementById('swipeText');
+    h.style.transform = 'translateX(0)';
+    h.style.transition = '';
+    f.style.width = '48px';
+    t.style.opacity = '1';
+    t.textContent = 'Swipe right to pay';
+}
+
+(function initSwipe() {
+    const track = document.getElementById('swipeTrack');
+    const handle = document.getElementById('swipeHandle');
+    const fill = document.getElementById('swipeFill');
+    const text = document.getElementById('swipeText');
+    let dragging = false, startX = 0, maxSlide = 0;
+
+    const getX = e => e.touches ? e.touches[0].clientX : e.clientX;
+
+    const onStart = e => {
+        dragging = true;
+        startX = getX(e);
+        maxSlide = track.offsetWidth - handle.offsetWidth - 8;
+        handle.style.transition = 'none';
+        fill.style.transition = 'none';
+        e.preventDefault();
+    };
+
+    const onMove = e => {
+        if (!dragging) return;
+        let d = Math.max(0, Math.min(getX(e) - startX, maxSlide));
+        handle.style.transform = `translateX(${d}px)`;
+        fill.style.width = `${d + 48}px`;
+        text.style.opacity = String(1 - (d / maxSlide) * 1.5);
+        if (d / maxSlide > 0.88) { dragging = false; onSwipeComplete(); }
+        e.preventDefault();
+    };
+
+    const onEnd = () => {
+        if (!dragging) return;
+        dragging = false;
+        handle.style.transition = 'transform 0.25s ease';
+        fill.style.transition = 'width 0.25s ease';
+        resetSwipe();
+    };
+
+    handle.addEventListener('mousedown', onStart);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    handle.addEventListener('touchstart', onStart, { passive: false });
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+})();
+
+/* ------------------------------------------------------------------ */
+/* Swipe Complete → ML Evaluation                                        */
+/* ------------------------------------------------------------------ */
+async function onSwipeComplete() {
+    document.getElementById('swipeText').textContent = 'Analyzing…';
+    beep(750, 0.1);
+    closeSheet();
+
+    const amt = parseFloat(curAmtStr) || 0;
+    const isScam = curIsScam;
+
+    const payload = {
+        amount: amt,
+        transaction_time_of_day: isScam ? 2 : 14,
+        transaction_amount_vs_sender_history: isScam ? 8.5 : 1.1,
+        authentication_attempts: isScam ? 4 : 1,
+        failed_transaction_count: isScam ? 2 : 0,
+        unusual_device_flag: isScam ? 1 : 0,
+        unusual_ip_flag: isScam ? 1 : 0,
+        session_source: isScam ? 'link' : 'app',
+        pin_entry_method: isScam ? 'pasted' : 'manual',
+        transaction_velocity: isScam ? 4 : 0
+    };
+
+    let result = null;
+    try {
+        const r = await fetch('/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (r.ok) result = await r.json();
+    } catch(e) {}
+
+    // Heuristic fallback
+    if (!result) {
+        const fraud = isScam || amt > 40000;
+        result = { is_fraud: fraud, percent: fraud ? 98.4 : 0.8, band: fraud ? 'high' : 'low',
+            cluster_name: fraud ? 'Cluster 3: Nocturnal Burst Anomaly' : 'Cluster 0: Normal Micro-UPI',
+            drivers: fraud ? [['Nocturnal Transfer (02:15 AM)', 38],['Outlier vs History (8.5×)', 32],['Unknown Device & IP', 24]] : [] };
+    }
+
+    if (result.band === 'high' || result.is_fraud) {
+        showFraud(amt, result);
+    } else {
+        showSuccess(amt, result);
+    }
+    logEvent(curVpa, amt, result);
+}
+
+function showSuccess(amt, r) {
+    document.getElementById('successAmt').textContent = '₹ ' + amt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    document.getElementById('successTo').textContent = 'Sent to ' + curName;
+    document.getElementById('modalSuccess').classList.add('open');
+    chime();
+}
+
+function showFraud(amt, r) {
+    document.getElementById('fraudAmt').textContent = '₹ ' + amt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    document.getElementById('fraudRiskTag').innerHTML = `🛑 Risk: ${r.percent}% (Severe Threat)`;
+    if (r.drivers && r.drivers.length > 0) {
+        if (r.drivers[0]) document.getElementById('fr1').innerHTML = `<span>⚠️</span><span>${r.drivers[0][0]}</span>`;
+        if (r.drivers[1]) document.getElementById('fr2').innerHTML = `<span>⚠️</span><span>${r.drivers[1][0]}</span>`;
+        if (r.drivers[2]) document.getElementById('fr3').innerHTML = `<span>⚠️</span><span>${r.drivers[2][0]}</span>`;
+    }
+    if (r.cluster_name) document.getElementById('clusterText').textContent = r.cluster_name;
+    document.getElementById('modalFraud').classList.add('open');
+    alarm();
+}
+
+function closeOutcome() {
+    document.getElementById('modalSuccess').classList.remove('open');
+    document.getElementById('modalFraud').classList.remove('open');
+    click();
+}
+
+function reportCyber() {
+    alert('🚨 FILED!\n\nRef: 1930-NPCI-2026-9842\nEvidence dispatched to National Cyber Crime Reporting Portal.\nVPA ' + curVpa + ' blacklisted on NPCI Fraud Registry.');
+    closeOutcome();
+}
+
+/* ------------------------------------------------------------------ */
+/* Scenario Pre-loaders                                                  */
+/* ------------------------------------------------------------------ */
+function loadScenario(id) {
+    click();
+    const map = {
+        chai: ['Ramesh Chaiwala','ramesh.chai@okhdfcbank',40,false],
+        grocery: ['Nature Basket Store','nature.basket@icici',2860,false],
+        tech: ['Quick Tech Hub','quick.tech99@ybl',24999,false],
+        fraud_kyc: ['🚨 Fake KYC Desk','sbi_kyc_verify.support@fakevpa',95000,true],
+        fraud_qr: ['🚨 QR Lure Portal','cashback.claim100@fakeaxis',48000,true],
+    };
+    const [n,v,a,s] = map[id] || map.chai;
+    openSend(n, v, a, s);
+}
+
+/* ------------------------------------------------------------------ */
+/* What-If Tuning                                                         */
+/* ------------------------------------------------------------------ */
+function recalc() {
+    const amt = +document.getElementById('slAmt').value;
+    const hr = +document.getElementById('slHr').value;
+    const ratio = +document.getElementById('slRatio').value;
+    const vel = +document.getElementById('slVel').value;
+    document.getElementById('tvAmt').textContent = '₹' + amt.toLocaleString('en-IN');
+    document.getElementById('tvHr').textContent = hr + ':00 ' + ((hr >= 23 || hr <= 4) ? '🚨 Night' : '');
+    document.getElementById('tvRatio').textContent = ratio.toFixed(1) + '×';
+    document.getElementById('tvVel').textContent = vel;
+    // Simple logistic model
+    let z = -3.5;
+    if (ratio > 5) z += 2.5; else if (ratio > 2.5) z += 1.2;
+    if (hr >= 23 || hr <= 4) z += 2.0;
+    z += vel * 0.4;
+    if (amt > 50000) z += 1.5;
+    const p = 1 / (1 + Math.exp(-z));
+    const pct = (p * 100).toFixed(1);
+    const el = document.getElementById('tuneOut');
+    if (p >= 0.5) { el.textContent = `🚨 High Risk (${pct}%)`; el.style.color = 'var(--danger)'; }
+    else if (p >= 0.2) { el.textContent = `⚠️ Suspicious (${pct}%)`; el.style.color = 'var(--warn)'; }
+    else { el.textContent = `✅ Safe (${pct}%)`; el.style.color = 'var(--safe)'; }
+}
+
+function syncToPhone() {
+    const amt = +document.getElementById('slAmt').value;
+    const hr = +document.getElementById('slHr').value;
+    const isScam = (hr >= 23 || hr <= 4) && amt > 30000;
+    openSend(isScam ? 'Suspicious Beneficiary' : 'Tuned Transfer', 'tuned@upi', amt, isScam);
+}
+
+/* ------------------------------------------------------------------ */
+/* Add Event to Live Stream Table                                         */
+/* ------------------------------------------------------------------ */
+function logEvent(vpa, amt, r) {
+    const tbody = document.getElementById('streamBody');
+    const tr = document.createElement('tr');
+    const isBlock = r.band === 'high' || r.is_fraud;
+    if (isBlock) tr.style.background = 'rgba(239,68,68,0.06)';
+    const cl = r.cluster_name ? r.cluster_name.split(':')[0] : 'Cluster 0';
+    tr.innerHTML = `
+        <td>Now</td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${vpa}</td>
+        <td>₹${amt.toLocaleString('en-IN')}</td>
+        <td>${isBlock ? '02:15' : '14:30'}</td>
+        <td>${cl}</td>
+        <td style="font-weight:700;color:${isBlock ? 'var(--danger)' : 'var(--safe)'}">${r.percent}%</td>
+        <td><span class="badge ${isBlock ? 'block' : 'pass'}">${isBlock ? 'BLOCKED' : 'APPROVED'}</span></td>`;
+    tbody.insertBefore(tr, tbody.firstChild);
+}
+
+/* ------------------------------------------------------------------ */
+/* Dot-Matrix Canvas Animation (Video 2 Apple Card Style)               */
+/* ------------------------------------------------------------------ */
+let _canvasAnim = null;
+function initCanvas() {
+    const canvas = document.getElementById('dotCanvas');
+    if (!canvas) return;
+    if (_canvasAnim) { cancelAnimationFrame(_canvasAnim); _canvasAnim = null; }
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    ctx.scale(dpr, dpr);
+    const W = r.width, H = r.height;
+    const cols = 28, rows = 14;
+    const sx = W / cols, sy = H / rows;
+    let tick = 0;
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        tick += 0.04;
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                const dist = Math.hypot(i - cols/2, j - rows/2);
+                const wave = Math.sin(dist * 0.4 - tick);
+                const radius = Math.max(0.8, (wave + 1) * 2.2);
+                const alpha = Math.max(0.08, (wave + 1) * 0.44);
+                ctx.beginPath();
+                ctx.arc(i * sx + sx/2, j * sy + sy/2, radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                ctx.fill();
+            }
+        }
+        _canvasAnim = requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+/* ------------------------------------------------------------------ */
+/* Notifications                                                          */
+/* ------------------------------------------------------------------ */
+function showNotifs() {
+    alert('🔔 PaySafe Security Alerts:\n\n• 3 phishing attacks intercepted this week\n• RuPay UPI limits verified\n• Fraud DB updated at 06:00 AM IST');
+}
+
+/* ------------------------------------------------------------------ */
+/* Live Clock in brand area                                               */
+/* ------------------------------------------------------------------ */
+(function clock() {
+    setInterval(() => {
+        const n = new Date();
+        document.title = `${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')} • PaySafe India`;
+    }, 60000);
+})();
+
+/* ------------------------------------------------------------------ */
+/* Init                                                                   */
+/* ------------------------------------------------------------------ */
+window.addEventListener('DOMContentLoaded', () => {
+    recalc();
+
+    /* ── Realistic Card 3D Tilt on Mouse Move ── */
+    document.querySelectorAll('.vcard, .acc-card').forEach(card => {
+        const holoLayer = card.querySelector('.holo-layer');
+        const holoGlint = card.querySelector('.holo-glint');
+
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top  + rect.height / 2;
+            const dx = (e.clientX - cx) / (rect.width  / 2);   // -1 → +1
+            const dy = (e.clientY - cy) / (rect.height / 2);   // -1 → +1
+
+            /* 3D tilt */
+            const rotY =  dx * 16;
+            const rotX = -dy *  9;
+            card.style.transform =
+                `perspective(600px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(1.06)`;
+            card.style.boxShadow =
+                `${-rotY*0.8}px ${rotX*0.5}px 40px rgba(0,0,0,0.5),
+                 0 0 20px rgba(99,102,241,0.2)`;
+
+            /* Holographic rainbow: shift gradient angle with mouse */
+            if (holoLayer) {
+                const angle = 125 + dx * 40 + dy * 20;
+                const px = ((dx + 1) / 2 * 100).toFixed(1);
+                const py = ((dy + 1) / 2 * 100).toFixed(1);
+                holoLayer.style.backgroundImage = `linear-gradient(
+                    ${angle}deg,
+                    rgba(255,0,128,0)    0%,
+                    rgba(255,0,128,0.22) 10%,
+                    rgba(255,165,0,0.26) 20%,
+                    rgba(255,255,0,0.22) 30%,
+                    rgba(0,255,100,0.24) 40%,
+                    rgba(0,200,255,0.26) 50%,
+                    rgba(100,0,255,0.24) 60%,
+                    rgba(255,0,200,0.22) 70%,
+                    rgba(255,100,0,0.18) 80%,
+                    rgba(0,255,200,0.22) 90%,
+                    rgba(255,0,128,0)    100%
+                )`;
+                holoLayer.style.backgroundPosition = `${px}% ${py}%`;
+                holoLayer.style.opacity = '1';
+            }
+
+            /* Move glint position with mouse X */
+            if (holoGlint) {
+                const glintX = ((dx + 1) / 2 * 120 - 10).toFixed(1);
+                holoGlint.style.left = `${glintX}%`;
+            }
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform  = '';
+            card.style.boxShadow  = '';
+            if (holoLayer) holoLayer.style.cssText = '';
+        });
+
+        /* Touch support (mobile) */
+        card.addEventListener('touchmove', e => {
+            const t = e.touches[0];
+            const rect = card.getBoundingClientRect();
+            const dx = ((t.clientX - rect.left) / rect.width  - 0.5) * 2;
+            const dy = ((t.clientY - rect.top)  / rect.height - 0.5) * 2;
+            const rotY =  dx * 12;
+            const rotX = -dy *  7;
+            card.style.transform =
+                `perspective(600px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(1.04)`;
+            if (holoLayer) {
+                holoLayer.style.opacity = '0.8';
+                holoLayer.style.backgroundPosition = `${((dx+1)/2*100).toFixed()}% ${((dy+1)/2*100).toFixed()}%`;
+            }
+        }, { passive: true });
+        card.addEventListener('touchend', () => {
+            card.style.transform = '';
+            if (holoLayer) holoLayer.style.cssText = '';
+        });
+    });
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════════
+     QR SCANNER MODAL
+═══════════════════════════════════════════════════ -->
+<div class="qr-modal" id="qrModal" onclick="if(event.target===this)closeQRScanner()">
+    <div class="qr-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div>
+                <div style="font-size:1rem;font-weight:800;color:#fff;">Scan QR Code</div>
+                <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Point camera at any UPI QR code</div>
+            </div>
+            <button onclick="closeQRScanner()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        <!-- Viewfinder -->
+        <div class="qr-viewfinder">
+            <div class="qr-scanline"></div>
+            <div class="qr-corner tl"></div>
+            <div class="qr-corner tr"></div>
+            <div class="qr-corner bl"></div>
+            <div class="qr-corner br"></div>
+            <div class="qr-pattern"></div>
+            <!-- Simulated QR blocks -->
+            <div style="position:absolute;top:50px;left:50px;width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:3px;"></div>
+            <div style="position:absolute;top:50px;right:50px;width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:3px;"></div>
+            <div style="position:absolute;bottom:50px;left:50px;width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:3px;"></div>
+        </div>
+
+        <!-- UPI Verified indicator -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:8px 12px;margin-bottom:12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#34d399;">UPI QR Verified</div>
+                <div style="font-size:0.6rem;color:var(--text3);">Merchant authenticated by NPCI</div>
+            </div>
+        </div>
+
+        <!-- Demo: Simulate a detected QR -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button onclick="simulateQRScan('Rahul Sharma','rahul@oksbi',500,false)" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:9px;border-radius:10px;cursor:pointer;font-size:0.75rem;font-weight:700;">
+                ✅ Demo: Safe QR
+            </button>
+            <button onclick="simulateQRScan('Fake KYC Portal','sbi_kyc_verify.support@fakevpa',95000,true)" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:9px;border-radius:10px;cursor:pointer;font-size:0.75rem;font-weight:700;">
+                🚨 Demo: Fraud QR
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- REQUEST MONEY MODAL -->
+<div class="qr-modal" id="requestModal" onclick="if(event.target===this)closeRequestModal()">
+    <div class="qr-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div>
+                <div style="font-size:1rem;font-weight:800;color:#fff;">Request Money</div>
+                <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Generate a UPI payment link</div>
+            </div>
+            <button onclick="closeRequestModal()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+        <!-- Amount input -->
+        <div style="margin-bottom:12px;">
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:5px;font-weight:600;">Enter Amount (₹)</div>
+            <input id="reqAmount" type="number" placeholder="0.00" min="1"
+                style="width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#fff;font-size:1rem;font-family:'Outfit',sans-serif;font-weight:700;box-sizing:border-box;outline:none;">
+        </div>
+        <!-- Note input -->
+        <div style="margin-bottom:14px;">
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:5px;font-weight:600;">Note (optional)</div>
+            <input id="reqNote" type="text" placeholder="e.g. Dinner split"
+                style="width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#fff;font-size:0.875rem;font-family:'Outfit',sans-serif;box-sizing:border-box;outline:none;">
+        </div>
+        <!-- UPI VPA display -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:9px 12px;margin-bottom:14px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <div>
+                <div style="font-size:0.65rem;color:var(--text3);">Receiving VPA</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#a5b4fc;font-weight:600;">avijit@okhdfc</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" style="margin-left:auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <button onclick="generateRequestLink()" style="width:100%;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff;padding:12px;border-radius:12px;cursor:pointer;font-size:0.875rem;font-weight:800;letter-spacing:0.02em;">
+            🔗 Generate Request Link
+        </button>
+    </div>
+</div>
+
+<script>
+/* ── QR Scanner ── */
+function openQRScanner() {
+    document.getElementById('qrModal').classList.add('open');
+}
+function closeQRScanner() {
+    document.getElementById('qrModal').classList.remove('open');
+}
+function simulateQRScan(name, vpa, amt, isScam) {
+    closeQRScanner();
+    setTimeout(() => openSend(name, vpa, amt, isScam), 300);
+}
+
+/* ── Request Money ── */
+function showRequestModal() {
+    document.getElementById('requestModal').classList.add('open');
+    document.getElementById('reqAmount').value = '';
+    document.getElementById('reqNote').value = '';
+}
+function closeRequestModal() {
+    document.getElementById('requestModal').classList.remove('open');
+}
+function generateRequestLink() {
+    const amt = document.getElementById('reqAmount').value;
+    const note = document.getElementById('reqNote').value || 'UPI Payment';
+    if (!amt || amt <= 0) {
+        document.getElementById('reqAmount').style.borderColor = '#ef4444';
+        setTimeout(() => document.getElementById('reqAmount').style.borderColor = '', 1500);
+        return;
+    }
+    closeRequestModal();
+    const link = `upi://pay?pa=avijit@okhdfc&pn=Avijit&am=${amt}&tn=${encodeURIComponent(note)}&cu=INR`;
+    setTimeout(() => {
+        alert(`✅ UPI Request Link Generated!\n\n${link}\n\nShare this link to receive ₹${Number(amt).toLocaleString('en-IN')} for "${note}"`);
+    }, 200);
+}
+
+/* ── Exit App ── */
+function exitApp() {
+    if (confirm('🔒 Lock PaySafe India?\n\nYou will be signed out of the UPI simulator.')) {
+        document.body.style.transition = 'opacity 0.5s';
+        document.body.style.opacity = '0';
+        setTimeout(() => {
+            document.body.innerHTML = `
+                <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060810;gap:16px;font-family:'Outfit',sans-serif;">
+                    <div style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#f97316,#6366f1 55%,#06b6d4);display:flex;align-items:center;justify-content:center;">
+                        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div style="color:#fff;font-size:1.3rem;font-weight:800;">PaySafe India</div>
+                    <div style="color:#6b7280;font-size:0.8rem;">Session ended securely</div>
+                    <button onclick="location.reload()" style="margin-top:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff;padding:12px 28px;border-radius:999px;cursor:pointer;font-size:0.875rem;font-weight:700;">↩ Sign Back In</button>
+                </div>`;
+            document.body.style.opacity = '1';
+        }, 500);
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+dataset,rows,fraud_%,roc_auc,pr_auc,verdict
+fraud_dataset.csv,26393,17.2205,0.9719,0.9501,USE — real signal in behavioural features
+upi_transactions_2024.csv,250000,0.192,0.5489,0.0024,EDA only — features carry ~no signal (AUC≈0.5)
+upi_data_new1.xlsx,500000,15.9,0.5612,0.1912,"REJECT — anonymised codes, ~no signal (AUC≈0.5)"
+upi_fraud_india_dataset.csv,1000,100.0,,,"CONTEXT only — every row is fraud, no legitimate class to learn from"

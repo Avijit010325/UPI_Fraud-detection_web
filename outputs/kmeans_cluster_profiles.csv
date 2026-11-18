@@ -1,0 +1,3 @@
+cluster,size,amount,transaction_amount_vs_sender_history,authentication_attempts,failed_transaction_count,pin_entry_speed,time_pressure_indicators,unusual_device_flag,fraud_rate,share_of_all_fraud
+0,25660,4690.22,3.02,1.03,0.0,1.22,0.19,0.03,0.149,0.839
+1,733,10996.74,3.49,3.97,2.04,0.15,0.49,1.0,1.0,0.161

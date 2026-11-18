@@ -6,6 +6,8 @@ import json
 import math
 import os
 import sys
+import warnings
+warnings.filterwarnings("ignore")          # Suppress sklearn version mismatch warnings
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request, send_from_directory

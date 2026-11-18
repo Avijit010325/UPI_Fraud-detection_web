@@ -51,11 +51,32 @@
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
             background-image:
                 radial-gradient(circle at 20% 10%, rgba(99,102,241,0.14) 0%, transparent 45%),
                 radial-gradient(circle at 80% 85%, rgba(6,182,212,0.10) 0%, transparent 50%);
             background-attachment: fixed;
         }
+
+        /* ── India/Rupee background image — 30% opacity, blurred, glass tint ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: url('/images/india_rupee_bg.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0.30;
+            filter: blur(3px) saturate(0.6) brightness(0.45) sepia(0.3);
+            mix-blend-mode: luminosity;
+            pointer-events: none;
+        }
+
+        /* Ensure all direct children of body sit above the bg layer */
+        body > * { position: relative; z-index: 1; }
+
 
         /* ================================================================
            LAYOUT HELPERS
@@ -63,16 +84,88 @@
         .container { max-width: 1360px; margin: 0 auto; padding: 0 20px; }
 
         /* ================================================================
-           TOP HEADER / NAVBAR
+           TOP HEADER / NAVBAR — iOS 26 Liquid Glass
         ================================================================ */
+
+        /* Animated prismatic shimmer for glass surfaces */
+        @keyframes glassPrism {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes glassShimmer {
+            0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+            40%  { opacity: 0.5; }
+            60%  { opacity: 0.5; }
+            100% { transform: translateX(300%) skewX(-15deg); opacity: 0; }
+        }
+        @keyframes liquidPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50%       { opacity: 1;   transform: scale(1.015); }
+        }
+
         .topbar {
             position: sticky; top: 0; z-index: 900;
-            background: rgba(7,9,14,0.88);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            /* Liquid glass base */
+            background: linear-gradient(135deg,
+                rgba(255,255,255,0.10) 0%,
+                rgba(255,255,255,0.05) 40%,
+                rgba(140,160,255,0.08) 70%,
+                rgba(255,255,255,0.07) 100%);
+            backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
+            -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
+            /* Prismatic border */
+            border: 1px solid transparent;
+            border-image: linear-gradient(135deg,
+                rgba(255,255,255,0.45) 0%,
+                rgba(160,180,255,0.3) 25%,
+                rgba(255,180,255,0.2) 50%,
+                rgba(130,220,255,0.3) 75%,
+                rgba(255,255,255,0.4) 100%) 1;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
             padding: 12px 20px;
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            position: sticky;
+            overflow: hidden;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.15) inset,
+                0 -1px 0 rgba(0,0,0,0.3) inset,
+                0 8px 32px rgba(0,0,0,0.4),
+                0 2px 8px rgba(99,102,241,0.15);
         }
+        /* Liquid glass moving shimmer sweep */
+        .topbar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -60%;
+            width: 45%; height: 100%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.08) 40%,
+                rgba(255,255,255,0.18) 50%,
+                rgba(255,255,255,0.08) 60%,
+                transparent 100%);
+            transform: skewX(-15deg);
+            animation: glassShimmer 4s ease-in-out infinite;
+            pointer-events: none; z-index: 0;
+        }
+        /* Prismatic colour breathing (top edge) */
+        .topbar::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg,
+                rgba(99,102,241,0.0) 0%,
+                rgba(99,102,241,0.8) 20%,
+                rgba(168,85,247,0.8) 40%,
+                rgba(6,182,212,0.8) 60%,
+                rgba(249,115,22,0.6) 80%,
+                rgba(99,102,241,0.0) 100%);
+            background-size: 200% 100%;
+            animation: glassPrism 3s linear infinite;
+            pointer-events: none; z-index: 1;
+        }
+        /* Make all topbar children sit above glass layers */
+        .topbar > * { position: relative; z-index: 2; }
 
         .brand { display: flex; align-items: center; gap: 12px; }
 
@@ -201,7 +294,7 @@
             font-family: 'Outfit', sans-serif; font-size: clamp(1.9rem, 6vw, 2.3rem);
             font-weight: 800; letter-spacing: -0.03em; line-height: 1;
         }
-        .balance-actions { display: flex; gap: 8px; padding: 12px 18px 18px; }
+        .balance-actions { display: flex; gap: 8px; padding: 10px 18px 6px; }
         .btn-primary {
             flex: 1; background: white; color: #000; border: none; border-radius: var(--r-full);
             padding: 10px 0; font-weight: 700; font-size: 0.875rem; cursor: pointer;
@@ -217,27 +310,433 @@
         }
         .btn-secondary:active { transform: scale(0.97); }
 
-        /* Cards carousel */
+        /* UPI Quick Actions grid (4 icon buttons) */
+        .upi-actions {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; padding: 8px 18px 14px;
+        }
+        .upi-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .upi-btn:active { transform: scale(0.92); }
+        .upi-btn-icon {
+            width: 46px; height: 46px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: box-shadow 0.2s;
+        }
+        .upi-btn:hover .upi-btn-icon { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        .upi-btn-label { font-size: 0.62rem; font-weight: 600; color: var(--text2); }
+
+        /* UPI Verified badge */
+        .upi-verified-bar {
+            display: flex; align-items: center; gap: 7px;
+            margin: 0 18px 10px; padding: 7px 12px;
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 10px;
+        }
+        .upi-verified-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+            box-shadow: 0 0 6px #10b981; flex-shrink: 0;
+            animation: blink 2s infinite;
+        }
+        .upi-verified-text { font-size: 0.68rem; font-weight: 600; color: #34d399; flex: 1; }
+        .upi-vpa-id { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text3); }
+
+        /* QR Scanner modal */
+        .qr-modal {
+            display: none; position: fixed; inset: 0; z-index: 9998;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            align-items: center; justify-content: center;
+        }
+        .qr-modal.open { display: flex; }
+        .qr-box {
+            background: #0d1117; border: 1px solid var(--border); border-radius: 24px;
+            padding: 24px; max-width: 320px; width: 90%; text-align: center;
+            animation: fadeup 0.3s cubic-bezier(.16,1,.3,1);
+        }
+        @keyframes fadeup { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .qr-viewfinder {
+            width: 200px; height: 200px; margin: 16px auto;
+            border-radius: 16px; background: #000; position: relative; overflow: hidden;
+        }
+        /* Animated scan line */
+        .qr-scanline {
+            position: absolute; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, #10b981, transparent);
+            animation: scanDown 2s ease-in-out infinite;
+        }
+        @keyframes scanDown {
+            0%   { top: 10%; opacity: 1; }
+            90%  { top: 90%; opacity: 1; }
+            100% { top: 10%; opacity: 0; }
+        }
+        /* Corner brackets */
+        .qr-corner { position: absolute; width: 24px; height: 24px; border-color: #10b981; border-style: solid; }
+        .qr-corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+        .qr-corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+        .qr-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+        .qr-corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+        /* Fake QR pattern */
+        .qr-pattern {
+            position: absolute; inset: 30px;
+            background-image:
+                repeating-linear-gradient(0deg,  rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 6px, transparent 6px, transparent 12px),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 6px, transparent 6px, transparent 12px);
+            border-radius: 4px;
+        }
+
+        /* ═══════════════════════════════════════════
+           REALISTIC CARD CAROUSEL
+        ═══════════════════════════════════════════ */
         .cards-scroll {
-            display: flex; gap: 12px; overflow-x: auto; padding: 0 18px 18px;
-            scrollbar-width: none;
+            display: flex; gap: 16px; overflow-x: auto; padding: 4px 18px 22px;
+            scrollbar-width: none; perspective: 1000px;
         }
         .cards-scroll::-webkit-scrollbar { display: none; }
 
+        /* Base card shell */
         .vcard {
-            flex-shrink: 0; width: 220px; height: 130px; border-radius: 18px;
-            padding: 14px; display: flex; flex-direction: column; justify-content: space-between;
-            cursor: pointer; transition: transform 0.2s;
+            flex-shrink: 0; width: 240px; height: 150px;
+            border-radius: 16px; cursor: pointer; position: relative;
+            overflow: hidden; transform-style: preserve-3d;
+            transition: transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s;
+            user-select: none;
         }
-        .vcard:active { transform: scale(0.97); }
-        .vcard.gold { background: linear-gradient(135deg, #f59e0b, #fbbf24, #d97706); color: #451a03; }
-        .vcard.emerald { background: linear-gradient(135deg, #059669, #10b981, #047857); color: #064e3b; }
-        .vcard.blue { background: linear-gradient(135deg, #2563eb, #3b82f6, #1d4ed8); color: white; }
-        .vcard-name { font-size: 0.75rem; font-weight: 700; }
-        .vcard-num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; letter-spacing: 0.06em; }
-        .vcard-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-        .vcard-bank { font-size: 0.65rem; font-weight: 600; }
-        .vcard-network { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.04em; }
+        .vcard:hover {
+            transform: perspective(600px) rotateY(-8deg) rotateX(4deg) scale(1.04);
+        }
+        .vcard:active { transform: scale(0.96); }
+
+        /* Shared shine overlay */
+        .vcard::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%, rgba(255,255,255,0.06) 100%);
+            border-radius: inherit; pointer-events: none; z-index: 10;
+            transition: opacity 0.3s;
+        }
+        .vcard:hover::after { opacity: 0.7; }
+
+        /* ── HDFC BANK Mastercard (dark navy) ── */
+        .vcard.hdfc {
+            background: linear-gradient(145deg, #0a1628 0%, #12275a 45%, #0d1f4a 70%, #091630 100%);
+            box-shadow: 0 8px 32px rgba(0,0,255,0.25), 0 2px 8px rgba(0,0,0,0.6);
+            color: #fff;
+        }
+        .vcard.hdfc::before {
+            content: '';
+            position: absolute; top: -30px; right: -30px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(30,60,120,0.5) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* ── Bank of America Visa (crimson red) ── */
+        .vcard.bofa {
+            background: linear-gradient(135deg, #8b0000 0%, #c0202a 25%, #a01020 50%, #8b0000 70%, #6b0010 100%);
+            box-shadow: 0 8px 32px rgba(180,0,30,0.4), 0 2px 8px rgba(0,0,0,0.5);
+            color: #fff;
+        }
+        .vcard.bofa::before {
+            content: '';
+            position: absolute;
+            top: -20px; left: 60px; width: 200px; height: 200px;
+            background: linear-gradient(135deg, transparent 40%, rgba(160,30,40,0.6) 60%, transparent 80%);
+            transform: rotate(-25deg);
+            pointer-events: none;
+        }
+        /* Diagonal stripe overlays like real BoA card */
+        .vcard.bofa .card-stripe1,
+        .vcard.bofa .card-stripe2 {
+            position: absolute; height: 300%; width: 60px;
+            background: rgba(255,255,255,0.05);
+            transform: rotate(-35deg);
+            top: -60px; pointer-events: none;
+        }
+        .vcard.bofa .card-stripe1 { left: 110px; }
+        .vcard.bofa .card-stripe2 { left: 160px; background: rgba(255,255,255,0.03); width: 90px; }
+
+        /* ── American Express Platinum (faithful silver/metal recreation) ── */
+        .vcard.amex {
+            background: linear-gradient(160deg,
+                #f0f0f0 0%, #e2e2e2 8%, #d4d4d4 18%,
+                #ececec 28%, #c8c8c8 40%, #e8e8e8 50%,
+                #d0d0d0 60%, #e6e6e6 72%, #bebebe 82%,
+                #e4e4e4 92%, #f2f2f2 100%);
+            box-shadow:
+                0 8px 32px rgba(0,0,0,0.30),
+                0 2px 8px rgba(0,0,0,0.25),
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                inset 0 -1px 0 rgba(0,0,0,0.08);
+            color: #111;
+        }
+        /* Subtle watermark grid */
+        .vcard.amex::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg,  transparent 0px, transparent 11px, rgba(150,150,150,0.07) 11px, rgba(150,150,150,0.07) 12px),
+                repeating-linear-gradient(90deg, transparent 0px, transparent 11px, rgba(150,150,150,0.07) 11px, rgba(150,150,150,0.07) 12px);
+            border-radius: inherit; pointer-events: none; z-index: 0;
+        }
+        /* Ornate thick black outer border — the defining Amex Platinum feature */
+        .vcard.amex .amex-border {
+            position: absolute; inset: 0;
+            border-radius: 16px;
+            border: 3px solid #0a0a0a;
+            pointer-events: none; z-index: 6;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+        }
+        /* Top ornate dot-row */
+        .vcard.amex .amex-border::before {
+            content: '· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·';
+            position: absolute; top: 1.5px; left: 5px; right: 5px;
+            font-size: 4px; letter-spacing: 1.5px; color: rgba(0,0,0,0.55);
+            overflow: hidden; white-space: nowrap; line-height: 1;
+        }
+        /* Bottom ornate dot-row */
+        .vcard.amex .amex-border::after {
+            content: '· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·';
+            position: absolute; bottom: 1.5px; left: 5px; right: 5px;
+            font-size: 4px; letter-spacing: 1.5px; color: rgba(0,0,0,0.55);
+            overflow: hidden; white-space: nowrap; line-height: 1;
+        }
+
+        /* ══════════════════════════════════════════════════════
+           HOLOGRAPHIC VIDEO EFFECT ON CARDS
+           Animated rainbow iridescent shimmer — real holo card
+        ══════════════════════════════════════════════════════ */
+
+        /* Keyframes */
+        @keyframes holoSweep {
+            0%   { background-position: 0% 50%; transform: translateX(-10%) rotate(-5deg); }
+            50%  { background-position: 100% 50%; transform: translateX(10%) rotate(5deg); }
+            100% { background-position: 0% 50%; transform: translateX(-10%) rotate(-5deg); }
+        }
+        @keyframes holoSparkle {
+            0%, 100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+            25%       { opacity: 0.6; transform: scale(1.1) rotate(90deg); }
+            50%       { opacity: 0.3; transform: scale(1) rotate(180deg); }
+            75%       { opacity: 0.7; transform: scale(1.15) rotate(270deg); }
+        }
+        @keyframes holoGlint {
+            0%   { left: -40%; opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { left: 140%; opacity: 0; }
+        }
+        @keyframes holoRipple {
+            0%   { background-position: 0% 0%; }
+            100% { background-position: 200% 200%; }
+        }
+
+        /* Holo rainbow layer (sits on top of card, pointer-events:none) */
+        .vcard .holo-layer {
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none; z-index: 8; overflow: hidden;
+            /* Animated prismatic rainbow gradient */
+            background: linear-gradient(
+                125deg,
+                rgba(255,0,128,0)    0%,
+                rgba(255,0,128,0.18) 10%,
+                rgba(255,165,0,0.22) 20%,
+                rgba(255,255,0,0.18) 30%,
+                rgba(0,255,100,0.20) 40%,
+                rgba(0,200,255,0.22) 50%,
+                rgba(100,0,255,0.20) 60%,
+                rgba(255,0,200,0.18) 70%,
+                rgba(255,100,0,0.15) 80%,
+                rgba(0,255,200,0.18) 90%,
+                rgba(255,0,128,0)    100%
+            );
+            background-size: 400% 400%;
+            mix-blend-mode: screen;
+            animation: holoSweep 4s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .vcard:hover .holo-layer { opacity: 1; }
+
+        /* Secondary texture layer — fine diagonal lines like real holo foil */
+        .vcard .holo-foil {
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none; z-index: 7; overflow: hidden;
+            background-image:
+                repeating-linear-gradient(
+                    60deg,
+                    rgba(255,255,255,0.0) 0px,
+                    rgba(255,255,255,0.0) 4px,
+                    rgba(255,255,255,0.04) 4px,
+                    rgba(255,255,255,0.04) 5px
+                ),
+                repeating-linear-gradient(
+                    -60deg,
+                    rgba(255,255,255,0.0) 0px,
+                    rgba(255,255,255,0.0) 4px,
+                    rgba(255,255,255,0.03) 4px,
+                    rgba(255,255,255,0.03) 5px
+                );
+            background-size: 10px 10px;
+            animation: holoRipple 6s linear infinite;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        /* Moving glint streak (always animated) */
+        .vcard .holo-glint {
+            position: absolute; top: -20%; left: -40%;
+            width: 30%; height: 140%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.0) 20%,
+                rgba(255,255,255,0.35) 50%,
+                rgba(255,255,255,0.0) 80%,
+                transparent 100%);
+            transform: skewX(-20deg);
+            pointer-events: none; z-index: 9;
+            animation: holoGlint 3.5s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .vcard:hover .holo-glint { opacity: 1; }
+
+        /* Sparkle dots */
+        .vcard .holo-sparks {
+            position: absolute; inset: 0; border-radius: inherit;
+            pointer-events: none; z-index: 10; overflow: hidden;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .vcard:hover .holo-sparks { opacity: 1; }
+        .spark {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            animation: holoSparkle 2s ease-in-out infinite;
+        }
+
+        /* On amex — extra silver foil shimmer */
+        .vcard.amex .holo-layer {
+            mix-blend-mode: color-dodge;
+            background: linear-gradient(
+                125deg,
+                rgba(200,200,255,0)    0%,
+                rgba(200,220,255,0.25) 15%,
+                rgba(255,255,255,0.3)  30%,
+                rgba(200,200,255,0.2)  50%,
+                rgba(255,230,200,0.25) 70%,
+                rgba(200,255,220,0.2)  85%,
+                rgba(200,200,255,0)    100%
+            );
+            background-size: 400% 400%;
+        }
+
+        /* ── Shared chip (EMV) ── */
+        .chip {
+            width: 34px; height: 26px; border-radius: 5px;
+            position: relative; flex-shrink: 0;
+        }
+        .chip.gold-chip {
+            background: linear-gradient(135deg, #c8961c 0%, #f0c844 30%, #d4a820 50%, #b8840e 70%, #e8b830 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .chip.silver-chip {
+            background: linear-gradient(135deg, #9ca3af 0%, #d1d5db 30%, #9ca3af 50%, #6b7280 70%, #d1d5db 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .chip::before {
+            content: '';
+            position: absolute; inset: 4px 3px;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(0,0,0,0.1));
+        }
+        .chip::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 60%; height: 1px;
+            background: rgba(0,0,0,0.2);
+            box-shadow: 0 -4px 0 rgba(0,0,0,0.15), 0 4px 0 rgba(0,0,0,0.15);
+        }
+
+        /* ── Card content layout ── */
+        .card-inner {
+            position: relative; z-index: 2;
+            width: 100%; height: 100%;
+            padding: 11px 13px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            box-sizing: border-box;
+        }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-mid { display: flex; flex-direction: column; gap: 2px; }
+        .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+
+        /* Card number */
+        .card-num {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.72rem; letter-spacing: 0.12em; font-weight: 500;
+        }
+        .card-num.dark { color: rgba(255,255,255,0.9); }
+        .card-num.light { color: #111; }
+
+        /* Cardholder & expiry */
+        .card-valid-label { font-size: 0.38rem; letter-spacing: 0.08em; opacity: 0.7; text-transform: uppercase; }
+        .card-valid { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; }
+        .card-holder { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+        .card-holder.dark { color: rgba(255,255,255,0.95); }
+        .card-holder.light { color: #111; }
+
+        /* Bank name labels */
+        .hdfc-label {
+            background: #005da6; color: #fff;
+            font-size: 0.55rem; font-weight: 800; letter-spacing: 0.06em;
+            padding: 2px 7px; border-radius: 3px;
+            border: 2px solid #fff;
+        }
+        .hdfc-logo-h {
+            width: 18px; height: 18px; background: #cc0000;
+            border-radius: 2px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.55rem; font-weight: 900; color: #fff; margin-right: 2px;
+        }
+        .bofa-label {
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.03em; color: #fff;
+            line-height: 1.1;
+        }
+        .amex-label {
+            font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; color: #111;
+            text-transform: uppercase;
+        }
+
+        /* Mastercard circles */
+        .mc-logo { display: flex; align-items: center; }
+        .mc-left { width: 18px; height: 18px; border-radius: 50%; background: #eb001b; }
+        .mc-right { width: 18px; height: 18px; border-radius: 50%; background: #f79e1b; margin-left: -7px; }
+        .mc-text { font-size: 0.38rem; color: rgba(255,255,255,0.8); margin-top: 1px; letter-spacing: 0.04em; text-align: center; }
+
+        /* Visa logo */
+        .visa-logo {
+            font-family: 'Times New Roman', serif; font-size: 1.2rem; font-weight: 900;
+            color: #fff; letter-spacing: -0.02em; font-style: italic;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Amex centurion silhouette (SVG inline) */
+        .amex-centurion {
+            width: 36px; height: 36px;
+        }
+
+        /* NFC contactless icon */
+        .nfc-icon { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+        .nfc-icon.dark-nfc { color: rgba(80,80,80,0.7); }
+
+        /* Member since badge (Amex) */
+        .amex-member {
+            font-size: 0.38rem; letter-spacing: 0.06em; color: #444;
+            border: 1px solid #888; padding: 1px 5px; border-radius: 3px;
+            text-transform: uppercase;
+        }
 
         /* Section header */
         .sec-hdr { display: flex; justify-content: space-between; align-items: center; padding: 0 18px; margin-bottom: 10px; }
@@ -280,13 +779,38 @@
         .tx-badge.safe { background: rgba(16,185,129,0.15); color: #34d399; }
         .tx-badge.block { background: rgba(239,68,68,0.18); color: #f87171; }
 
-        /* Phone tab dock */
+        /* Phone tab dock — Liquid Glass */
         .phone-dock {
             position: sticky; bottom: 0; display: flex; justify-content: space-around;
             align-items: center; padding: 10px 24px 14px;
-            background: rgba(10,14,24,0.92); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
+            /* Liquid glass */
+            background: linear-gradient(180deg,
+                rgba(255,255,255,0.08) 0%,
+                rgba(10,14,24,0.75) 40%,
+                rgba(10,14,24,0.88) 100%);
+            backdrop-filter: blur(28px) saturate(160%) brightness(1.05);
+            -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.05);
+            border-top: 1px solid rgba(255,255,255,0.12);
+            box-shadow:
+                0 -1px 0 rgba(255,255,255,0.08) inset,
+                0 -12px 32px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
+        /* Prismatic top-edge on dock */
+        .phone-dock::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(99,102,241,0.6) 25%,
+                rgba(6,182,212,0.6) 50%,
+                rgba(168,85,247,0.6) 75%,
+                transparent 100%);
+            background-size: 200% 100%;
+            animation: glassPrism 4s linear infinite reverse;
+            pointer-events: none;
+        }
+        .phone-dock > * { position: relative; z-index: 2; }
         .dock-btn {
             background: none; border: none; color: var(--text3); padding: 6px 14px;
             border-radius: 10px; cursor: pointer; display: flex; flex-direction: column;
@@ -320,15 +844,88 @@
         .cat-bar { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
 
         /* Accounts tab */
-        .accounts-list { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 12px; }
-        .acc-card { border-radius: 20px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
-        .acc-card.gold { background: linear-gradient(135deg, #f59e0b, #fbbf24, #d97706); color: #451a03; }
-        .acc-card.emerald { background: linear-gradient(135deg, #059669, #10b981, #047857); color: #064e3b; }
-        .acc-top { display: flex; justify-content: space-between; align-items: center; }
-        .acc-name { font-size: 0.85rem; font-weight: 700; }
-        .acc-tag { font-size: 0.65rem; background: rgba(0,0,0,0.15); padding: 2px 8px; border-radius: 999px; font-weight: 600; }
-        .acc-num { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; opacity: 0.8; }
-        .acc-bal { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 800; }
+        .accounts-list { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 16px; }
+
+        /* Realistic full-width account cards */
+        .acc-card {
+            border-radius: 20px; padding: 18px 20px;
+            display: flex; flex-direction: column; justify-content: space-between; gap: 14px;
+            position: relative; overflow: hidden;
+            cursor: pointer; transform-style: preserve-3d;
+            transition: transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s;
+            min-height: 140px;
+        }
+        .acc-card:hover { transform: perspective(800px) rotateX(3deg) scale(1.02); }
+        .acc-card > * { position: relative; z-index: 2; }
+
+        /* Shared shine overlay */
+        .acc-card::after {
+            content: '';
+            position: absolute; inset: 0; border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+            pointer-events: none; z-index: 1;
+        }
+
+        /* ── HDFC-style dark navy account card ── */
+        .acc-card.hdfc-acc {
+            background: linear-gradient(145deg, #0a1628 0%, #12275a 45%, #0d1f4a 70%, #091630 100%);
+            box-shadow: 0 10px 40px rgba(0,30,120,0.35), 0 2px 8px rgba(0,0,0,0.6);
+            color: #fff;
+        }
+        .acc-card.hdfc-acc::before {
+            content: '';
+            position: absolute; top: -40px; right: -40px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(30,60,140,0.4) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 0;
+        }
+
+        /* ── BoA-style crimson account card ── */
+        .acc-card.bofa-acc {
+            background: linear-gradient(135deg, #8b0000 0%, #c0202a 25%, #a01020 50%, #8b0000 70%, #6b0010 100%);
+            box-shadow: 0 10px 40px rgba(180,0,30,0.35), 0 2px 8px rgba(0,0,0,0.5);
+            color: #fff;
+        }
+        .acc-card.bofa-acc::before {
+            content: '';
+            position: absolute; top: -30px; left: 80px; width: 260px; height: 260px;
+            background: linear-gradient(135deg, transparent 40%, rgba(160,30,40,0.5) 60%, transparent 80%);
+            transform: rotate(-25deg); pointer-events: none; z-index: 0;
+        }
+
+        /* ── Amex-style silver account card ── */
+        .acc-card.amex-acc {
+            background: linear-gradient(160deg,
+                #f0f0f0 0%, #e2e2e2 8%, #d4d4d4 18%,
+                #ececec 28%, #c8c8c8 40%, #e8e8e8 50%,
+                #d0d0d0 60%, #e6e6e6 72%, #bebebe 82%,
+                #e4e4e4 92%, #f2f2f2 100%);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.06);
+            color: #111; min-height: 200px;
+        }
+        .acc-card.amex-acc::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(180,180,180,0.07) 18px, rgba(180,180,180,0.07) 19px),
+                        repeating-linear-gradient(0deg,  transparent, transparent 18px, rgba(180,180,180,0.07) 18px, rgba(180,180,180,0.07) 19px);
+            border-radius: inherit; pointer-events: none; z-index: 0;
+        }
+
+        /* Holo effect on acc-cards (same as carousel) */
+        .acc-card .holo-layer,
+        .acc-card .holo-foil,
+        .acc-card .holo-glint,
+        .acc-card .holo-sparks { border-radius: 20px; }
+
+        /* Account card inner layout */
+        .acc-top  { display: flex; justify-content: space-between; align-items: flex-start; }
+        .acc-mid  { display: flex; align-items: center; gap: 10px; }
+        .acc-name { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.01em; }
+        .acc-tag  { font-size: 0.6rem; background: rgba(255,255,255,0.15); padding: 2px 9px; border-radius: 999px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); }
+        .acc-tag.dark-tag { background: rgba(0,0,0,0.12); border-color: rgba(0,0,0,0.15); color: #333; }
+        .acc-num  { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.14em; opacity: 0.85; }
+        .acc-bal  { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; }
+        .acc-bal-label { font-size: 0.6rem; opacity: 0.7; margin-bottom: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
 
         /* ================================================================
            SEND PAYMENT SHEET (Full-screen overlay inside the card)
@@ -395,7 +992,7 @@
            OUTCOME MODALS (full viewport)
         ================================================================ */
         .outcome-modal {
-            position: fixed; inset: 0; z-index: 950;
+            position: fixed; inset: 0; z-index: 9998;
             display: none; flex-direction: column; align-items: center; justify-content: center;
             padding: 30px 24px env(safe-area-inset-bottom, 24px);
             text-align: center; animation: popin 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
@@ -530,7 +1127,32 @@
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
         .hide-mobile { display: block; }
         @media (max-width: 999px) { .hide-mobile { display: none !important; } }
-    </style>
+    
+        /* Add Contact Modal */
+        .add-contact-modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;}
+        .add-contact-modal.open{display:flex;}
+        .ac-box{background:#fff;border-radius:24px;padding:28px 24px 20px;width:min(340px,90vw);box-shadow:0 24px 60px rgba(0,0,0,0.18);}
+        .ac-box h3{font-size:1.1rem;font-weight:700;color:#1d1d1f;margin:0 0 18px;}
+        .ac-box input{width:100%;box-sizing:border-box;border:1px solid rgba(0,0,0,0.12);border-radius:12px;padding:11px 14px;font-size:.95rem;font-family:inherit;color:#1d1d1f;background:#f5f5f7;margin-bottom:12px;outline:none;}
+        .ac-box input:focus{border-color:#007aff;background:#fff;}
+        .ac-row{display:flex;gap:10px;margin-top:4px;}
+        .ac-cancel{flex:1;padding:12px;border-radius:12px;border:1px solid rgba(0,0,0,.1);background:#f5f5f7;color:#1d1d1f;font-size:.95rem;font-weight:600;cursor:pointer;}
+        .ac-save{flex:1;padding:12px;border-radius:12px;border:none;background:#007aff;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;}
+        /* Payment Method Pills */
+        .pay-method-section{padding:0 0 10px;}
+        .pay-method-label{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+        .pay-method-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+        .pay-method-scroll::-webkit-scrollbar{display:none;}
+        .pay-pill{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:1.5px solid rgba(0,0,0,.10);background:rgba(255,255,255,.90);cursor:pointer;white-space:nowrap;transition:all .15s;min-width:fit-content;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+        .pay-pill.selected{border-color:#007aff;background:rgba(0,122,255,.08);}
+        .pay-pill-icon{font-size:1.1rem;}
+        .pay-pill-name{font-size:.82rem;font-weight:600;color:#1d1d1f;}
+        .pay-pill-sub{font-size:.7rem;color:var(--text2);}
+        .pay-pill.selected .pay-pill-name{color:#007aff;}
+        .rec-item-new{animation:popIn .3s ease;}
+        @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+        </style>
 </head>
 <body>
 
@@ -601,41 +1223,246 @@
             <div class="balance-row">
                 <div>
                     <div class="balance-label">Total UPI Balance</div>
-                    <div class="balance-amount">₹78,540<span style="font-size:1.5rem;color:var(--text2)">.43</span></div>
+                    <div class="balance-amount" id="mainBalance">₹78,540<span style="font-size:1.5rem;color:var(--text2)">.43</span></div>
                 </div>
             </div>
-            <div class="balance-actions">
-                <button class="btn-primary" onclick="openSend('Pavlo','pavlo@upi',286,false)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg> Send
+            <!-- UPI Verified Bar -->
+            <div class="upi-verified-bar">
+                <div class="upi-verified-dot"></div>
+                <div style="flex:1;">
+                    <div class="upi-verified-text">✓ UPI ID Verified</div>
+                    <div class="upi-vpa-id">avijit@okhdfc · avijit@ybl</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+
+            <!-- 4 UPI Quick Action Buttons -->
+            <div class="upi-actions">
+                <button class="upi-btn" onclick="openSend('Pavlo','pavlo@upi',286,false)">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+                    </div>
+                    <span class="upi-btn-label">Send</span>
                 </button>
-                <button class="btn-secondary" onclick="alert('UPI Request Link generated: upi://pay?pa=avijit@okhdfc')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="8 7 3 12 8 17"/><line x1="3" y1="12" x2="21" y2="12"/></svg> Request
+                <button class="upi-btn" onclick="showRequestModal()">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><polyline points="8 7 3 12 8 17"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                    </div>
+                    <span class="upi-btn-label">Request</span>
+                </button>
+                <button class="upi-btn" onclick="openQRScanner()">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/>
+                            <rect x="3" y="15" width="6" height="6" rx="1"/>
+                            <line x1="15" y1="15" x2="17" y2="15"/><line x1="21" y1="15" x2="21" y2="15.01"/>
+                            <line x1="15" y1="21" x2="21" y2="21"/><line x1="21" y1="18" x2="15" y2="18"/>
+                        </svg>
+                    </div>
+                    <span class="upi-btn-label">Scan QR</span>
+                </button>
+                <button class="upi-btn" onclick="exitApp()">
+                    <div class="upi-btn-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </div>
+                    <span class="upi-btn-label">Exit</span>
                 </button>
             </div>
 
-            <!-- Cards Carousel -->
+            <!-- Cards Carousel — Realistic card designs -->
             <div class="cards-scroll">
-                <div class="vcard gold">
-                    <div class="vcard-name">SBI RuPay Credit on UPI</div>
-                    <div class="vcard-num">•••• 7642</div>
-                    <div class="vcard-bottom"><span class="vcard-bank">STATE BANK OF INDIA</span><span class="vcard-network">RuPay</span></div>
+
+                <!-- ① HDFC Bank Mastercard (dark navy) -->
+                <div class="vcard hdfc" title="HDFC Bank Mastercard">
+                    <!-- Holographic layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:20%;left:30%;animation-delay:0s;animation-duration:1.8s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:60%;left:70%;animation-delay:0.5s;animation-duration:2.2s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:40%;left:55%;animation-delay:0.9s;animation-duration:1.5s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:75%;left:20%;animation-delay:1.3s;animation-duration:2.0s;"></div>
+                        <div class="spark" style="width:4px;height:4px;top:15%;left:80%;animation-delay:0.3s;animation-duration:1.7s;"></div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-top">
+                            <div style="display:flex;align-items:center;gap:4px;">
+                                <div class="hdfc-logo-h">✦</div>
+                                <span style="display:flex;flex-direction:column;line-height:1;">
+                                    <span class="hdfc-label">HDFC BANK</span>
+                                </span>
+                            </div>
+                            <div class="chip gold-chip"></div>
+                        </div>
+                        <div class="card-mid">
+                            <div class="card-num dark">1234  5678  9012  3456</div>
+                            <div style="display:flex;gap:12px;align-items:flex-end;margin-top:2px;">
+                                <div>
+                                    <div class="card-valid-label" style="color:rgba(255,255,255,0.6);">सेवा समाप्ति / VALID THRU</div>
+                                    <div class="card-valid" style="color:#fff;">12/26</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-bottom">
+                            <div>
+                                <div class="card-holder dark">AVIJIT ADITYA</div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:center;">
+                                <div class="mc-logo">
+                                    <div class="mc-left"></div>
+                                    <div class="mc-right"></div>
+                                </div>
+                                <div class="mc-text">mastercard</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="vcard emerald">
-                    <div class="vcard-name">HDFC Millennia UPI</div>
-                    <div class="vcard-num">•••• 5123</div>
-                    <div class="vcard-bottom"><span class="vcard-bank">HDFC BANK</span><span class="vcard-network">UPI 2.0</span></div>
+
+                <!-- ② Bank of America Visa (crimson red) -->
+                <div class="vcard bofa" title="Bank of America Visa">
+                    <div class="card-stripe1"></div>
+                    <div class="card-stripe2"></div>
+                    <!-- Holographic layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:25%;left:40%;animation-delay:0.2s;animation-duration:2.0s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:65%;left:60%;animation-delay:0.7s;animation-duration:1.6s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:45%;left:25%;animation-delay:1.1s;animation-duration:2.3s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:80%;left:75%;animation-delay:0.4s;animation-duration:1.9s;"></div>
+                        <div class="spark" style="width:4px;height:4px;top:10%;left:65%;animation-delay:1.5s;animation-duration:1.4s;"></div>
+                    </div>
+                    <div class="card-inner">
+                        <div class="card-top">
+                            <div class="bofa-label">Bank of America<br><span style="font-size:0.5rem;font-weight:600;opacity:0.9;">BankAmericard CASH REWARDS™</span></div>
+                            <div class="chip silver-chip"></div>
+                        </div>
+                        <div class="card-mid">
+                            <div class="card-num dark">4000  1234  5678  9123</div>
+                            <div style="display:flex;gap:12px;align-items:flex-end;margin-top:2px;">
+                                <div>
+                                    <div class="card-valid-label" style="color:rgba(255,255,255,0.6);">VALID THRU</div>
+                                    <div class="card-valid" style="color:#fff;">08/28</div>
+                                </div>
+                                <div style="font-size:0.45rem;color:rgba(255,255,255,0.5);align-self:flex-start;margin-top:1px;">4000</div>
+                            </div>
+                        </div>
+                        <div class="card-bottom">
+                            <div class="card-holder dark">AVIJIT ADITYA</div>
+                            <div class="visa-logo">VISA</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="vcard blue">
-                    <div class="vcard-name">ICICI Platinum Savings</div>
-                    <div class="vcard-num">•••• 3413</div>
-                    <div class="vcard-bottom"><span class="vcard-bank">ICICI BANK</span><span class="vcard-network">UPI</span></div>
+
+                <!-- ③ American Express Platinum (silver metal) -->
+                <div class="vcard amex" title="American Express Platinum">
+                    <div class="amex-border"></div>
+                    <!-- Holographic layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:5px;height:5px;top:30%;left:45%;animation-delay:0.1s;animation-duration:1.9s;background:radial-gradient(circle,rgba(180,180,255,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:4px;height:4px;top:70%;left:55%;animation-delay:0.6s;animation-duration:2.1s;background:radial-gradient(circle,rgba(255,220,180,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:3px;height:3px;top:50%;left:30%;animation-delay:1.0s;animation-duration:1.7s;background:radial-gradient(circle,rgba(180,255,220,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:6px;height:6px;top:20%;left:70%;animation-delay:0.4s;animation-duration:2.4s;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,transparent 60%);"></div>
+                        <div class="spark" style="width:3px;height:3px;top:85%;left:35%;animation-delay:1.4s;animation-duration:1.5s;background:radial-gradient(circle,rgba(220,180,255,0.9) 0%,transparent 70%);"></div>
+                    </div>
+                    <div class="card-inner" style="padding:9px 11px;">
+
+                        <!-- ROW 1: AMERICAN EXPRESS centered title -->
+                        <div style="text-align:center;position:relative;z-index:3;">
+                            <div style="font-family:'Outfit',sans-serif;font-size:0.68rem;font-weight:900;letter-spacing:0.14em;color:#111;text-transform:uppercase;line-height:1;">AMERICAN EXPRESS</div>
+                        </div>
+
+                        <!-- ROW 2: chip left | Centurion oval center | NFC+member right -->
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;flex:1;margin:4px 0;">
+                            <!-- Silver EMV chip -->
+                            <div class="chip silver-chip" style="flex-shrink:0;"></div>
+
+                            <!-- Centurion oval medallion -->
+                            <div style="flex:1;display:flex;justify-content:center;">
+                                <div style="position:relative;width:52px;height:58px;">
+                                    <!-- Oval frame -->
+                                    <svg viewBox="0 0 60 68" width="52" height="58" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Oval border -->
+                                        <ellipse cx="30" cy="34" rx="27" ry="31" fill="none" stroke="#888" stroke-width="1.5"/>
+                                        <ellipse cx="30" cy="34" rx="25" ry="29" fill="url(#centurionFill)" stroke="#aaa" stroke-width="0.5"/>
+                                        <defs>
+                                            <radialGradient id="centurionFill" cx="40%" cy="35%" r="65%">
+                                                <stop offset="0%" stop-color="#e0e0e0"/>
+                                                <stop offset="100%" stop-color="#b0b0b0"/>
+                                            </radialGradient>
+                                        </defs>
+                                        <!-- Centurion warrior silhouette — head with helmet -->
+                                        <g opacity="0.75" transform="translate(30,34)">
+                                            <!-- Helmet plume -->
+                                            <path d="M-2,-24 Q-4,-30 0,-33 Q4,-30 2,-24" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                            <path d="M-5,-22 Q-10,-28 -8,-32 Q-5,-29 -3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                            <path d="M5,-22 Q10,-28 8,-32 Q5,-29 3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                            <!-- Helmet crest -->
+                                            <path d="M-6,-20 L6,-20 L7,-17 Q0,-15 -7,-17 Z" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                            <!-- Head -->
+                                            <ellipse cx="0" cy="-10" rx="6" ry="7.5" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                            <!-- Face profile (looking right) -->
+                                            <path d="M0,-14 Q5,-13 6,-10 Q6,-6 3,-4 Q0,-3 -1,-5 Q-3,-8 -2,-14 Z" fill="#888" stroke="#666" stroke-width="0.3"/>
+                                            <!-- Eye -->
+                                            <ellipse cx="3" cy="-10" rx="1" ry="1" fill="#444"/>
+                                            <!-- Nose -->
+                                            <path d="M5,-8 Q7,-7 6,-5" stroke="#666" stroke-width="0.5" fill="none"/>
+                                            <!-- Chin/jaw -->
+                                            <path d="M-1,-5 Q2,-2 4,-3 Q5,-1 2,2" stroke="#777" stroke-width="0.5" fill="none"/>
+                                            <!-- Neck -->
+                                            <rect x="-2" y="2" width="4" height="4" rx="1" fill="#999" stroke="#777" stroke-width="0.4"/>
+                                            <!-- Shoulder armour -->
+                                            <path d="M-8,6 Q-5,4 -2,6 L-2,14 Q-5,15 -9,13 Z" fill="#888" stroke="#666" stroke-width="0.5"/>
+                                            <path d="M2,6 Q5,4 8,6 L9,13 Q5,15 2,14 Z" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                            <!-- Chest -->
+                                            <path d="M-8,6 Q0,8 8,6 L9,20 Q0,22 -9,20 Z" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+                                            <!-- Armour lines -->
+                                            <line x1="-7" y1="10" x2="8" y2="10" stroke="#888" stroke-width="0.4"/>
+                                            <line x1="-8" y1="14" x2="8" y2="14" stroke="#888" stroke-width="0.4"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- NFC + Member Since (right side) -->
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
+                                <div style="display:flex;align-items:center;gap:2px;">
+                                    <!-- Contactless symbol -->
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 1 Q20 5 20 12 Q20 19 12 23" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                        <path d="M12 5 Q17 8 17 12 Q17 16 12 19" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                        <path d="M12 9 Q14 10.5 14 12 Q14 13.5 12 15" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#222;font-weight:600;letter-spacing:0.06em;">7997</span>
+                                </div>
+                                <!-- Member Since badge -->
+                                <div style="border:1px solid #888;border-radius:2px;padding:1px 4px;text-align:center;">
+                                    <div style="font-size:0.32rem;letter-spacing:0.07em;color:#555;text-transform:uppercase;font-weight:700;line-height:1.3;">MEMBER SINCE</div>
+                                    <div style="font-size:0.5rem;color:#333;font-family:'JetBrains Mono',monospace;font-weight:600;text-align:center;">09</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROW 3: Cardholder name left | © AMEX right -->
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;color:#111;text-transform:uppercase;">AVIJIT</div>
+                            <div style="font-size:0.38rem;color:#555;font-weight:700;letter-spacing:0.06em;">© AMEX</div>
+                        </div>
+
+                    </div>
                 </div>
+
             </div>
 
             <!-- Recipients -->
             <div class="sec-hdr">
                 <span class="sec-title">Quick Transfer</span>
-                <button class="sec-link">+ Add</button>
+                <button class="sec-link" onclick="openAddContact()">+ Add</button>
             </div>
             <div class="recipients-scroll">
                 <div class="rec-item" onclick="openSend('Pavlo','pavlo@upi',286,false)">
@@ -707,7 +1534,7 @@
                 <div class="canvas-overlay">
                     <div>
                         <div style="font-size:0.68rem;color:rgba(255,255,255,0.65)">PaySafe Balance</div>
-                        <div class="canvas-bal">₹78,540.43</div>
+                        <div class="canvas-bal" id="cardBalance">₹78,540.43</div>
                     </div>
                     <div style="text-align:right">
                         <div style="font-size:0.68rem;color:rgba(255,255,255,0.65)">Fraud Saved</div>
@@ -735,22 +1562,192 @@
         <div class="tab-page" id="tabAccounts">
             <div style="padding:14px 18px 12px;font-size:1rem;font-weight:700;">Linked Accounts</div>
             <div class="accounts-list">
-                <div class="acc-card gold">
-                    <div class="acc-top"><span class="acc-name">State Bank of India</span><span class="acc-tag">Primary VPA</span></div>
-                    <div class="acc-num">•••• •••• •••• 7642</div>
-                    <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end">
-                        <div><div style="font-size:0.65rem;opacity:0.8">Account Balance</div><div class="acc-bal">₹52,140.20</div></div>
-                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.9rem;letter-spacing:0.04em">RuPay</div>
+
+                <!-- HDFC Bank Mastercard Account -->
+                <div class="acc-card hdfc-acc">
+                    <!-- Holo layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:25%;left:35%;animation-delay:0.3s;animation-duration:1.9s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:70%;left:65%;animation-delay:0.8s;animation-duration:2.2s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:50%;left:80%;animation-delay:1.2s;animation-duration:1.6s;"></div>
+                    </div>
+                    <!-- Card chip top-left -->
+                    <div class="acc-top">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div class="chip gold-chip" style="width:30px;height:22px;"></div>
+                            <div>
+                                <div style="display:flex;align-items:center;gap:5px;">
+                                    <div class="hdfc-logo-h" style="width:16px;height:16px;font-size:0.45rem;">✦</div>
+                                    <span class="hdfc-label" style="font-size:0.5rem;padding:1px 5px;">HDFC BANK</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                            <span class="acc-tag">Primary VPA</span>
+                            <div style="display:flex;flex-direction:column;align-items:center;">
+                                <div class="mc-logo" style="transform:scale(0.85);transform-origin:right;">
+                                    <div class="mc-left" style="width:16px;height:16px;"></div>
+                                    <div class="mc-right" style="width:16px;height:16px;margin-left:-6px;"></div>
+                                </div>
+                                <div class="mc-text">mastercard</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="acc-num">1234  5678  9012  3456</div>
+                        <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);letter-spacing:0.04em;margin-top:2px;">avijit@okhdfc</div>
+                    </div>
+                    <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end;">
+                        <div>
+                            <div class="acc-bal-label" style="color:rgba(255,255,255,0.65);">Account Balance</div>
+                            <div class="acc-bal">₹52,140.20</div>
+                        </div>
+                        <div>
+                            <div class="acc-bal-label" style="color:rgba(255,255,255,0.65);text-align:right;">AVIJIT ADITYA</div>
+                            <div style="font-size:0.55rem;color:rgba(255,255,255,0.4);text-align:right;">VALID THRU 12/26</div>
+                        </div>
                     </div>
                 </div>
-                <div class="acc-card emerald">
-                    <div class="acc-top"><span class="acc-name">HDFC Bank Salary</span><span class="acc-tag">Linked UPI</span></div>
-                    <div class="acc-num">•••• •••• •••• 5123</div>
-                    <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end">
-                        <div><div style="font-size:0.65rem;opacity:0.8">Account Balance</div><div class="acc-bal">₹26,400.23</div></div>
-                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.9rem">HDFC</div>
+
+                <!-- Bank of America Visa Account -->
+                <div class="acc-card bofa-acc">
+                    <!-- Diagonal stripes -->
+                    <div style="position:absolute;top:-60px;left:110px;width:60px;height:300%;background:rgba(255,255,255,0.05);transform:rotate(-35deg);pointer-events:none;z-index:0;"></div>
+                    <div style="position:absolute;top:-60px;left:170px;width:90px;height:300%;background:rgba(255,255,255,0.03);transform:rotate(-35deg);pointer-events:none;z-index:0;"></div>
+                    <!-- Holo layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:4px;height:4px;top:30%;left:50%;animation-delay:0.5s;animation-duration:2.0s;"></div>
+                        <div class="spark" style="width:3px;height:3px;top:65%;left:30%;animation-delay:1.0s;animation-duration:1.7s;"></div>
+                        <div class="spark" style="width:5px;height:5px;top:20%;left:75%;animation-delay:0.2s;animation-duration:2.4s;"></div>
+                    </div>
+                    <div class="acc-top">
+                        <div>
+                            <div class="bofa-label" style="font-size:0.68rem;">Bank of America</div>
+                            <div style="font-size:0.46rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:1px;">BankAmericard CASH REWARDS™</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                            <span class="acc-tag">Linked UPI</span>
+                            <div class="chip silver-chip" style="width:30px;height:22px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="acc-num">4000  1234  5678  9123</div>
+                        <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);letter-spacing:0.04em;margin-top:2px;">avijit@okbofa</div>
+                    </div>
+                    <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end;">
+                        <div>
+                            <div class="acc-bal-label" style="color:rgba(255,255,255,0.65);">Account Balance</div>
+                            <div class="acc-bal">₹26,400.23</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                            <div style="font-size:0.55rem;color:rgba(255,255,255,0.65);">AVIJIT ADITYA</div>
+                            <div class="visa-logo" style="font-size:1rem;">VISA</div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- American Express Platinum Account -->
+                <div class="acc-card amex-acc">
+                    <!-- Ornate black outer border -->
+                    <div style="position:absolute;inset:0;border-radius:20px;border:3.5px solid #0a0a0a;pointer-events:none;z-index:6;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);"></div>
+                    <!-- Dot border pattern top -->
+                    <div style="position:absolute;top:4px;left:8px;right:8px;font-size:4px;letter-spacing:1.5px;color:rgba(0,0,0,0.5);overflow:hidden;white-space:nowrap;z-index:7;line-height:1;pointer-events:none;">· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·</div>
+                    <!-- Dot border pattern bottom -->
+                    <div style="position:absolute;bottom:4px;left:8px;right:8px;font-size:4px;letter-spacing:1.5px;color:rgba(0,0,0,0.5);overflow:hidden;white-space:nowrap;z-index:7;line-height:1;pointer-events:none;">· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·</div>
+                    <!-- Holo layers -->
+                    <div class="holo-foil"></div>
+                    <div class="holo-layer"></div>
+                    <div class="holo-glint"></div>
+                    <div class="holo-sparks">
+                        <div class="spark" style="width:5px;height:5px;top:25%;left:40%;animation-delay:0.4s;animation-duration:2.1s;background:radial-gradient(circle,rgba(180,180,255,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:4px;height:4px;top:70%;left:70%;animation-delay:0.9s;animation-duration:1.8s;background:radial-gradient(circle,rgba(255,220,180,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:6px;height:6px;top:45%;left:85%;animation-delay:0.1s;animation-duration:2.5s;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,transparent 60%);"></div>
+                        <div class="spark" style="width:3px;height:3px;top:60%;left:20%;animation-delay:1.2s;animation-duration:1.6s;background:radial-gradient(circle,rgba(180,255,220,0.9) 0%,transparent 70%);"></div>
+                    </div>
+
+                    <!-- AMERICAN EXPRESS header centered -->
+                    <div style="text-align:center;position:relative;z-index:3;padding-top:4px;">
+                        <div style="font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:900;letter-spacing:0.14em;color:#0a0a0a;text-transform:uppercase;">AMERICAN EXPRESS</div>
+                        <div style="display:flex;justify-content:flex-end;margin-top:-16px;">
+                            <span class="acc-tag dark-tag">Platinum Card</span>
+                        </div>
+                    </div>
+
+                    <!-- Middle: chip | Centurion | NFC+member -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:3;">
+                        <!-- Chip -->
+                        <div class="chip silver-chip" style="width:34px;height:26px;flex-shrink:0;"></div>
+
+                        <!-- Centurion oval -->
+                        <div style="flex:1;display:flex;justify-content:center;">
+                            <svg viewBox="0 0 60 68" width="68" height="76" xmlns="http://www.w3.org/2000/svg">
+                                <ellipse cx="30" cy="34" rx="27" ry="31" fill="none" stroke="#888" stroke-width="1.5"/>
+                                <ellipse cx="30" cy="34" rx="25" ry="29" fill="url(#centurionFill2)" stroke="#aaa" stroke-width="0.5"/>
+                                <defs>
+                                    <radialGradient id="centurionFill2" cx="40%" cy="35%" r="65%">
+                                        <stop offset="0%" stop-color="#e0e0e0"/>
+                                        <stop offset="100%" stop-color="#b0b0b0"/>
+                                    </radialGradient>
+                                </defs>
+                                <g opacity="0.78" transform="translate(30,34)">
+                                    <path d="M-2,-24 Q-4,-30 0,-33 Q4,-30 2,-24" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                    <path d="M-5,-22 Q-10,-28 -8,-32 Q-5,-29 -3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                    <path d="M5,-22 Q10,-28 8,-32 Q5,-29 3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
+                                    <path d="M-6,-20 L6,-20 L7,-17 Q0,-15 -7,-17 Z" fill="#555" stroke="#444" stroke-width="0.4"/>
+                                    <ellipse cx="0" cy="-10" rx="6" ry="7.5" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                    <path d="M0,-14 Q5,-13 6,-10 Q6,-6 3,-4 Q0,-3 -1,-5 Q-3,-8 -2,-14 Z" fill="#888" stroke="#666" stroke-width="0.3"/>
+                                    <ellipse cx="3" cy="-10" rx="1" ry="1" fill="#444"/>
+                                    <path d="M5,-8 Q7,-7 6,-5" stroke="#666" stroke-width="0.5" fill="none"/>
+                                    <path d="M-1,-5 Q2,-2 4,-3 Q5,-1 2,2" stroke="#777" stroke-width="0.5" fill="none"/>
+                                    <rect x="-2" y="2" width="4" height="4" rx="1" fill="#999" stroke="#777" stroke-width="0.4"/>
+                                    <path d="M-8,6 Q-5,4 -2,6 L-2,14 Q-5,15 -9,13 Z" fill="#888" stroke="#666" stroke-width="0.5"/>
+                                    <path d="M2,6 Q5,4 8,6 L9,13 Q5,15 2,14 Z" fill="#999" stroke="#777" stroke-width="0.5"/>
+                                    <path d="M-8,6 Q0,8 8,6 L9,20 Q0,22 -9,20 Z" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+                                    <line x1="-7" y1="10" x2="8" y2="10" stroke="#888" stroke-width="0.4"/>
+                                    <line x1="-8" y1="14" x2="8" y2="14" stroke="#888" stroke-width="0.4"/>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- NFC + Member Since -->
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                            <div style="display:flex;align-items:center;gap:3px;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 1 Q20 5 20 12 Q20 19 12 23" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                    <path d="M12 5 Q17 8 17 12 Q17 16 12 19" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                    <path d="M12 9 Q14 10.5 14 12 Q14 13.5 12 15" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                </svg>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#222;font-weight:600;letter-spacing:0.06em;">7997</span>
+                            </div>
+                            <div style="border:1px solid #888;border-radius:3px;padding:2px 6px;text-align:center;">
+                                <div style="font-size:0.35rem;letter-spacing:0.08em;color:#555;text-transform:uppercase;font-weight:700;line-height:1.4;">MEMBER SINCE</div>
+                                <div style="font-size:0.58rem;color:#333;font-family:'JetBrains Mono',monospace;font-weight:700;text-align:center;">09</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: account number, balance, name -->
+                    <div style="position:relative;z-index:3;">
+                        <div class="acc-num" style="color:#1a1a1a;letter-spacing:0.14em;margin-bottom:6px;">3782  822463  10005</div>
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+                            <div>
+                                <div class="acc-bal-label" style="color:rgba(0,0,0,0.5);">Available Credit</div>
+                                <div class="acc-bal" style="color:#111;">₹1,20,000</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;color:#111;text-transform:uppercase;">AVIJIT</div>
+                                <div style="font-size:0.42rem;color:#666;font-weight:700;letter-spacing:0.06em;margin-top:1px;">© AMEX</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -906,7 +1903,7 @@
 
     <div class="amount-display">
         <div class="amount-val" id="amtDisplay">₹ 286</div>
-        <div class="amount-sub">Available: ₹ 78,540.43</div>
+        <div class="amount-sub" id="availableBalance">Available: ₹ 78,540.43</div>
     </div>
 
     <div class="arith-row">
@@ -916,6 +1913,28 @@
         <button class="arith-btn" onclick="arith('÷')">÷</button>
     </div>
 
+    <!-- Payment Method Selector -->
+    <div class="pay-method-section">
+        <div class="pay-method-label">Pay using</div>
+        <div class="pay-method-scroll" id="payMethodScroll">
+            <div class="pay-pill selected" data-method="upi" onclick="selectPayMethod(this)">
+                <span class="pay-pill-icon">🇮🇳</span>
+                <div><div class="pay-pill-name">UPI</div><div class="pay-pill-sub">avijit@okhdfcbank</div></div>
+            </div>
+            <div class="pay-pill" data-method="hdfc" onclick="selectPayMethod(this)">
+                <span class="pay-pill-icon">🏦</span>
+                <div><div class="pay-pill-name">HDFC Card</div><div class="pay-pill-sub">•••• 3456</div></div>
+            </div>
+            <div class="pay-pill" data-method="boa" onclick="selectPayMethod(this)">
+                <span class="pay-pill-icon">🔴</span>
+                <div><div class="pay-pill-name">Bank of America</div><div class="pay-pill-sub">•••• 9123</div></div>
+            </div>
+            <div class="pay-pill" data-method="amex" onclick="selectPayMethod(this)">
+                <span class="pay-pill-icon">⬛</span>
+                <div><div class="pay-pill-name">Amex Platinum</div><div class="pay-pill-sub">•••• 7997</div></div>
+            </div>
+        </div>
+    </div>
     <div class="keypad">
         <button class="key" onclick="kp('1')">1</button><button class="key" onclick="kp('2')">2</button><button class="key" onclick="kp('3')">3</button>
         <button class="key" onclick="kp('4')">4</button><button class="key" onclick="kp('5')">5</button><button class="key" onclick="kp('6')">6</button>
@@ -930,6 +1949,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
     </div>
+
 </div>
 
 <!-- ================================================================
@@ -1105,7 +2125,7 @@ function resetSwipe() {
         handle.style.transform = `translateX(${d}px)`;
         fill.style.width = `${d + 48}px`;
         text.style.opacity = String(1 - (d / maxSlide) * 1.5);
-        if (d / maxSlide > 0.88) { dragging = false; onSwipeComplete(); }
+        if (maxSlide > 10 && d / maxSlide > 0.88) { dragging = false; onSwipeComplete(); }
         e.preventDefault();
     };
 
@@ -1128,15 +2148,33 @@ function resetSwipe() {
 /* ------------------------------------------------------------------ */
 /* Swipe Complete → ML Evaluation                                        */
 /* ------------------------------------------------------------------ */
-async function onSwipeComplete() {
-    document.getElementById('swipeText').textContent = 'Analyzing…';
-    beep(750, 0.1);
-    closeSheet();
+function onSwipeComplete() {
+    var amt    = parseFloat(curAmtStr) || 0;
+    var name   = String(curName);
+    var vpa    = String(curVpa);
+    var isScam = !!curIsScam;
+    var isFraud = isScam || amt > 50000;
 
-    const amt = parseFloat(curAmtStr) || 0;
-    const isScam = curIsScam;
+    // --- Play sound immediately (user gesture is still active) ---
+    playSoundNow(isFraud ? 'fraud' : 'success');
 
-    const payload = {
+    // --- Close the send sheet ---
+    var sheet = document.getElementById('sendSheet');
+    if (sheet) sheet.classList.remove('open');
+    resetSwipe();
+
+    // --- Show result popup after sheet animation ---
+    setTimeout(function() {
+        if (isFraud) {
+            _doShowFraud(amt);
+        } else {
+            _doShowSuccess(amt, name);
+            deductBalance(amt);
+        }
+    }, 320);
+
+    // --- Background ML call for analytics table ---
+    var payload = {
         amount: amt,
         transaction_time_of_day: isScam ? 2 : 14,
         transaction_amount_vs_sender_history: isScam ? 8.5 : 1.1,
@@ -1148,32 +2186,18 @@ async function onSwipeComplete() {
         pin_entry_method: isScam ? 'pasted' : 'manual',
         transaction_velocity: isScam ? 4 : 0
     };
-
-    let result = null;
-    try {
-        const r = await fetch('/api/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (r.ok) result = await r.json();
-    } catch(e) {}
-
-    // Heuristic fallback
-    if (!result) {
-        const fraud = isScam || amt > 40000;
-        result = { is_fraud: fraud, percent: fraud ? 98.4 : 0.8, band: fraud ? 'high' : 'low',
-            cluster_name: fraud ? 'Cluster 3: Nocturnal Burst Anomaly' : 'Cluster 0: Normal Micro-UPI',
-            drivers: fraud ? [['Nocturnal Transfer (02:15 AM)', 38],['Outlier vs History (8.5×)', 32],['Unknown Device & IP', 24]] : [] };
-    }
-
-    if (result.band === 'high' || result.is_fraud) {
-        showFraud(amt, result);
-    } else {
-        showSuccess(amt, result);
-    }
-    logEvent(curVpa, amt, result);
+    fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); })
+      .then(function(res){ logEvent(vpa, amt, res); })
+      .catch(function(){
+          logEvent(vpa, amt, { is_fraud: isFraud, percent: isFraud ? 98.4 : 0.8,
+              band: isFraud ? 'high' : 'low', cluster_name: 'Cluster 0', drivers: [] });
+      });
 }
+
 
 function showSuccess(amt, r) {
     document.getElementById('successAmt').textContent = '₹ ' + amt.toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -1196,10 +2220,13 @@ function showFraud(amt, r) {
 }
 
 function closeOutcome() {
-    document.getElementById('modalSuccess').classList.remove('open');
-    document.getElementById('modalFraud').classList.remove('open');
-    click();
+    var ms = document.getElementById('modalSuccess');
+    var mf = document.getElementById('modalFraud');
+    if (ms) { ms.classList.remove('open'); ms.style.display = 'none'; }
+    if (mf) { mf.classList.remove('open'); mf.style.display = 'none'; }
+    if (typeof click === 'function') click();
 }
+
 
 function reportCyber() {
     alert('🚨 FILED!\n\nRef: 1930-NPCI-2026-9842\nEvidence dispatched to National Cyber Crime Reporting Portal.\nVPA ' + curVpa + ' blacklisted on NPCI Fraud Registry.');
@@ -1334,7 +2361,420 @@ function showNotifs() {
 /* ------------------------------------------------------------------ */
 window.addEventListener('DOMContentLoaded', () => {
     recalc();
+
+    /* ── Realistic Card 3D Tilt on Mouse Move ── */
+    document.querySelectorAll('.vcard, .acc-card').forEach(card => {
+        const holoLayer = card.querySelector('.holo-layer');
+        const holoGlint = card.querySelector('.holo-glint');
+
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top  + rect.height / 2;
+            const dx = (e.clientX - cx) / (rect.width  / 2);   // -1 → +1
+            const dy = (e.clientY - cy) / (rect.height / 2);   // -1 → +1
+
+            /* 3D tilt */
+            const rotY =  dx * 16;
+            const rotX = -dy *  9;
+            card.style.transform =
+                `perspective(600px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(1.06)`;
+            card.style.boxShadow =
+                `${-rotY*0.8}px ${rotX*0.5}px 40px rgba(0,0,0,0.5),
+                 0 0 20px rgba(99,102,241,0.2)`;
+
+            /* Holographic rainbow: shift gradient angle with mouse */
+            if (holoLayer) {
+                const angle = 125 + dx * 40 + dy * 20;
+                const px = ((dx + 1) / 2 * 100).toFixed(1);
+                const py = ((dy + 1) / 2 * 100).toFixed(1);
+                holoLayer.style.backgroundImage = `linear-gradient(
+                    ${angle}deg,
+                    rgba(255,0,128,0)    0%,
+                    rgba(255,0,128,0.22) 10%,
+                    rgba(255,165,0,0.26) 20%,
+                    rgba(255,255,0,0.22) 30%,
+                    rgba(0,255,100,0.24) 40%,
+                    rgba(0,200,255,0.26) 50%,
+                    rgba(100,0,255,0.24) 60%,
+                    rgba(255,0,200,0.22) 70%,
+                    rgba(255,100,0,0.18) 80%,
+                    rgba(0,255,200,0.22) 90%,
+                    rgba(255,0,128,0)    100%
+                )`;
+                holoLayer.style.backgroundPosition = `${px}% ${py}%`;
+                holoLayer.style.opacity = '1';
+            }
+
+            /* Move glint position with mouse X */
+            if (holoGlint) {
+                const glintX = ((dx + 1) / 2 * 120 - 10).toFixed(1);
+                holoGlint.style.left = `${glintX}%`;
+            }
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform  = '';
+            card.style.boxShadow  = '';
+            if (holoLayer) holoLayer.style.cssText = '';
+        });
+
+        /* Touch support (mobile) */
+        card.addEventListener('touchmove', e => {
+            const t = e.touches[0];
+            const rect = card.getBoundingClientRect();
+            const dx = ((t.clientX - rect.left) / rect.width  - 0.5) * 2;
+            const dy = ((t.clientY - rect.top)  / rect.height - 0.5) * 2;
+            const rotY =  dx * 12;
+            const rotX = -dy *  7;
+            card.style.transform =
+                `perspective(600px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(1.04)`;
+            if (holoLayer) {
+                holoLayer.style.opacity = '0.8';
+                holoLayer.style.backgroundPosition = `${((dx+1)/2*100).toFixed()}% ${((dy+1)/2*100).toFixed()}%`;
+            }
+        }, { passive: true });
+        card.addEventListener('touchend', () => {
+            card.style.transform = '';
+            if (holoLayer) holoLayer.style.cssText = '';
+        });
+    });
 });
+
+/* ======================================================
+   BALANCE
+   ====================================================== */
+let currentBalance = 78540.43;
+function deductBalance(amount) {
+    currentBalance = Math.max(0, currentBalance - amount);
+    var whole = Math.floor(currentBalance);
+    var dec   = (currentBalance - whole).toFixed(2).slice(1);
+    var fmt   = whole.toLocaleString('en-IN');
+    var el = document.getElementById('mainBalance');
+    if (el) el.innerHTML = '₹' + fmt + '<span style="font-size:1.5rem;color:var(--text2)">' + dec + '</span>';
+    var cb = document.getElementById('cardBalance');
+    if (cb) cb.textContent = '₹' + fmt + dec;
+    var ab = document.getElementById('availableBalance');
+    if (ab) ab.textContent = 'Available: ₹ ' + fmt + dec;
+}
+
+/* ======================================================
+   ADD CONTACT
+   ====================================================== */
+var _grads = ['linear-gradient(135deg,#f59e0b,#ef4444)','linear-gradient(135deg,#10b981,#06b6d4)',
+    'linear-gradient(135deg,#6366f1,#3b82f6)','linear-gradient(135deg,#ec4899,#8b5cf6)',
+    'linear-gradient(135deg,#14b8a6,#22c55e)','linear-gradient(135deg,#f97316,#eab308)'];
+function openAddContact() {
+    document.getElementById('newContactName').value = '';
+    document.getElementById('newContactVpa').value  = '';
+    document.getElementById('addContactModal').classList.add('open');
+    setTimeout(function(){ document.getElementById('newContactName').focus(); }, 100);
+}
+function closeAddContact() {
+    document.getElementById('addContactModal').classList.remove('open');
+}
+function saveContact() {
+    var name = document.getElementById('newContactName').value.trim();
+    var vpa  = document.getElementById('newContactVpa').value.trim();
+    if (!name || !vpa) { alert('Please enter both name and UPI ID.'); return; }
+    var init = name.replace(/[^a-zA-Z]/g,'').charAt(0).toUpperCase() || '?';
+    var grad = _grads[Math.floor(Math.random() * _grads.length)];
+    var scroll = document.querySelector('.recipients-scroll');
+    if (!scroll) { alert('Could not find contact list.'); return; }
+    var div = document.createElement('div');
+    div.className = 'rec-item';
+    div.style.cursor = 'pointer';
+    // Store data as attributes to avoid quote issues
+    div.dataset.name = name;
+    div.dataset.vpa  = vpa;
+    div.addEventListener('click', function() {
+        openSend(this.dataset.name, this.dataset.vpa, 0, false);
+    });
+    div.innerHTML = '<div class="rec-av" style="background:' + grad + '">' + init + '</div>'
+        + '<span class="rec-name">' + name + '</span>'
+        + '<span class="rec-sub">@' + vpa.split('@')[0] + '</span>';
+    var scam = scroll.querySelector('.rec-item.scam');
+    if (scam) scroll.insertBefore(div, scam); else scroll.appendChild(div);
+    closeAddContact();
+    // Flash the new contact
+    div.style.opacity = '0';
+    div.style.transition = 'opacity 0.4s';
+    setTimeout(function(){ div.style.opacity = '1'; }, 50);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var m = document.getElementById('addContactModal');
+    if (m) m.addEventListener('click', function(e){ if(e.target===this) closeAddContact(); });
+});
+
+/* ======================================================
+   PAYMENT METHOD SELECTOR
+   ====================================================== */
+var selectedPayMethod = 'upi';
+function selectPayMethod(el) {
+    document.querySelectorAll('.pay-pill').forEach(function(p){ p.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedPayMethod = el.dataset.method;
+}
+
+/* ======================================================
+   SOUND (reliable — called during user gesture)
+   ====================================================== */
+function playSoundNow(type) {
+    try {
+        if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+        if (_ac.state === 'suspended') _ac.resume();
+        if (type === 'success') {
+            [[523.25,0],[659.25,100],[783.99,200],[1046.5,300]].forEach(function(pair){
+                var f=pair[0], d=pair[1];
+                setTimeout(function(){
+                    var o=_ac.createOscillator(), g=_ac.createGain();
+                    o.type='sine'; o.frequency.value=f;
+                    g.gain.setValueAtTime(0.22,_ac.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001,_ac.currentTime+0.5);
+                    o.connect(g); g.connect(_ac.destination);
+                    o.start(); o.stop(_ac.currentTime+0.5);
+                }, d);
+            });
+        } else {
+            for (var i=0;i<4;i++) {
+                (function(i){
+                    setTimeout(function(){
+                        var o=_ac.createOscillator(),g=_ac.createGain();
+                        o.type='sawtooth'; o.frequency.value=880;
+                        g.gain.setValueAtTime(0.3,_ac.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.001,_ac.currentTime+0.18);
+                        o.connect(g); g.connect(_ac.destination);
+                        o.start(); o.stop(_ac.currentTime+0.18);
+                    }, i*220);
+                    setTimeout(function(){
+                        var o=_ac.createOscillator(),g=_ac.createGain();
+                        o.type='sawtooth'; o.frequency.value=440;
+                        g.gain.setValueAtTime(0.25,_ac.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.001,_ac.currentTime+0.18);
+                        o.connect(g); g.connect(_ac.destination);
+                        o.start(); o.stop(_ac.currentTime+0.18);
+                    }, i*220+100);
+                })(i);
+            }
+        }
+    } catch(e) {}
+}
+
+function _doShowSuccess(amt, name) {
+    var el = document.getElementById('successAmt');
+    if (el) el.textContent = '₹ ' + amt.toLocaleString('en-IN',{minimumFractionDigits:2});
+    var el2 = document.getElementById('successTo');
+    if (el2) el2.textContent = 'Sent to ' + name;
+    var modal = document.getElementById('modalSuccess');
+    if (modal) { modal.style.display='flex'; modal.classList.add('open'); }
+    // Play ascending chime exactly when popup appears
+    try {
+        var ac2 = _ac || new (window.AudioContext||window.webkitAudioContext)();
+        if (ac2.state==='suspended') ac2.resume();
+        [[523,0],[659,120],[784,240],[1047,360]].forEach(function(p){
+            setTimeout(function(){
+                var o=ac2.createOscillator(), g=ac2.createGain();
+                o.type='sine'; o.frequency.value=p[0];
+                g.gain.setValueAtTime(0.25,ac2.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001,ac2.currentTime+0.55);
+                o.connect(g); g.connect(ac2.destination);
+                o.start(); o.stop(ac2.currentTime+0.55);
+            }, p[1]);
+        });
+    } catch(e) {}
+}
+
+
+function _doShowFraud(amt) {
+    var el = document.getElementById('fraudAmt');
+    if (el) el.textContent = '₹ ' + amt.toLocaleString('en-IN',{minimumFractionDigits:2});
+    var rt = document.getElementById('fraudRiskTag');
+    if (rt) rt.innerHTML = '🛑 Risk: 98.4% (Severe Threat)';
+    var d1=document.getElementById('fr1'), d2=document.getElementById('fr2'), d3=document.getElementById('fr3');
+    if(d1) d1.innerHTML='<span>⚠️</span><span>Nocturnal Transfer / Unusual Hour</span>';
+    if(d2) d2.innerHTML='<span>⚠️</span><span>Amount far exceeds sender history</span>';
+    if(d3) d3.innerHTML='<span>⚠️</span><span>Unknown Device & IP Address</span>';
+    var ct=document.getElementById('clusterText');
+    if(ct) ct.textContent='Cluster 3: Nocturnal Burst Anomaly (High Risk)';
+    var modal=document.getElementById('modalFraud');
+    if(modal) { modal.style.display='flex'; modal.classList.add('open'); }
+    // Play alarm burst when fraud popup appears
+    try {
+        var ac2 = _ac || new (window.AudioContext||window.webkitAudioContext)();
+        if (ac2.state==='suspended') ac2.resume();
+        for(var k=0;k<5;k++){
+            (function(k){
+                setTimeout(function(){
+                    var o=ac2.createOscillator(),g=ac2.createGain();
+                    o.type='sawtooth'; o.frequency.value = k%2===0 ? 880 : 440;
+                    g.gain.setValueAtTime(0.3,ac2.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001,ac2.currentTime+0.2);
+                    o.connect(g); g.connect(ac2.destination);
+                    o.start(); o.stop(ac2.currentTime+0.2);
+                }, k*230);
+            })(k);
+        }
+    } catch(e) {}
+}
+
+
 </script>
+
+<!-- ═══════════════════════════════════════════════════
+     QR SCANNER MODAL
+═══════════════════════════════════════════════════ -->
+<div class="qr-modal" id="qrModal" onclick="if(event.target===this)closeQRScanner()">
+    <div class="qr-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div>
+                <div style="font-size:1rem;font-weight:800;color:#fff;">Scan QR Code</div>
+                <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Point camera at any UPI QR code</div>
+            </div>
+            <button onclick="closeQRScanner()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+
+        <!-- Viewfinder -->
+        <div class="qr-viewfinder">
+            <div class="qr-scanline"></div>
+            <div class="qr-corner tl"></div>
+            <div class="qr-corner tr"></div>
+            <div class="qr-corner bl"></div>
+            <div class="qr-corner br"></div>
+            <div class="qr-pattern"></div>
+            <!-- Simulated QR blocks -->
+            <div style="position:absolute;top:50px;left:50px;width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:3px;"></div>
+            <div style="position:absolute;top:50px;right:50px;width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:3px;"></div>
+            <div style="position:absolute;bottom:50px;left:50px;width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:3px;"></div>
+        </div>
+
+        <!-- UPI Verified indicator -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:8px 12px;margin-bottom:12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+                <div style="font-size:0.7rem;font-weight:700;color:#34d399;">UPI QR Verified</div>
+                <div style="font-size:0.6rem;color:var(--text3);">Merchant authenticated by NPCI</div>
+            </div>
+        </div>
+
+        <!-- Demo: Simulate a detected QR -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button onclick="simulateQRScan('Rahul Sharma','rahul@oksbi',500,false)" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:9px;border-radius:10px;cursor:pointer;font-size:0.75rem;font-weight:700;">
+                ✅ Demo: Safe QR
+            </button>
+            <button onclick="simulateQRScan('Fake KYC Portal','sbi_kyc_verify.support@fakevpa',95000,true)" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:9px;border-radius:10px;cursor:pointer;font-size:0.75rem;font-weight:700;">
+                🚨 Demo: Fraud QR
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- REQUEST MONEY MODAL -->
+<div class="qr-modal" id="requestModal" onclick="if(event.target===this)closeRequestModal()">
+    <div class="qr-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div>
+                <div style="font-size:1rem;font-weight:800;color:#fff;">Request Money</div>
+                <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">Generate a UPI payment link</div>
+            </div>
+            <button onclick="closeRequestModal()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+        <!-- Amount input -->
+        <div style="margin-bottom:12px;">
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:5px;font-weight:600;">Enter Amount (₹)</div>
+            <input id="reqAmount" type="number" placeholder="0.00" min="1"
+                style="width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#fff;font-size:1rem;font-family:'Outfit',sans-serif;font-weight:700;box-sizing:border-box;outline:none;">
+        </div>
+        <!-- Note input -->
+        <div style="margin-bottom:14px;">
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:5px;font-weight:600;">Note (optional)</div>
+            <input id="reqNote" type="text" placeholder="e.g. Dinner split"
+                style="width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:#fff;font-size:0.875rem;font-family:'Outfit',sans-serif;box-sizing:border-box;outline:none;">
+        </div>
+        <!-- UPI VPA display -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:9px 12px;margin-bottom:14px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <div>
+                <div style="font-size:0.65rem;color:var(--text3);">Receiving VPA</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#a5b4fc;font-weight:600;">avijit@okhdfc</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" style="margin-left:auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <button onclick="generateRequestLink()" style="width:100%;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff;padding:12px;border-radius:12px;cursor:pointer;font-size:0.875rem;font-weight:800;letter-spacing:0.02em;">
+            🔗 Generate Request Link
+        </button>
+    </div>
+</div>
+
+<script>
+/* ── QR Scanner ── */
+function openQRScanner() {
+    document.getElementById('qrModal').classList.add('open');
+}
+function closeQRScanner() {
+    document.getElementById('qrModal').classList.remove('open');
+}
+function simulateQRScan(name, vpa, amt, isScam) {
+    closeQRScanner();
+    setTimeout(() => openSend(name, vpa, amt, isScam), 300);
+}
+
+/* ── Request Money ── */
+function showRequestModal() {
+    document.getElementById('requestModal').classList.add('open');
+    document.getElementById('reqAmount').value = '';
+    document.getElementById('reqNote').value = '';
+}
+function closeRequestModal() {
+    document.getElementById('requestModal').classList.remove('open');
+}
+function generateRequestLink() {
+    const amt = document.getElementById('reqAmount').value;
+    const note = document.getElementById('reqNote').value || 'UPI Payment';
+    if (!amt || amt <= 0) {
+        document.getElementById('reqAmount').style.borderColor = '#ef4444';
+        setTimeout(() => document.getElementById('reqAmount').style.borderColor = '', 1500);
+        return;
+    }
+    closeRequestModal();
+    const link = `upi://pay?pa=avijit@okhdfc&pn=Avijit&am=${amt}&tn=${encodeURIComponent(note)}&cu=INR`;
+    setTimeout(() => {
+        alert(`✅ UPI Request Link Generated!\n\n${link}\n\nShare this link to receive ₹${Number(amt).toLocaleString('en-IN')} for "${note}"`);
+    }, 200);
+}
+
+/* ── Exit App ── */
+function exitApp() {
+    if (confirm('🔒 Lock PaySafe India?\n\nYou will be signed out of the UPI simulator.')) {
+        document.body.style.transition = 'opacity 0.5s';
+        document.body.style.opacity = '0';
+        setTimeout(() => {
+            document.body.innerHTML = `
+                <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060810;gap:16px;font-family:'Outfit',sans-serif;">
+                    <div style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#f97316,#6366f1 55%,#06b6d4);display:flex;align-items:center;justify-content:center;">
+                        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div style="color:#fff;font-size:1.3rem;font-weight:800;">PaySafe India</div>
+                    <div style="color:#6b7280;font-size:0.8rem;">Session ended securely</div>
+                    <button onclick="location.reload()" style="margin-top:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;color:#fff;padding:12px 28px;border-radius:999px;cursor:pointer;font-size:0.875rem;font-weight:700;">↩ Sign Back In</button>
+                </div>`;
+            document.body.style.opacity = '1';
+        }, 500);
+    }
+}
+</script>
+<!-- Add Contact Modal -->
+<div class="add-contact-modal" id="addContactModal">
+    <div class="ac-box">
+        <h3>➕ Add New Contact</h3>
+        <input type="text" id="newContactName" placeholder="Name (e.g. Riya)" maxlength="30"/>
+        <input type="text" id="newContactVpa"  placeholder="UPI ID (e.g. riya@okaxis)"  maxlength="50"/>
+        <div class="ac-row">
+            <button class="ac-cancel" onclick="closeAddContact()">Cancel</button>
+            <button class="ac-save"   onclick="saveContact()">Save</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
