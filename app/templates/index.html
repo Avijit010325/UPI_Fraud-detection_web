@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#07090e">
-    <title>PaySafe India — UPI Fraud Detection</title>
+    <meta name="theme-color" content="#f0f4ff">
+    <title>UPI Fraud Detection System — Machine Learning Project Prototype</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
@@ -16,14 +16,14 @@
            CSS CUSTOM PROPERTIES
         ================================================================ */
         :root {
-            --bg: #07090e;
-            --bg-card: rgba(18,22,34,0.8);
-            --bg-glass: rgba(255,255,255,0.05);
-            --border: rgba(255,255,255,0.08);
-            --border-active: rgba(99,102,241,0.4);
-            --text: #f8fafc;
-            --text2: #94a3b8;
-            --text3: #64748b;
+            --bg: #f0f4ff;
+            --bg-card: rgba(255,255,255,0.82);
+            --bg-glass: rgba(255,255,255,0.55);
+            --border: rgba(99,102,241,0.15);
+            --border-active: rgba(99,102,241,0.5);
+            --text: #0f172a;
+            --text2: #475569;
+            --text3: #94a3b8;
             --brand: #6366f1;
             --cyan: #06b6d4;
             --saffron: #f97316;
@@ -53,8 +53,8 @@
             overflow-x: hidden;
             position: relative;
             background-image:
-                radial-gradient(circle at 20% 10%, rgba(99,102,241,0.14) 0%, transparent 45%),
-                radial-gradient(circle at 80% 85%, rgba(6,182,212,0.10) 0%, transparent 50%);
+                radial-gradient(circle at 20% 10%, rgba(99,102,241,0.08) 0%, transparent 45%),
+                radial-gradient(circle at 80% 85%, rgba(6,182,212,0.06) 0%, transparent 50%);
             background-attachment: fixed;
         }
 
@@ -69,7 +69,7 @@
             background-position: center center;
             background-repeat: no-repeat;
             opacity: 0.30;
-            filter: blur(3px) saturate(0.6) brightness(0.45) sepia(0.3);
+            filter: blur(2px) saturate(0.5) brightness(0.9) sepia(0.2);
             mix-blend-mode: luminosity;
             pointer-events: none;
         }
@@ -178,20 +178,26 @@
         .brand-logo svg { width: 22px; height: 22px; fill: white; }
 
         .brand-text h1 {
-            font-family: 'Outfit', sans-serif; font-size: clamp(1rem, 3vw, 1.25rem);
+            font-family: 'Outfit', sans-serif; font-size: clamp(1rem, 3vw, 1.3rem);
             font-weight: 800; letter-spacing: -0.02em;
-            background: linear-gradient(90deg, #fff 40%, #c7d2fe);
+            background: linear-gradient(90deg, #0f172a 35%, #4338ca 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .brand-text p { font-size: 0.7rem; color: var(--text3); display: none; }
+        .brand-text p { font-size: 0.76rem; color: #475569; font-weight: 500; display: block; margin-top: 2px; }
         @media (min-width: 480px) { .brand-text p { display: block; } }
 
         .proto-pill {
-            font-size: 0.6rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
-            background: rgba(99,102,241,0.18); color: #a5b4fc; padding: 2px 7px;
-            border-radius: var(--r-full); border: 1px solid rgba(99,102,241,0.35);
-            -webkit-text-fill-color: #a5b4fc; white-space: nowrap;
+            font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+            background: rgba(99,102,241,0.12); color: #4338ca; padding: 3px 8px;
+            border-radius: var(--r-full); border: 1.5px solid rgba(99,102,241,0.35);
+            -webkit-text-fill-color: #4338ca; white-space: nowrap; font-weight: 700;
         }
+        .project-tag {
+            font-size: 0.72rem; font-weight: 700; background: rgba(99,102,241,0.10);
+            color: #4338ca; padding: 5px 12px; border-radius: 999px;
+            border: 1px solid rgba(99,102,241,0.25); white-space: nowrap;
+        }
+        @media (max-width: 600px) { .project-tag { display: none; } }
 
         .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
@@ -208,7 +214,7 @@
            SCENARIO STRIP
         ================================================================ */
         .scenario-strip {
-            background: rgba(10,14,24,0.7); border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.75); border-bottom: 1px solid var(--border);
             padding: 10px 16px; display: flex; gap: 8px;
             overflow-x: auto; white-space: nowrap; scrollbar-width: none; align-items: center;
         }
@@ -257,7 +263,7 @@
 
         /* App-style header inside the card */
         .app-chrome {
-            background: rgba(10,14,24,0.95);
+            background: rgba(255,255,255,0.95);
             padding: 14px 18px 12px;
             border-bottom: 1px solid var(--border);
         }
@@ -272,7 +278,7 @@
             font-weight: 700; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.12);
             position: relative; flex-shrink: 0;
         }
-        .avatar .dot { position: absolute; bottom: 0; right: 0; width: 9px; height: 9px; background: var(--safe); border: 2px solid #0a0e18; border-radius: 50%; }
+        .avatar .dot { position: absolute; bottom: 0; right: 0; width: 9px; height: 9px; background: var(--safe); border: 2px solid #fff; border-radius: 50%; }
         .user-name { font-size: 0.85rem; font-weight: 700; }
         .user-vpa { font-size: 0.7rem; color: var(--text3); }
 
@@ -282,7 +288,7 @@
             border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: var(--text); position: relative;
         }
-        .icon-btn .notif { position: absolute; top: 1px; right: 1px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid #0a0e18; font-size: 0.55rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .icon-btn .notif { position: absolute; top: 1px; right: 1px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid #fff; font-size: 0.55rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
         /* Balance section */
         .balance-row {
@@ -932,7 +938,7 @@
         ================================================================ */
         .send-sheet {
             position: fixed; inset: 0; z-index: 800;
-            background: #090c15; display: none; flex-direction: column;
+            background: rgba(255,255,255,0.97); display: none; flex-direction: column;
             padding: env(safe-area-inset-top, 20px) 22px env(safe-area-inset-bottom, 20px);
             animation: slideup 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
         }
@@ -1165,26 +1171,27 @@
             <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V8.26l7-3.89v8.62z"/></svg>
         </div>
         <div class="brand-text">
-            <h1>PaySafe India <span class="proto-pill">AI Prototype</span></h1>
-            <p>NPCI UPI Real-Time Fraud Intelligence Engine</p>
+            <h1>UPI Fraud Detection System <span class="proto-pill">ML Project Prototype</span></h1>
+            <p>Project Type: Machine Learning & Real-Time UPI Anomaly Detection · Team Void Alchemist</p>
         </div>
     </div>
     <div class="topbar-right">
+        <span class="project-tag">Major Project • Team Void Alchemist</span>
         <div class="health-dot"></div>
-        <span class="health-label">Shield Active</span>
+        <span class="health-label">Model Active</span>
     </div>
 </header>
 
 <!-- ================================================================
      SCENARIO QUICK-LAUNCH STRIP
 ================================================================ -->
-<nav class="scenario-strip" aria-label="Demo scenarios">
-    <span class="strip-label">Scenarios:</span>
-    <button class="s-pill safe"  onclick="loadScenario('chai')">☕ Chai ₹40</button>
-    <button class="s-pill safe"  onclick="loadScenario('grocery')">🛍️ Grocery ₹2,860</button>
-    <button class="s-pill warn"  onclick="loadScenario('tech')">⚠️ Tech ₹24,999</button>
-    <button class="s-pill danger" onclick="loadScenario('fraud_kyc')">🚨 Phishing ₹95,000</button>
-    <button class="s-pill danger" onclick="loadScenario('fraud_qr')">🚨 QR Lure ₹48,000</button>
+<nav class="scenario-strip" aria-label="ML evaluation test cases">
+    <span class="strip-label">Model Test Cases:</span>
+    <button class="s-pill safe"  onclick="loadScenario('chai')">☕ Chai ₹40 (Normal)</button>
+    <button class="s-pill safe"  onclick="loadScenario('grocery')">🛍️ Grocery ₹2,860 (Normal)</button>
+    <button class="s-pill warn"  onclick="loadScenario('tech')">⚠️ Tech ₹24,999 (High Value)</button>
+    <button class="s-pill danger" onclick="loadScenario('fraud_kyc')">🚨 Fake KYC ₹95,000 (Blocked - Scam)</button>
+    <button class="s-pill danger" onclick="loadScenario('fraud_qr')">🚨 QR Lure ₹48,000 (Blocked - Phishing)</button>
 </nav>
 
 <!-- ================================================================
@@ -1801,8 +1808,8 @@
         <div class="soc-panel">
             <div class="soc-hdr">
                 <div>
-                    <h2>Live Fraud Analytics</h2>
-                    <p>Real-time scoring on current simulator transaction</p>
+                    <h2>Machine Learning Risk Engine & Analytics</h2>
+                    <p>Live inference evaluating Random Forest (97.65% Acc) + K-Means Clustering on current transaction</p>
                 </div>
                 <div class="soc-tabs">
                     <button class="soc-tab active" onclick="switchSoc('stream', this)">Live Stream</button>
