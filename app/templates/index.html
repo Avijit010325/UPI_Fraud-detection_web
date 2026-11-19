@@ -47,31 +47,46 @@
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
+            background: linear-gradient(145deg, #f4f7fe 0%, #edf1fc 35%, #e8eefa 70%, #f6f8ff 100%);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            background-image:
-                radial-gradient(circle at 20% 10%, rgba(99,102,241,0.08) 0%, transparent 45%),
-                radial-gradient(circle at 80% 85%, rgba(6,182,212,0.06) 0%, transparent 50%);
             background-attachment: fixed;
         }
 
-        /* ── India/Rupee background image — 30% opacity, blurred, glass tint ── */
+        /* ── Soft Ambient Studio Lighting Backdrop (matches Cashly reference) ── */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             z-index: 0;
-            background-image: url('/images/india_rupee_bg.jpg');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            opacity: 0.30;
-            filter: blur(2px) saturate(0.5) brightness(0.9) sepia(0.2);
-            mix-blend-mode: luminosity;
+            background:
+                radial-gradient(circle at 50% 10%, rgba(219, 228, 255, 0.85) 0%, transparent 55%),
+                radial-gradient(circle at 8% 42%, rgba(238, 242, 255, 0.95) 0%, transparent 48%),
+                radial-gradient(circle at 92% 70%, rgba(224, 242, 254, 0.70) 0%, transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(243, 232, 255, 0.60) 0%, transparent 50%);
             pointer-events: none;
+        }
+
+        /* ── Sleek Ghost Typography Watermark at Top (matches reference 'PAYMENT APP') ── */
+        .bg-watermark {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: clamp(3.8rem, 9.8vw, 9.8rem);
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            color: rgba(148, 163, 184, 0.22);
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+            line-height: 1;
+            filter: drop-shadow(0 2px 12px rgba(99,102,241,0.08));
         }
 
         /* Ensure all direct children of body sit above the bg layer */
@@ -1158,9 +1173,323 @@
         .rec-item-new{animation:popIn .3s ease;}
         @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 
-        </style>
+        
+        /* ================================================================
+           CASHLY REFERENCE MOCKUP STYLING (Analytics & Floating Dock)
+        ================================================================ */
+
+        /* Topbar on Analytics / History screen */
+        .history-topbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px 10px;
+            background: #ffffff;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .hist-back-btn {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #334155; transition: all 0.15s; flex-shrink: 0;
+        }
+        .hist-back-btn:active { transform: scale(0.92); background: #f1f5f9; }
+        .hist-search-box {
+            flex: 1; display: flex; align-items: center; gap: 8px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 999px; padding: 7px 14px;
+            font-size: 0.78rem; color: #94a3b8;
+        }
+        .hist-bank-pill {
+            display: flex; align-items: center; gap: 5px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 999px; padding: 6px 10px;
+            font-size: 0.72rem; font-weight: 700; color: #1e293b;
+            flex-shrink: 0; cursor: pointer;
+        }
+        .hist-bank-badge {
+            background: #dc2626; color: #fff; font-size: 0.58rem;
+            padding: 1px 4px; border-radius: 3px; font-weight: 800;
+        }
+
+        /* Balance Header Section */
+        .hist-balance-section {
+            padding: 16px 20px 10px;
+            background: #ffffff;
+        }
+        .hist-bal-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 6px;
+        }
+        .hist-bal-label {
+            font-size: 0.78rem; font-weight: 600; color: #64748b;
+        }
+        .hist-date-selector {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 0.74rem; font-weight: 700; color: #334155;
+            background: #f1f5f9; padding: 4px 10px; border-radius: 999px;
+            cursor: pointer;
+        }
+        .hist-bal-amt {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        .hist-bal-trend {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 0.75rem; font-weight: 700; color: #10b981;
+            margin-top: 4px;
+        }
+        .trend-arrow { font-size: 0.68rem; }
+
+        /* Spline Chart Card Area */
+        .chart-container-card {
+            background: #ffffff;
+            padding: 6px 16px 14px;
+            position: relative;
+        }
+        .chart-header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-size: 0.68rem;
+        }
+        .chart-tag-badge {
+            color: #64748b; font-weight: 600;
+        }
+        .chart-mode-toggle {
+            background: #ede9fe; color: #6366f1; border: none;
+            padding: 3px 9px; border-radius: 999px; font-weight: 700;
+            font-size: 0.65rem; cursor: pointer; transition: all 0.15s;
+        }
+        .chart-mode-toggle:hover { background: #ddd6fe; }
+
+        .svg-chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 165px;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: visible;
+        }
+        #spendSplineSvg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* Floating Dark Tooltip Pin matching Cashly reference */
+        .chart-tooltip-pin {
+            position: absolute;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            margin-top: -12px;
+            transition: left 0.3s cubic-bezier(0.16,1,0.3,1), top 0.3s cubic-bezier(0.16,1,0.3,1);
+            z-index: 10;
+        }
+        .chart-tooltip-pin::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+        .pin-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+        .pin-date {
+            font-size: 0.58rem;
+            color: #94a3b8;
+            margin-top: 1px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Range Filter Pills Row (1D, 2D, 3D, 4D, 5D, 6D, 7D, 8D) */
+        .chart-pills-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px;
+            margin-top: 14px;
+            padding: 2px 4px;
+        }
+        .cpill {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 6px 2px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.18s;
+            text-align: center;
+        }
+        .cpill:hover { color: #0f172a; background: #f1f5f9; }
+        .cpill.active {
+            background: #4f46e5 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+        }
+
+        /* Recent Payments Section on History Tab */
+        .hist-recent-section {
+            background: #ffffff;
+            padding: 16px 18px 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .hist-sec-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .hist-sec-hdr h3 {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .sec-more-btn {
+            background: none; border: none; color: #94a3b8;
+            font-size: 1.1rem; cursor: pointer; line-height: 1;
+        }
+
+        .hist-tx-list {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .hist-tx-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 6px 0; border-bottom: 1px solid #f8fafc;
+        }
+        .hist-tx-item:last-child { border-bottom: none; }
+        .hist-tx-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .ig-icon {
+            background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af, #515bd4);
+            color: #ffffff;
+        }
+        .yt-icon {
+            background: #fee2e2;
+        }
+        .fraud-icon {
+            background: #fee2e2;
+        }
+        .hist-tx-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .hist-tx-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .hist-tx-info { flex: 1; min-width: 0; }
+        .hist-tx-title {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.82rem; font-weight: 700; color: #0f172a;
+        }
+        .hist-tx-sub {
+            font-size: 0.68rem; color: #64748b; margin-top: 2px;
+        }
+        .badge-autopay {
+            background: #ecfdf5; color: #059669; font-size: 0.6rem;
+            padding: 1px 6px; border-radius: 999px; font-weight: 700;
+        }
+        .badge-verified {
+            color: #3b82f6; font-size: 0.72rem; font-weight: 800;
+        }
+        .badge-blocked {
+            background: #fee2e2; color: #dc2626; font-size: 0.6rem;
+            padding: 1px 6px; border-radius: 999px; font-weight: 800;
+        }
+        .hist-tx-amt {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem; font-weight: 800; text-align: right;
+            flex-shrink: 0;
+        }
+        .hist-tx-amt.debit { color: #0f172a; }
+        .hist-tx-amt.credit { color: #10b981; }
+        .hist-tx-amt.blocked { color: #ef4444; }
+
+        .scam-intercept-item {
+            background: rgba(254, 242, 242, 0.6);
+            border-radius: 12px;
+            padding: 8px 10px;
+            margin-top: 4px;
+        }
+
+        .hist-security-card {
+            margin: 12px 16px 20px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        /* ── Floating Translucent Frosted Dock (matches Cashly reference) ── */
+        .phone-dock {
+            position: sticky;
+            bottom: 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 7px 14px;
+            margin: 0 16px 12px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 12px 35px -8px rgba(99, 102, 241, 0.22), 0 4px 14px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            overflow: visible;
+        }
+        .phone-dock::before { display: none; }
+        .dock-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            padding: 8px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .dock-btn svg { width: 19px; height: 19px; stroke: currentColor; flex-shrink: 0; }
+        .dock-btn .dock-label { display: none; }
+        .dock-btn.active {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.38);
+            padding: 8px 18px;
+        }
+        .dock-btn.active .dock-label { display: inline-block; }
+
+</style>
 </head>
 <body>
+<div class="bg-watermark">PAYMENT APP</div>
 
 <!-- ================================================================
      HEADER / NAVBAR
@@ -1533,39 +1862,226 @@
             </div>
         </div>
 
-        <!-- Analytics Tab -->
+                <!-- ============================================================
+             ANALYTICS & SPEND HISTORY TAB (matches Cashly reference mockup)
+        ============================================================ -->
         <div class="tab-page" id="tabAnalytics">
-            <div style="padding:14px 18px 0;font-size:1rem;font-weight:700;">Spend & Anomaly Intel</div>
-            <div class="canvas-wrap" style="margin-top:14px">
-                <canvas id="dotCanvas"></canvas>
-                <div class="canvas-overlay">
-                    <div>
-                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.65)">PaySafe Balance</div>
-                        <div class="canvas-bal" id="cardBalance">₹78,540.43</div>
+            
+            <!-- Top App Bar for Analytics/History -->
+            <div class="history-topbar">
+                <button class="hist-back-btn" onclick="switchTab('Home')" aria-label="Back to Home">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <div class="hist-search-box">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span>Search Payments</span>
+                </div>
+                <div class="hist-bank-pill">
+                    <span class="hist-bank-badge">HDFC</span>
+                    <span>v</span>
+                </div>
+            </div>
+
+            <!-- Balance Header Section -->
+            <div class="hist-balance-section">
+                <div class="hist-bal-row">
+                    <span class="hist-bal-label">Available Balance</span>
+                    <div class="hist-date-selector">
+                        <span>May 2025</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
-                    <div style="text-align:right">
-                        <div style="font-size:0.68rem;color:rgba(255,255,255,0.65)">Fraud Saved</div>
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;font-weight:700;color:#34d399">₹4,20,000</div>
+                </div>
+                <div class="hist-bal-amt" id="histMainBalance">₹2,34,800.22</div>
+                <div class="hist-bal-trend" id="histBalTrend">
+                    <span>+₹2,500.00 Last Transaction (1.2%)</span>
+                    <span class="trend-arrow">▲</span>
+                </div>
+            </div>
+
+            <!-- Interactive Spline Line Chart (Generated from Code Data) -->
+            <div class="chart-container-card">
+                <div class="chart-header-row">
+                    <span class="chart-tag-badge" id="chartDatasetBadge">3-Day Spend Wave (Active Reference View)</span>
+                    <button class="chart-mode-toggle" onclick="toggleChartDatasetMode()" id="chartModeBtn" title="Toggle between Spend Wave and Nocturnal Anomaly Curve">
+                        Mode: Spend Wave
+                    </button>
+                </div>
+
+                <!-- SVG Spline Curve Container with Interactive Tooltip Pin -->
+                <div class="svg-chart-wrapper" id="svgChartWrapper">
+                    <svg id="spendSplineSvg" viewBox="0 0 360 170" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="purpleSplineGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#6366f1" stop-opacity="0.28"/>
+                                <stop offset="60%" stop-color="#818cf8" stop-opacity="0.08"/>
+                                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0"/>
+                            </linearGradient>
+                            <filter id="splineShadow" x="-10%" y="-10%" width="120%" height="120%">
+                                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4f46e5" flood-opacity="0.25"/>
+                            </filter>
+                        </defs>
+                        <!-- Chart Area Fill -->
+                        <path id="chartAreaPath" d="" fill="url(#purpleSplineGrad)"/>
+                        <!-- Smooth Curve Stroke -->
+                        <path id="chartLinePath" d="" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#splineShadow)"/>
+                        
+                        <!-- Dotted Guide Line to Tooltip Pin -->
+                        <line id="chartPinGuide" x1="0" y1="0" x2="0" y2="0" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>
+                        <!-- Target Point Node on Curve -->
+                        <circle id="chartPinDot" cx="0" cy="0" r="4.5" fill="#ffffff" stroke="#4f46e5" stroke-width="3"/>
+                        <circle id="chartPinPulse" cx="0" cy="0" r="9" fill="rgba(99,102,241,0.2)"/>
+                    </svg>
+
+                    <!-- Tooltip Pin Badge (Floating Dark Pill matching reference) -->
+                    <div class="chart-tooltip-pin" id="chartTooltipPin">
+                        <div class="pin-amount" id="pinAmt">₹126.00</div>
+                        <div class="pin-date" id="pinDate">05-06-2025</div>
+                    </div>
+                </div>
+
+                <!-- Filter Pills Row (1D, 2D, 3D [active], 4D, 5D, 6D, 7D, 8D) -->
+                <div class="chart-pills-row" id="chartPillsRow">
+                    <button class="cpill" onclick="selectChartPeriod('1D', this)">1D</button>
+                    <button class="cpill" onclick="selectChartPeriod('2D', this)">2D</button>
+                    <button class="cpill active" onclick="selectChartPeriod('3D', this)">3D</button>
+                    <button class="cpill" onclick="selectChartPeriod('4D', this)">4D</button>
+                    <button class="cpill" onclick="selectChartPeriod('5D', this)">5D</button>
+                    <button class="cpill" onclick="selectChartPeriod('6D', this)">6D</button>
+                    <button class="cpill" onclick="selectChartPeriod('7D', this)">7D</button>
+                    <button class="cpill" onclick="selectChartPeriod('8D', this)">8D</button>
+                </div>
+            </div>
+
+            <!-- Recent Payments Section (Matches Right Screen of Mockup) -->
+            <div class="hist-recent-section">
+                <div class="hist-sec-hdr">
+                    <h3>Recent Payments</h3>
+                    <button class="sec-more-btn" aria-label="More options">•••</button>
+                </div>
+
+                <div class="hist-tx-list">
+                    <!-- Instagram Meta Verify -->
+                    <div class="hist-tx-item">
+                        <div class="hist-tx-icon ig-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </div>
+                        <div class="hist-tx-info">
+                            <div class="hist-tx-title">
+                                <span>Instagram Meta Verify</span>
+                                <span class="badge-autopay">Autopay ✓</span>
+                            </div>
+                            <div class="hist-tx-sub">Monthly Subscription • 22 May 2025</div>
+                        </div>
+                        <div class="hist-tx-amt debit">₹150.00</div>
+                    </div>
+
+                    <!-- Robin (Direct Payment) -->
+                    <div class="hist-tx-item">
+                        <div class="hist-tx-avatar" style="background:#fce7f3;color:#db2777;font-weight:700;">
+                            R
+                        </div>
+                        <div class="hist-tx-info">
+                            <div class="hist-tx-title">
+                                <span>Robin</span>
+                                <span class="badge-verified">✓</span>
+                            </div>
+                            <div class="hist-tx-sub">Direct Payment • 19 May 2025</div>
+                        </div>
+                        <div class="hist-tx-amt credit">+ ₹2,500.00</div>
+                    </div>
+
+                    <!-- Youtube Premium -->
+                    <div class="hist-tx-item">
+                        <div class="hist-tx-icon yt-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff0000"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#ffffff"/></svg>
+                        </div>
+                        <div class="hist-tx-info">
+                            <div class="hist-tx-title">
+                                <span>Youtube Premium</span>
+                                <span class="badge-autopay">Autopay ✓</span>
+                            </div>
+                            <div class="hist-tx-sub">Monthly Subscription • 18 May 2025</div>
+                        </div>
+                        <div class="hist-tx-amt debit">₹150.00</div>
+                    </div>
+
+                    <!-- Fany -->
+                    <div class="hist-tx-item">
+                        <div class="hist-tx-avatar" style="background:#e0f2fe;color:#0284c7;font-weight:700;">
+                            F
+                        </div>
+                        <div class="hist-tx-info">
+                            <div class="hist-tx-title">
+                                <span>Fany</span>
+                                <span class="badge-verified">✓</span>
+                            </div>
+                            <div class="hist-tx-sub">Direct Payment • 12 May 2025</div>
+                        </div>
+                        <div class="hist-tx-amt credit">+ ₹500.00</div>
+                    </div>
+
+                    <!-- Emely -->
+                    <div class="hist-tx-item">
+                        <div class="hist-tx-avatar" style="background:#fef3c7;color:#d97706;font-weight:700;">
+                            E
+                        </div>
+                        <div class="hist-tx-info">
+                            <div class="hist-tx-title">
+                                <span>Emely</span>
+                            </div>
+                            <div class="hist-tx-sub">Direct Payment • 09 May 2025</div>
+                        </div>
+                        <div class="hist-tx-amt credit">+ ₹100.00</div>
+                    </div>
+
+                    <!-- Project Fraud Anomaly Intercept Item (Cell 18 model decision) -->
+                    <div class="hist-tx-item scam-intercept-item">
+                        <div class="hist-tx-icon fraud-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div class="hist-tx-info">
+                            <div class="hist-tx-title">
+                                <span style="color:#ef4444;font-weight:700;">🚨 Fake KYC Scam Desk</span>
+                                <span class="badge-blocked">BLOCKED</span>
+                            </div>
+                            <div class="hist-tx-sub">Random Forest Intercept • 02:15 AM (Cluster 3)</div>
+                        </div>
+                        <div class="hist-tx-amt blocked">₹95,000.00</div>
                     </div>
                 </div>
             </div>
-            <div class="cat-card">
-                <div class="sec-title" style="margin-bottom:14px">Spending by Category</div>
-                <div class="cat-row"><div class="cat-hdr"><span>🛍️ Shopping (112 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹9,708</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:78%;background:#f97316"></div></div></div>
-                <div class="cat-row"><div class="cat-hdr"><span>🍔 Food & Drinks (599 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹8,526</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:68%;background:#ec4899"></div></div></div>
-                <div class="cat-row"><div class="cat-hdr"><span>⚙️ Services (42 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹5,483</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:44%;background:#3b82f6"></div></div></div>
-                <div class="cat-row"><div class="cat-hdr"><span>🚗 Transport (176 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹3,817</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:32%;background:#10b981"></div></div></div>
-                <div class="cat-row"><div class="cat-hdr"><span>🎮 Entertainment (77 tx)</span><span style="font-family:'JetBrains Mono',monospace">₹2,084</span></div><div class="cat-bar-bg"><div class="cat-bar" style="width:20%;background:#a855f7"></div></div></div>
+
+            <!-- AI Model Health Summary from Notebook -->
+            <div class="hist-security-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:0.75rem;font-weight:700;color:#0f172a;">🛡️ AI Security Core (PaySafe Engine)</div>
+                    <span style="font-size:0.62rem;background:#ecfdf5;color:#059669;padding:2px 7px;border-radius:999px;font-weight:700;">ACTIVE</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:0.68rem;text-align:center;">
+                    <div style="background:#f8fafc;padding:8px 4px;border-radius:10px;border:1px solid #e2e8f0;">
+                        <div style="color:#64748b;font-size:0.62rem;">PRECISION</div>
+                        <div style="font-weight:800;color:#0f172a;font-size:0.85rem;margin-top:2px;">98.28%</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:8px 4px;border-radius:10px;border:1px solid #e2e8f0;">
+                        <div style="color:#64748b;font-size:0.62rem;">RECALL</div>
+                        <div style="font-weight:800;color:#0f172a;font-size:0.85rem;margin-top:2px;">87.90%</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:8px 4px;border-radius:10px;border:1px solid #e2e8f0;">
+                        <div style="color:#64748b;font-size:0.62rem;">ROC-AUC</div>
+                        <div style="font-weight:800;color:#4f46e5;font-size:0.85rem;margin-top:2px;">0.969</div>
+                    </div>
+                </div>
             </div>
-            <div class="tx-feed" style="margin-top:0">
-                <div style="font-size:0.82rem;font-weight:700;margin-bottom:10px">AI Security Health</div>
-                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2);margin-bottom:5px"><span>Model Precision:</span><span style="font-weight:700;color:#38bdf8">98.28%</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2);margin-bottom:5px"><span>Fraud Recall:</span><span style="font-weight:700;color:#34d399">87.90%</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text2)"><span>ROC-AUC:</span><span style="font-weight:700;color:#fbbf24">0.969</span></div>
-            </div>
+
         </div>
 
-        <!-- Accounts Tab -->
+<!-- Accounts Tab -->
         <div class="tab-page" id="tabAccounts">
             <div style="padding:14px 18px 12px;font-size:1rem;font-weight:700;">Linked Accounts</div>
             <div class="accounts-list">
@@ -1759,18 +2275,18 @@
         </div>
 
         <!-- Dock Navigation -->
-        <nav class="phone-dock" aria-label="App navigation">
+                <nav class="phone-dock" aria-label="App navigation">
             <button class="dock-btn active" id="dockHome" onclick="switchTab('Home')" aria-label="Home">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Home
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span class="dock-label">Home</span>
             </button>
-            <button class="dock-btn" id="dockAnalytics" onclick="switchTab('Analytics')" aria-label="Analytics">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Spend
+            <button class="dock-btn" id="dockAnalytics" onclick="switchTab('Analytics')" aria-label="History">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span class="dock-label">History</span>
             </button>
-            <button class="dock-btn" id="dockAccounts" onclick="switchTab('Accounts')" aria-label="Accounts">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                Accounts
+            <button class="dock-btn" id="dockAccounts" onclick="switchTab('Accounts')" aria-label="Cards">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.3"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <span class="dock-label">Cards</span>
             </button>
         </nav>
     </section>
@@ -2313,42 +2829,223 @@ function logEvent(vpa, amt, r) {
 /* Dot-Matrix Canvas Animation (Video 2 Apple Card Style)               */
 /* ------------------------------------------------------------------ */
 let _canvasAnim = null;
-function initCanvas() {
-    const canvas = document.getElementById('dotCanvas');
-    if (!canvas) return;
-    if (_canvasAnim) { cancelAnimationFrame(_canvasAnim); _canvasAnim = null; }
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const r = canvas.getBoundingClientRect();
-    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
-    ctx.scale(dpr, dpr);
-    const W = r.width, H = r.height;
-    const cols = 28, rows = 14;
-    const sx = W / cols, sy = H / rows;
-    let tick = 0;
-    function draw() {
-        ctx.clearRect(0, 0, W, H);
-        tick += 0.04;
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                const dist = Math.hypot(i - cols/2, j - rows/2);
-                const wave = Math.sin(dist * 0.4 - tick);
-                const radius = Math.max(0.8, (wave + 1) * 2.2);
-                const alpha = Math.max(0.08, (wave + 1) * 0.44);
-                ctx.beginPath();
-                ctx.arc(i * sx + sx/2, j * sy + sy/2, radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-                ctx.fill();
-            }
-        }
-        _canvasAnim = requestAnimationFrame(draw);
-    }
-    draw();
-}
 
 /* ------------------------------------------------------------------ */
-/* Notifications                                                          */
+/* CASHLY REFERENCE SPLINE CHART ENGINE (Using Notebook Code Data)      */
 /* ------------------------------------------------------------------ */
+
+const NOTEBOOK_CODE_DATA = {
+    '1D': {
+        points: [
+            { x: '00:00', y: 1326 }, { x: '03:00', y: 1515 }, { x: '06:00', y: 1197 },
+            { x: '09:00', y: 1305 }, { x: '12:00', y: 1249 }, { x: '15:00', y: 1438 },
+            { x: '18:00', y: 1449 }, { x: '21:00', y: 1529 }, { x: '23:59', y: 1286 }
+        ],
+        pinIndex: 4, pinLabel: '₹126.00', pinDate: '05-06-2025',
+        title: '1-Day Hourly Pattern (upi_transactions_2024.csv)',
+        balance: '₹2,34,800.22', trend: '+₹2,500.00 Last Transaction (1.2%) ▲'
+    },
+    '2D': {
+        points: [
+            { x: '00:00', y: 1120 }, { x: '04:00', y: 980 }, { x: '08:00', y: 1340 },
+            { x: '12:00', y: 1490 }, { x: '16:00', y: 1280 }, { x: '20:00', y: 1650 },
+            { x: '23:59', y: 1334 }
+        ],
+        pinIndex: 3, pinLabel: '₹150.00', pinDate: 'Youtube Premium Autopay',
+        title: '2-Day Moving Window · Balanced Settlement',
+        balance: '₹2,34,800.22', trend: '+₹1,850.00 (0.9%) ▲'
+    },
+    '3D': {
+        /* EXACT VISUAL FROM USER REFERENCE MOCKUP */
+        points: [
+            { x: '00:00', y: 1450 }, { x: '03:00', y: 1600 }, { x: '06:00', y: 1150 },
+            { x: '09:00', y: 1200 }, { x: '12:00', y: 780 }, { x: '15:00', y: 820 },
+            { x: '17:30', y: 126 },  /* Pin point */
+            { x: '19:00', y: 940 }, { x: '21:00', y: 1180 }, { x: '23:59', y: 1050 }
+        ],
+        pinIndex: 6, pinLabel: '₹126.00', pinDate: '05-06-2025',
+        title: '3-Day Spend Wave (Active Reference View)',
+        balance: '₹2,34,800.22', trend: '+₹2,500.00 Last Transaction (1.2%) ▲'
+    },
+    '4D': {
+        points: [
+            { x: 'Day 1', y: 1183 }, { x: 'Day 2', y: 1334 }, { x: 'Day 3', y: 859 }, { x: 'Day 4', y: 954 }
+        ],
+        pinIndex: 2, pinLabel: '₹859.80', pinDate: '04-01-2024',
+        title: '4-Day Trend · upi_transactions_2024.csv',
+        balance: '₹2,32,300.22', trend: '+₹1,200.00 (0.5%) ▲'
+    },
+    '5D': {
+        points: [
+            { x: 'Day 1', y: 1183 }, { x: 'Day 2', y: 1334 }, { x: 'Day 3', y: 859 },
+            { x: 'Day 4', y: 954 }, { x: 'Day 5', y: 1242 }
+        ],
+        pinIndex: 4, pinLabel: '₹1,242.50', pinDate: '05-01-2024',
+        title: '5-Day Window · High Retail Volume',
+        balance: '₹2,33,500.00', trend: '+₹3,150.00 (1.4%) ▲'
+    },
+    '6D': {
+        points: [
+            { x: 'Day 1', y: 1183 }, { x: 'Day 2', y: 1334 }, { x: 'Day 3', y: 859 },
+            { x: 'Day 4', y: 954 }, { x: 'Day 5', y: 1242 }, { x: 'Day 6', y: 1006 }
+        ],
+        pinIndex: 5, pinLabel: '₹1,006.90', pinDate: '06-01-2024',
+        title: '6-Day Aggregate · Weekend Spend',
+        balance: '₹2,34,500.00', trend: '+₹2,100.00 (0.9%) ▲'
+    },
+    '7D': {
+        points: [
+            { x: 'Day 1', y: 1183 }, { x: 'Day 2', y: 1334 }, { x: 'Day 3', y: 859 },
+            { x: 'Day 4', y: 954 }, { x: 'Day 5', y: 1242 }, { x: 'Day 6', y: 1006 },
+            { x: 'Day 7', y: 1575 }
+        ],
+        pinIndex: 6, pinLabel: '₹1,575.10', pinDate: '07-01-2024',
+        title: '7-Day Weekly Cycle · Peak Volume',
+        balance: '₹2,34,800.22', trend: '+₹4,200.00 (1.8%) ▲'
+    },
+    '8D': {
+        points: [
+            { x: 'Day 1', y: 1183 }, { x: 'Day 2', y: 1334 }, { x: 'Day 3', y: 859 },
+            { x: 'Day 4', y: 954 }, { x: 'Day 5', y: 1242 }, { x: 'Day 6', y: 1006 },
+            { x: 'Day 7', y: 1575 }, { x: 'Day 8', y: 1385 }
+        ],
+        pinIndex: 7, pinLabel: '₹1,385.10', pinDate: '08-01-2024',
+        title: 'Full 8-Day Series (upi_transactions_2024.csv)',
+        balance: '₹2,34,800.22', trend: '+₹2,500.00 Last Transaction (1.2%) ▲'
+    }
+};
+
+let currentPeriod = '3D';
+let isAnomalyMode = false;
+
+function renderCodeSplineChart(periodKey) {
+    currentPeriod = periodKey || currentPeriod;
+    const data = NOTEBOOK_CODE_DATA[currentPeriod];
+    if (!data) return;
+
+    const wrapper = document.getElementById('svgChartWrapper');
+    if (!wrapper) return;
+
+    const svgW = 360;
+    const svgH = 170;
+    const padX = 24;
+    const padY = 24;
+
+    const pts = data.points;
+    const ys = pts.map(p => p.y);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const rangeY = (maxY - minY) || 1;
+
+    // Scale coordinates
+    const scaled = pts.map((p, i) => {
+        const sx = padX + (i / (pts.length - 1)) * (svgW - 2 * padX);
+        const sy = (svgH - padY) - ((p.y - minY) / rangeY) * (svgH - 2 * padY);
+        return { x: sx, y: sy, raw: p };
+    });
+
+    // Build cubic bezier spline path
+    let linePath = `M ${scaled[0].x.toFixed(1)},${scaled[0].y.toFixed(1)}`;
+    for (let i = 0; i < scaled.length - 1; i++) {
+        const p0 = scaled[Math.max(0, i - 1)];
+        const p1 = scaled[i];
+        const p2 = scaled[i + 1];
+        const p3 = scaled[Math.min(scaled.length - 1, i + 2)];
+
+        const cp1x = p1.x + (p2.x - p0.x) / 5.5;
+        const cp1y = p1.y + (p2.y - p0.y) / 5.5;
+        const cp2x = p2.x - (p3.x - p1.x) / 5.5;
+        const cp2y = p2.y - (p3.y - p1.y) / 5.5;
+
+        linePath += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+
+    const areaPath = linePath + ` L ${scaled[scaled.length - 1].x.toFixed(1)},${svgH} L ${scaled[0].x.toFixed(1)},${svgH} Z`;
+
+    const pathLine = document.getElementById('chartLinePath');
+    const pathArea = document.getElementById('chartAreaPath');
+    if (pathLine) pathLine.setAttribute('d', linePath);
+    if (pathArea) pathArea.setAttribute('d', areaPath);
+
+    // Position tooltip pin & guide
+    const pinIdx = Math.min(data.pinIndex, scaled.length - 1);
+    const pinPt = scaled[pinIdx];
+
+    const pinGuide = document.getElementById('chartPinGuide');
+    const pinDot = document.getElementById('chartPinDot');
+    const pinPulse = document.getElementById('chartPinPulse');
+    const tooltipPin = document.getElementById('chartTooltipPin');
+
+    if (pinGuide) {
+        pinGuide.setAttribute('x1', pinPt.x.toFixed(1));
+        pinGuide.setAttribute('y1', pinPt.y.toFixed(1));
+        pinGuide.setAttribute('x2', pinPt.x.toFixed(1));
+        pinGuide.setAttribute('y2', (svgH - 10).toString());
+    }
+    if (pinDot) {
+        pinDot.setAttribute('cx', pinPt.x.toFixed(1));
+        pinDot.setAttribute('cy', pinPt.y.toFixed(1));
+    }
+    if (pinPulse) {
+        pinPulse.setAttribute('cx', pinPt.x.toFixed(1));
+        pinPulse.setAttribute('cy', pinPt.y.toFixed(1));
+    }
+    if (tooltipPin) {
+        const pctX = (pinPt.x / svgW) * 100;
+        const pctY = (pinPt.y / svgH) * 100;
+        tooltipPin.style.left = pctX + '%';
+        tooltipPin.style.top = pctY + '%';
+        document.getElementById('pinAmt').textContent = data.pinLabel;
+        document.getElementById('pinDate').textContent = data.pinDate;
+    }
+
+    // Update labels
+    const badge = document.getElementById('chartDatasetBadge');
+    if (badge) badge.textContent = data.title;
+}
+
+function selectChartPeriod(key, btn) {
+    click();
+    document.querySelectorAll('.cpill').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderCodeSplineChart(key);
+}
+
+function toggleChartDatasetMode() {
+    click();
+    isAnomalyMode = !isAnomalyMode;
+    const btn = document.getElementById('chartModeBtn');
+    if (isAnomalyMode) {
+        btn.textContent = 'Mode: Fraud Risk Wave';
+        NOTEBOOK_CODE_DATA['3D'].points = [
+            { x: '00h', y: 4632 }, { x: '02h', y: 95000 }, /* Nocturnal Anomaly! */
+            { x: '05h', y: 6047 }, { x: '08h', y: 4046 }, { x: '11h', y: 4237 },
+            { x: '14h', y: 4158 }, { x: '17h', y: 4224 }, { x: '20h', y: 4721 }, { x: '23h', y: 4286 }
+        ];
+        NOTEBOOK_CODE_DATA['3D'].pinIndex = 1;
+        NOTEBOOK_CODE_DATA['3D'].pinLabel = '₹95,000.00';
+        NOTEBOOK_CODE_DATA['3D'].pinDate = '02:15 AM (Cluster 3 Anomaly)';
+        NOTEBOOK_CODE_DATA['3D'].title = '🚨 Nocturnal Fraud Anomaly Spike (fraud_dataset.csv)';
+    } else {
+        btn.textContent = 'Mode: Spend Wave';
+        NOTEBOOK_CODE_DATA['3D'].points = [
+            { x: '00:00', y: 1450 }, { x: '03:00', y: 1600 }, { x: '06:00', y: 1150 },
+            { x: '09:00', y: 1200 }, { x: '12:00', y: 780 }, { x: '15:00', y: 820 },
+            { x: '17:30', y: 126 }, { x: '19:00', y: 940 }, { x: '21:00', y: 1180 }, { x: '23:59', y: 1050 }
+        ];
+        NOTEBOOK_CODE_DATA['3D'].pinIndex = 6;
+        NOTEBOOK_CODE_DATA['3D'].pinLabel = '₹126.00';
+        NOTEBOOK_CODE_DATA['3D'].pinDate = '05-06-2025';
+        NOTEBOOK_CODE_DATA['3D'].title = '3-Day Spend Wave (Active Reference View)';
+    }
+    renderCodeSplineChart(currentPeriod);
+}
+
+function initCanvas() {
+    renderCodeSplineChart(currentPeriod);
+}
+
+
 function showNotifs() {
     alert('🔔 PaySafe Security Alerts:\n\n• 3 phishing attacks intercepted this week\n• RuPay UPI limits verified\n• Fraud DB updated at 06:00 AM IST');
 }

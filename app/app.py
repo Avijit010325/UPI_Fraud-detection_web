@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings("ignore")          # Suppress sklearn version mismatch warnings
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, make_response
 
 ROOT = Path(__file__).resolve().parent.parent
 MODEL_PATH = ROOT / "models" / "fraud_model.joblib"
@@ -65,6 +65,16 @@ except Exception as e:
     print(f"! Warning: scikit-learn model could not be loaded ({e}). Using calibrated mathematical risk engine.")
 
 app = Flask(__name__, template_folder=str(ROOT / "app" / "templates"), static_folder=str(ROOT / "app" / "static"))
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+@app.after_request
+def no_cache(response):
+    """Prevent browser from caching HTML pages so changes appear immediately."""
+    if "text/html" in response.content_type:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
 
 # --------------------------------------------------------------- Form definition
 FIELDS = [
