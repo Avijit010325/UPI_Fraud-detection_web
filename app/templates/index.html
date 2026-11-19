@@ -457,7 +457,7 @@
             border-radius: 50%;
         }
 
-        /* ── Bank of America Visa (crimson red) ── */
+        /* ── State Bank of India Visa (crimson red) ── */
         .vcard.bofa {
             background: linear-gradient(135deg, #8b0000 0%, #c0202a 25%, #a01020 50%, #8b0000 70%, #6b0010 100%);
             box-shadow: 0 8px 32px rgba(180,0,30,0.4), 0 2px 8px rgba(0,0,0,0.5);
@@ -482,7 +482,7 @@
         .vcard.bofa .card-stripe1 { left: 110px; }
         .vcard.bofa .card-stripe2 { left: 160px; background: rgba(255,255,255,0.03); width: 90px; }
 
-        /* ── American Express Platinum (faithful silver/metal recreation) ── */
+        /* ── Axis Bank RuPay Platinum (faithful silver/metal recreation) ── */
         .vcard.amex {
             background: linear-gradient(160deg,
                 #f0f0f0 0%, #e2e2e2 8%, #d4d4d4 18%,
@@ -505,7 +505,7 @@
                 repeating-linear-gradient(90deg, transparent 0px, transparent 11px, rgba(150,150,150,0.07) 11px, rgba(150,150,150,0.07) 12px);
             border-radius: inherit; pointer-events: none; z-index: 0;
         }
-        /* Ornate thick black outer border — the defining Amex Platinum feature */
+        /* Ornate thick black outer border — the defining Axis Bank RuPay feature */
         .vcard.amex .amex-border {
             position: absolute; inset: 0;
             border-radius: 16px;
@@ -723,7 +723,7 @@
             border-radius: 2px; display: flex; align-items: center; justify-content: center;
             font-size: 0.55rem; font-weight: 900; color: #fff; margin-right: 2px;
         }
-        .bofa-label {
+        .sbi-label {
             font-size: 0.6rem; font-weight: 800; letter-spacing: 0.03em; color: #fff;
             line-height: 1.1;
         }
@@ -1671,141 +1671,67 @@
                     </div>
                 </div>
 
-                <!-- ② Bank of America Visa (crimson red) -->
-                <div class="vcard bofa" title="Bank of America Visa">
-                    <div class="card-stripe1"></div>
-                    <div class="card-stripe2"></div>
-                    <!-- Holographic layers -->
+                <!-- ② SBI Visa Debit (SBI blue) -->
+                <div class="vcard bofa" title="State Bank of India Visa" style="background:linear-gradient(135deg,#1a3c5e 0%,#2563a8 60%,#1e40af 100%);">
+                    <div class="card-stripe1" style="background:rgba(255,255,255,0.08);"></div>
+                    <div class="card-stripe2" style="background:rgba(255,255,255,0.05);"></div>
                     <div class="holo-foil"></div>
                     <div class="holo-layer"></div>
                     <div class="holo-glint"></div>
-                    <div class="holo-sparks">
-                        <div class="spark" style="width:4px;height:4px;top:25%;left:40%;animation-delay:0.2s;animation-duration:2.0s;"></div>
-                        <div class="spark" style="width:3px;height:3px;top:65%;left:60%;animation-delay:0.7s;animation-duration:1.6s;"></div>
-                        <div class="spark" style="width:5px;height:5px;top:45%;left:25%;animation-delay:1.1s;animation-duration:2.3s;"></div>
-                        <div class="spark" style="width:3px;height:3px;top:80%;left:75%;animation-delay:0.4s;animation-duration:1.9s;"></div>
-                        <div class="spark" style="width:4px;height:4px;top:10%;left:65%;animation-delay:1.5s;animation-duration:1.4s;"></div>
-                    </div>
                     <div class="card-inner">
                         <div class="card-top">
-                            <div class="bofa-label">Bank of America<br><span style="font-size:0.5rem;font-weight:600;opacity:0.9;">BankAmericard CASH REWARDS™</span></div>
+                            <div class="sbi-label" style="color:rgba(255,255,255,0.9);font-size:0.6rem;font-weight:700;line-height:1.3;">
+                                STATE BANK OF INDIA<br>
+                                <span style="font-size:0.45rem;font-weight:600;opacity:0.8;">SBI Global Debit Card</span>
+                            </div>
                             <div class="chip silver-chip"></div>
                         </div>
                         <div class="card-mid">
-                            <div class="card-num dark">4000  1234  5678  9123</div>
+                            <div class="card-num dark" style="color:#fff;">4321  5678  9876  1089</div>
                             <div style="display:flex;gap:12px;align-items:flex-end;margin-top:2px;">
                                 <div>
                                     <div class="card-valid-label" style="color:rgba(255,255,255,0.6);">VALID THRU</div>
-                                    <div class="card-valid" style="color:#fff;">08/28</div>
+                                    <div class="card-valid" style="color:#fff;">11/27</div>
                                 </div>
-                                <div style="font-size:0.45rem;color:rgba(255,255,255,0.5);align-self:flex-start;margin-top:1px;">4000</div>
                             </div>
                         </div>
                         <div class="card-bottom">
-                            <div class="card-holder dark">AVIJIT ADITYA</div>
-                            <div class="visa-logo">VISA</div>
+                            <div class="card-holder dark" style="color:#fff;">AVIJIT ADITYA</div>
+                            <div class="visa-logo" style="color:rgba(255,255,255,0.9);">VISA</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ③ American Express Platinum (silver metal) -->
-                <div class="vcard amex" title="American Express Platinum">
-                    <div class="amex-border"></div>
-                    <!-- Holographic layers -->
+                <!-- ③ Axis Bank RuPay Credit (purple) -->
+                <div class="vcard amex" title="Axis Bank RuPay Credit Card" style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 60%,#9333ea 100%);">
                     <div class="holo-foil"></div>
                     <div class="holo-layer"></div>
                     <div class="holo-glint"></div>
                     <div class="holo-sparks">
-                        <div class="spark" style="width:5px;height:5px;top:30%;left:45%;animation-delay:0.1s;animation-duration:1.9s;background:radial-gradient(circle,rgba(180,180,255,0.9) 0%,transparent 70%);"></div>
-                        <div class="spark" style="width:4px;height:4px;top:70%;left:55%;animation-delay:0.6s;animation-duration:2.1s;background:radial-gradient(circle,rgba(255,220,180,0.9) 0%,transparent 70%);"></div>
-                        <div class="spark" style="width:3px;height:3px;top:50%;left:30%;animation-delay:1.0s;animation-duration:1.7s;background:radial-gradient(circle,rgba(180,255,220,0.9) 0%,transparent 70%);"></div>
-                        <div class="spark" style="width:6px;height:6px;top:20%;left:70%;animation-delay:0.4s;animation-duration:2.4s;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,transparent 60%);"></div>
-                        <div class="spark" style="width:3px;height:3px;top:85%;left:35%;animation-delay:1.4s;animation-duration:1.5s;background:radial-gradient(circle,rgba(220,180,255,0.9) 0%,transparent 70%);"></div>
+                        <div class="spark" style="width:5px;height:5px;top:30%;left:45%;animation-delay:0.1s;animation-duration:1.9s;"></div>
+                        <div class="spark" style="width:4px;height:4px;top:70%;left:55%;animation-delay:0.6s;animation-duration:2.1s;"></div>
                     </div>
-                    <div class="card-inner" style="padding:9px 11px;">
-
-                        <!-- ROW 1: AMERICAN EXPRESS centered title -->
-                        <div style="text-align:center;position:relative;z-index:3;">
-                            <div style="font-family:'Outfit',sans-serif;font-size:0.68rem;font-weight:900;letter-spacing:0.14em;color:#111;text-transform:uppercase;line-height:1;">AMERICAN EXPRESS</div>
-                        </div>
-
-                        <!-- ROW 2: chip left | Centurion oval center | NFC+member right -->
-                        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;flex:1;margin:4px 0;">
-                            <!-- Silver EMV chip -->
-                            <div class="chip silver-chip" style="flex-shrink:0;"></div>
-
-                            <!-- Centurion oval medallion -->
-                            <div style="flex:1;display:flex;justify-content:center;">
-                                <div style="position:relative;width:52px;height:58px;">
-                                    <!-- Oval frame -->
-                                    <svg viewBox="0 0 60 68" width="52" height="58" xmlns="http://www.w3.org/2000/svg">
-                                        <!-- Oval border -->
-                                        <ellipse cx="30" cy="34" rx="27" ry="31" fill="none" stroke="#888" stroke-width="1.5"/>
-                                        <ellipse cx="30" cy="34" rx="25" ry="29" fill="url(#centurionFill)" stroke="#aaa" stroke-width="0.5"/>
-                                        <defs>
-                                            <radialGradient id="centurionFill" cx="40%" cy="35%" r="65%">
-                                                <stop offset="0%" stop-color="#e0e0e0"/>
-                                                <stop offset="100%" stop-color="#b0b0b0"/>
-                                            </radialGradient>
-                                        </defs>
-                                        <!-- Centurion warrior silhouette — head with helmet -->
-                                        <g opacity="0.75" transform="translate(30,34)">
-                                            <!-- Helmet plume -->
-                                            <path d="M-2,-24 Q-4,-30 0,-33 Q4,-30 2,-24" fill="#555" stroke="#444" stroke-width="0.4"/>
-                                            <path d="M-5,-22 Q-10,-28 -8,-32 Q-5,-29 -3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
-                                            <path d="M5,-22 Q10,-28 8,-32 Q5,-29 3,-24" fill="#666" stroke="#444" stroke-width="0.3"/>
-                                            <!-- Helmet crest -->
-                                            <path d="M-6,-20 L6,-20 L7,-17 Q0,-15 -7,-17 Z" fill="#555" stroke="#444" stroke-width="0.4"/>
-                                            <!-- Head -->
-                                            <ellipse cx="0" cy="-10" rx="6" ry="7.5" fill="#999" stroke="#777" stroke-width="0.5"/>
-                                            <!-- Face profile (looking right) -->
-                                            <path d="M0,-14 Q5,-13 6,-10 Q6,-6 3,-4 Q0,-3 -1,-5 Q-3,-8 -2,-14 Z" fill="#888" stroke="#666" stroke-width="0.3"/>
-                                            <!-- Eye -->
-                                            <ellipse cx="3" cy="-10" rx="1" ry="1" fill="#444"/>
-                                            <!-- Nose -->
-                                            <path d="M5,-8 Q7,-7 6,-5" stroke="#666" stroke-width="0.5" fill="none"/>
-                                            <!-- Chin/jaw -->
-                                            <path d="M-1,-5 Q2,-2 4,-3 Q5,-1 2,2" stroke="#777" stroke-width="0.5" fill="none"/>
-                                            <!-- Neck -->
-                                            <rect x="-2" y="2" width="4" height="4" rx="1" fill="#999" stroke="#777" stroke-width="0.4"/>
-                                            <!-- Shoulder armour -->
-                                            <path d="M-8,6 Q-5,4 -2,6 L-2,14 Q-5,15 -9,13 Z" fill="#888" stroke="#666" stroke-width="0.5"/>
-                                            <path d="M2,6 Q5,4 8,6 L9,13 Q5,15 2,14 Z" fill="#999" stroke="#777" stroke-width="0.5"/>
-                                            <!-- Chest -->
-                                            <path d="M-8,6 Q0,8 8,6 L9,20 Q0,22 -9,20 Z" fill="#aaa" stroke="#888" stroke-width="0.5"/>
-                                            <!-- Armour lines -->
-                                            <line x1="-7" y1="10" x2="8" y2="10" stroke="#888" stroke-width="0.4"/>
-                                            <line x1="-8" y1="14" x2="8" y2="14" stroke="#888" stroke-width="0.4"/>
-                                        </g>
-                                    </svg>
-                                </div>
+                    <div class="card-inner">
+                        <div class="card-top">
+                            <div style="font-size:0.6rem;font-weight:800;color:rgba(255,255,255,0.95);letter-spacing:0.08em;line-height:1.4;">
+                                AXIS BANK<br>
+                                <span style="font-size:0.45rem;font-weight:600;opacity:0.85;">MY ZONE RuPay Credit</span>
                             </div>
-
-                            <!-- NFC + Member Since (right side) -->
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
-                                <div style="display:flex;align-items:center;gap:2px;">
-                                    <!-- Contactless symbol -->
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 1 Q20 5 20 12 Q20 19 12 23" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                                        <path d="M12 5 Q17 8 17 12 Q17 16 12 19" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                        <path d="M12 9 Q14 10.5 14 12 Q14 13.5 12 15" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                    </svg>
-                                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#222;font-weight:600;letter-spacing:0.06em;">7997</span>
-                                </div>
-                                <!-- Member Since badge -->
-                                <div style="border:1px solid #888;border-radius:2px;padding:1px 4px;text-align:center;">
-                                    <div style="font-size:0.32rem;letter-spacing:0.07em;color:#555;text-transform:uppercase;font-weight:700;line-height:1.3;">MEMBER SINCE</div>
-                                    <div style="font-size:0.5rem;color:#333;font-family:'JetBrains Mono',monospace;font-weight:600;text-align:center;">09</div>
+                            <div class="chip silver-chip"></div>
+                        </div>
+                        <div class="card-mid">
+                            <div class="card-num dark" style="color:#fff;font-size:0.82rem;letter-spacing:0.14em;">6522  8800  1234  5543</div>
+                            <div style="display:flex;gap:12px;align-items:flex-end;margin-top:4px;">
+                                <div>
+                                    <div class="card-valid-label" style="color:rgba(255,255,255,0.6);font-size:0.42rem;letter-spacing:0.08em;">VALID THRU</div>
+                                    <div class="card-valid" style="color:#fff;">03/29</div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- ROW 3: Cardholder name left | © AMEX right -->
-                        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                            <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;color:#111;text-transform:uppercase;">AVIJIT</div>
-                            <div style="font-size:0.38rem;color:#555;font-weight:700;letter-spacing:0.06em;">© AMEX</div>
+                        <div class="card-bottom">
+                            <div class="card-holder dark" style="color:#fff;">AVIJIT ADITYA</div>
+                            <div style="font-size:1rem;font-weight:900;color:#fff;letter-spacing:0.04em;font-style:italic;">RuPay</div>
                         </div>
-
                     </div>
                 </div>
 
@@ -1848,7 +1774,7 @@
                 <div class="tx-item">
                     <div class="tx-left">
                         <div class="tx-icon">🍎</div>
-                        <div><div class="tx-name">Apple Store</div><div class="tx-time">2h ago • HDFC UPI</div></div>
+                        <div><div class="tx-name">Swiggy Instamart</div><div class="tx-time">2h ago • HDFC UPI</div></div>
                     </div>
                     <div class="tx-right">
                         <div class="tx-amt">−₹2,000</div>
@@ -1858,7 +1784,7 @@
                 <div class="tx-item">
                     <div class="tx-left">
                         <div class="tx-icon">🧵</div>
-                        <div><div class="tx-name">Threads App</div><div class="tx-time">Yesterday • RuPay</div></div>
+                        <div><div class="tx-name">Paytm Recharge</div><div class="tx-time">Yesterday • RuPay</div></div>
                     </div>
                     <div class="tx-right">
                         <div class="tx-amt">−₹300</div>
@@ -1997,14 +1923,14 @@
                         <div class="hist-tx-amt debit">₹150.00</div>
                     </div>
 
-                    <!-- Robin (Direct Payment) -->
+                    <!-- Rahul Kapoor (Direct Payment) -->
                     <div class="hist-tx-item">
                         <div class="hist-tx-avatar" style="background:#fce7f3;color:#db2777;font-weight:700;">
                             R
                         </div>
                         <div class="hist-tx-info">
                             <div class="hist-tx-title">
-                                <span>Robin</span>
+                                <span>Rahul Kapoor</span>
                                 <span class="badge-verified">✓</span>
                             </div>
                             <div class="hist-tx-sub">Direct Payment • 19 May 2025</div>
@@ -2027,14 +1953,14 @@
                         <div class="hist-tx-amt debit">₹150.00</div>
                     </div>
 
-                    <!-- Fany -->
+                    <!-- Priya Sharma -->
                     <div class="hist-tx-item">
                         <div class="hist-tx-avatar" style="background:#e0f2fe;color:#0284c7;font-weight:700;">
-                            F
+                            P
                         </div>
                         <div class="hist-tx-info">
                             <div class="hist-tx-title">
-                                <span>Fany</span>
+                                <span>Priya Sharma</span>
                                 <span class="badge-verified">✓</span>
                             </div>
                             <div class="hist-tx-sub">Direct Payment • 12 May 2025</div>
@@ -2042,14 +1968,14 @@
                         <div class="hist-tx-amt credit">+ ₹500.00</div>
                     </div>
 
-                    <!-- Emely -->
+                    <!-- Amit Joshi -->
                     <div class="hist-tx-item">
                         <div class="hist-tx-avatar" style="background:#fef3c7;color:#d97706;font-weight:700;">
-                            E
+                            A
                         </div>
                         <div class="hist-tx-info">
                             <div class="hist-tx-title">
-                                <span>Emely</span>
+                                <span>Amit Joshi</span>
                             </div>
                             <div class="hist-tx-sub">Direct Payment • 09 May 2025</div>
                         </div>
@@ -2151,7 +2077,7 @@
                     </div>
                 </div>
 
-                <!-- Bank of America Visa Account -->
+                <!-- State Bank of India Visa Account -->
                 <div class="acc-card bofa-acc">
                     <!-- Diagonal stripes -->
                     <div style="position:absolute;top:-60px;left:110px;width:60px;height:300%;background:rgba(255,255,255,0.05);transform:rotate(-35deg);pointer-events:none;z-index:0;"></div>
@@ -2167,8 +2093,8 @@
                     </div>
                     <div class="acc-top">
                         <div>
-                            <div class="bofa-label" style="font-size:0.68rem;">Bank of America</div>
-                            <div style="font-size:0.46rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:1px;">BankAmericard CASH REWARDS™</div>
+                            <div class="sbi-label" style="font-size:0.68rem;">State Bank of India</div>
+                            <div style="font-size:0.46rem;color:rgba(255,255,255,0.75);font-weight:600;margin-top:1px;">SBI Global Debit™</div>
                         </div>
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
                             <span class="acc-tag">Linked UPI</span>
@@ -2176,7 +2102,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="acc-num">4000  1234  5678  9123</div>
+                        <div class="acc-num">4000  1234  5678  1089</div>
                         <div style="font-size:0.55rem;color:rgba(255,255,255,0.5);letter-spacing:0.04em;margin-top:2px;">avijit@okbofa</div>
                     </div>
                     <div class="acc-bottom-row" style="display:flex;justify-content:space-between;align-items:flex-end;">
@@ -2191,7 +2117,7 @@
                     </div>
                 </div>
 
-                <!-- American Express Platinum Account -->
+                <!-- Axis Bank RuPay Platinum Account -->
                 <div class="acc-card amex-acc">
                     <!-- Ornate black outer border -->
                     <div style="position:absolute;inset:0;border-radius:20px;border:3.5px solid #0a0a0a;pointer-events:none;z-index:6;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);"></div>
@@ -2210,9 +2136,9 @@
                         <div class="spark" style="width:3px;height:3px;top:60%;left:20%;animation-delay:1.2s;animation-duration:1.6s;background:radial-gradient(circle,rgba(180,255,220,0.9) 0%,transparent 70%);"></div>
                     </div>
 
-                    <!-- AMERICAN EXPRESS header centered -->
+                    <!-- AXIS BANK RUPAY header centered -->
                     <div style="text-align:center;position:relative;z-index:3;padding-top:4px;">
-                        <div style="font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:900;letter-spacing:0.14em;color:#0a0a0a;text-transform:uppercase;">AMERICAN EXPRESS</div>
+                        <div style="font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:900;letter-spacing:0.14em;color:#0a0a0a;text-transform:uppercase;">AXIS BANK RUPAY</div>
                         <div style="display:flex;justify-content:flex-end;margin-top:-16px;">
                             <span class="acc-tag dark-tag">Platinum Card</span>
                         </div>
@@ -2262,7 +2188,7 @@
                                     <path d="M12 5 Q17 8 17 12 Q17 16 12 19" stroke="#555" stroke-width="2" fill="none" stroke-linecap="round"/>
                                     <path d="M12 9 Q14 10.5 14 12 Q14 13.5 12 15" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round"/>
                                 </svg>
-                                <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#222;font-weight:600;letter-spacing:0.06em;">7997</span>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#222;font-weight:600;letter-spacing:0.06em;">5543</span>
                             </div>
                             <div style="border:1px solid #888;border-radius:3px;padding:2px 6px;text-align:center;">
                                 <div style="font-size:0.35rem;letter-spacing:0.08em;color:#555;text-transform:uppercase;font-weight:700;line-height:1.4;">MEMBER SINCE</div>
@@ -2459,13 +2385,13 @@
                 <span class="pay-pill-icon">🏦</span>
                 <div><div class="pay-pill-name">HDFC Card</div><div class="pay-pill-sub">•••• 3456</div></div>
             </div>
-            <div class="pay-pill" data-method="boa" onclick="selectPayMethod(this)">
-                <span class="pay-pill-icon">🔴</span>
-                <div><div class="pay-pill-name">Bank of America</div><div class="pay-pill-sub">•••• 9123</div></div>
+            <div class="pay-pill" data-method="sbi" onclick="selectPayMethod(this)">
+                <span class="pay-pill-icon">🏛️</span>
+                <div><div class="pay-pill-name">SBI Bank</div><div class="pay-pill-sub">•••• 1089</div></div>
             </div>
-            <div class="pay-pill" data-method="amex" onclick="selectPayMethod(this)">
-                <span class="pay-pill-icon">⬛</span>
-                <div><div class="pay-pill-name">Amex Platinum</div><div class="pay-pill-sub">•••• 7997</div></div>
+            <div class="pay-pill" data-method="axis" onclick="selectPayMethod(this)">
+                <span class="pay-pill-icon">🟣</span>
+                <div><div class="pay-pill-name">Axis Bank</div><div class="pay-pill-sub">•••• 5543</div></div>
             </div>
         </div>
     </div>
